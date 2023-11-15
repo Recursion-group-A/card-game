@@ -1,2 +1,2 @@
-# card-game
-Recursionチーム開発のリポジトリ
+# Card Game
+Recursion-group-Aのチーム開発リポジトリ
