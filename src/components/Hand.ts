@@ -1,4 +1,4 @@
-import { Card } from "@/components/Card"
+import Card from "@/components/Card"
 
 export default class Hand {
   private hand: Card[]
@@ -34,16 +34,16 @@ export default class Hand {
     let total = 0
     let aceCount = 0
 
-    for (const card of this.hand) {
+    this.hand.forEach((card: Card) => {
       if (card.getRank() === "A") {
         aceCount++
       }
       total += card.getRankNumber()
-    }
+    })
 
-    while (total > 21 && aceCount > 0) {
-      total -= 10
-      aceCount--
+    while (aceCount > 0 && total <= 11) {
+      total += 10
+      aceCount -= 1
     }
 
     return total

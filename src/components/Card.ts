@@ -1,6 +1,6 @@
 import { Suit, Rank } from "@/constants/constants"
 
-export class Card {
+export default class Card {
   private suit?: Suit
   private rank: Rank
 
@@ -27,7 +27,7 @@ export class Card {
     if (this.rank === "Joker") {
       return 0 // ジョーカーの場合は0とする（ブラックジャックでは使用されない）
     } else if (this.rank === "A") {
-      return 11
+      return 1
     } else if (this.rank === "K" || this.rank === "Q" || this.rank === "J") {
       return 10
     } else {
