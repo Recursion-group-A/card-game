@@ -13,6 +13,7 @@ export type Rank =
   | "Q"
   | "K"
   | "A"
+  | "Joker"
 export type PLAYERTYPE = "player" | "house" | "ai"
 
 export const SUITS: Suit[] = ["H", "D", "C", "S"]
