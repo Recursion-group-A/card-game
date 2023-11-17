@@ -13,10 +13,12 @@ export type Rank =
   | "Q"
   | "K"
   | "A"
+  | "Joker"
 export type PLAYERTYPE = "player" | "house" | "ai"
 
 export const SUITS: Suit[] = ["H", "D", "C", "S"]
 export const RANKS: Rank[] = [
+  "A",
   "2",
   "3",
   "4",
@@ -29,6 +31,9 @@ export const RANKS: Rank[] = [
   "J",
   "Q",
   "K",
-  "A",
 ]
-export const GAMESWITHJOKER: string[] = []
+export const GAMESWITHJOKER: GAMETYPE[] = []
+export enum GAMETYPE {
+  Blackjack = "blackjack",
+  Poker = "poker",
+}
