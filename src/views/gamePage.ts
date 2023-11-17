@@ -1,0 +1,2 @@
+import { GAMEPAGE } from "@/config";
+
