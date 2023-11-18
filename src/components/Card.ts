@@ -19,7 +19,7 @@ export default class Card {
   public getSuit(): Suit | undefined {
     return this.suit
   }
-  
+
   // TODO: 必要ないかも
   public getRank(): Rank {
     return this.rank
@@ -29,9 +29,11 @@ export default class Card {
   public getRankNumber(): number {
     if (this.rank === 'Joker') {
       return 0 // ジョーカーの場合は0とする（ブラックジャックでは使用されない）
-    } else if (this.rank === "A") {
+    }
+    if (this.rank === 'A') {
       return 1
-    } else if (this.rank === "K" || this.rank === "Q" || this.rank === "J") {
+    }
+    if (this.rank === 'K' || this.rank === 'Q' || this.rank === 'J') {
       return 10
     }
     return parseInt(this.rank, 10)
