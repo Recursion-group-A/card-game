@@ -5,6 +5,7 @@ export class startPage{
 
 
         // testtesttest
+        // naoto nishimura
 
 
         STARTPAGE?.innerHTML = 
