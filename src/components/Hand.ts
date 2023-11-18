@@ -1,4 +1,4 @@
-import Card from "@/components/Card"
+import Card from '@/components/Card'
 
 export default class Hand {
   private hand: Card[]
@@ -29,14 +29,14 @@ export default class Hand {
     return this.hand.length
   }
 
-  // TODO:ブラックジャックに特化　あとで変える
+  // TODO:ブラックジャックに特化
   public getHandTotalScore(): number {
     let total = 0
     let aceCount = 0
 
     this.hand.forEach((card: Card) => {
-      if (card.getRank() === "A") {
-        aceCount++
+      if (card.getRank() === 'A') {
+        aceCount += 1
       }
       total += card.getRankNumber()
     })
@@ -51,5 +51,13 @@ export default class Hand {
 
   public isBlackjack(): boolean {
     return this.getHandTotalScore() === 21 && this.getCardCount() === 2
+  }
+
+  public isBust(): boolean {
+    return this.getHandTotalScore() > 21
+  }
+
+  public canHit(): boolean {
+    return !this.isBlackjack() && !this.isBust()
   }
 }
