@@ -2,6 +2,11 @@ import { STARTPAGE } from "@/config";
 
 export class startPage{
     public static render():void{
+
+
+        // testtesttest
+
+
         STARTPAGE?.innerHTML = 
         `
             <div class="img-start text-center flex justify-center items-center py-5 bg-cover h-screen w-screen">
