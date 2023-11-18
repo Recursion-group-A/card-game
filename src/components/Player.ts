@@ -2,7 +2,10 @@ import { PLAYERTYPE, Rank } from "@/constants/constants";
 import  Card  from "@/components/Card";
 import { Hand } from "@/components/Hand";
 
-export abstract class Player {
+// 一旦ブラックジャック特有のPlayerクラスです！
+// abstractを削除しました！
+
+export class Player {
   protected playerName: string;
   protected playerType: PLAYERTYPE;
   protected gameType: string;
@@ -12,6 +15,7 @@ export abstract class Player {
   protected currentTurn: number;
   protected hand: Hand;
   protected status: string;
+  protected blackjack: boolean;
 
   constructor(
     playerName: string,
@@ -28,6 +32,7 @@ export abstract class Player {
     this.currentTurn = 1;
     this.hand = new Hand();
     this.status = "betting";
+    this.blackjack = false;
   }
 
   protected initializeChips(): void {
@@ -50,7 +55,7 @@ export abstract class Player {
     this.status = "betting";
   }
 
-  // 1ゲーム終了ごとに、ベット額や現在のターンを初期化する
+  // 1ゲーム終了ごとに、ベット、ターン、状態、を初期化する
   protected initialize(): void {
     this.initializeBet();
     this.initializeCurrentTurn();
@@ -140,26 +145,13 @@ export abstract class Player {
   }
 
   protected decideAiPlayerBetAmount(): void {
-    if (this.chips < 10) {
-      this.bet = this.chips;
-    } else {
-      // chipsが1000に設定されていたので、1割-2割の間でベット額が決まるようにしました。
-      // Recursionの課題通りchipsを400で行うのであれば変更します！
-      const max: number = Math.floor(this.chips * 0.2);
-      const min: number = Math.floor(this.chips * 0.1);
-      const betAmount: number = Math.floor(Math.random() * (max - min) + min);
+    // chipsが1000に設定されていたので、1割-2割の間でベット額が決まるようにしました。
+    // Recursionの課題通りchipsを400で行うのであれば変更します！
+    const max: number = Math.floor(this.chips * 0.2);
+    const min: number = Math.floor(this.chips * 0.1);
+    const betAmount: number = Math.floor(Math.random() * (max - min) + min);
 
-      this.bet = betAmount;
-    }
-  }
-}
-
-class BlackjackPlayer extends Player {
-  protected blackjack: boolean;
-
-  constructor(name: string, playerType: PLAYERTYPE, gameType: string) {
-    super(name, playerType, gameType);
-    this.blackjack = false;
+    this.bet = betAmount;
   }
 
   protected setToBroken(): void {
