@@ -1,26 +1,22 @@
-import { PLAYERTYPE, Rank } from "@/constants/constants";
+import { GAMETYPE, PLAYERTYPE } from "@/constants/constants";
 import  Card  from "@/components/Card";
 import Hand from "@/components/Hand";
-
-// 一旦ブラックジャック特有のPlayerクラスです！
-// abstractを削除しました！
 
 export class Player {
   private playerName: string;
   private playerType: PLAYERTYPE;
-  private gameType: string;
+  private gameType: GAMETYPE;
   private chips: number;
   private bet: number;
   private winAmount: number;
   private currentTurn: number;
   private hand: Hand;
   private status: string;
-  private blackjack: boolean;
 
   constructor(
     playerName: string,
     playerType: PLAYERTYPE,
-    gameType: string,
+    gameType: GAMETYPE,
     chips: number = 1000
   ) {
     this.playerName = playerName;
@@ -31,8 +27,7 @@ export class Player {
     this.winAmount = 0;
     this.currentTurn = 1;
     this.hand = new Hand();
-    this.status = "betting";
-    this.blackjack = false;
+    this.status = "";
   }
 
   public initializeChips(): void {
@@ -59,7 +54,6 @@ export class Player {
     this.status = "betting";
   }
 
-  // 1ゲーム終了ごとに、ベット、ターン、状態、を初期化する
   public prepareForNextRound(): void {
     this.initializeBet();
     this.initializeCurrentTurn();
@@ -73,10 +67,6 @@ export class Player {
 
   public getPlayerType(): PLAYERTYPE {
     return this.playerType;
-  }
-
-  public getHand(): Card[] {
-    return this.hand.getHand();
   }
 
   public getChips(): number {
@@ -93,6 +83,10 @@ export class Player {
 
   public getCurrentTurn(): number {
     return this.currentTurn;
+  }
+
+  public getHand(): Card[] {
+    return this.hand.getHand();
   }
 
   public getStatus(): string {
@@ -135,17 +129,7 @@ export class Player {
     this.status = status;
   }
 
-  public isFirstTurn(): boolean {
-    return this.currentTurn === 1;
-  }
-
-  public canBet(bet: number): boolean {
-    return this.bet + bet <= this.chips;
-  }
-
   public decideAiPlayerBetAmount(): void {
-    // chipsが1000に設定されていたので、1割-2割の間でベット額が決まるようにしました。
-    // Recursionの課題通りchipsを400で行うのであれば変更します！
     const max: number = Math.floor(this.chips * 0.2);
     const min: number = Math.floor(this.chips * 0.1);
     const betAmount: number = Math.floor(Math.random() * (max - min) + min);
@@ -155,14 +139,6 @@ export class Player {
 
   public setToBroken(): void {
     this.changeStatus("broken");
-  }
-
-  public setToBetting(): void {
-    this.changeStatus("betting");
-  }
-
-  public setToWaiting(): void {
-    this.changeStatus("waiting");
   }
 
   public setToStand(): void {
@@ -189,34 +165,32 @@ export class Player {
     this.changeStatus("blackjack");
   }
 
-  public setBlackjack(): void {
-    if(this.hand.isBlackjack()) this.blackjack = true;
+  public isFirstTurn(): boolean {
+    return this.currentTurn === 1;
   }
 
   public isBlackjack(): boolean {
-    return this.blackjack;
+    return this.hand.isBlackjack();
   }
 
-  // ディーラーの場合を考慮する
   public isBroken(): boolean {
     return this.chips <= 0;
   }
 
   public isBust(): boolean {
-    const currentScore = this.getHandTotalScore();
-    return currentScore > 21;
+    return this.hand.isBust();
+  }
+
+  public canBet(bet: number): boolean {
+    return this.bet + bet <= this.chips;
   }
 
   public canHit(): boolean {
-    if (this.blackjack) return false;
-
-    const currentScore: number = this.getHandTotalScore();
-
-    return currentScore < 21;
+    return this.hand.canHit();
   }
 
   public canDouble(): boolean {
-    if (this.blackjack) return false;
+    if (this.isBlackjack()) return false;
 
     const doubleBet: number = this.getBet() * 2;
     const currentChips: number = this.getChips();
@@ -225,7 +199,7 @@ export class Player {
   }
 
   public canSurrender(): boolean {
-    if (this.blackjack) return false;
+    if (this.isBlackjack()) return false;
 
     const halfBet: number = Math.floor(this.getBet() / 2);
 
