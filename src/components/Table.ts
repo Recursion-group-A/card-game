@@ -1,6 +1,6 @@
 import Card from '@/models/common/Card'
 import Deck from '@/models/common/Deck'
-import Player from '@/models/common/Player'
+import { Player } from '@/models/common/Player'
 import House from '@/models/common/House'
 import { GAMETYPE } from '@/types/gameTypes'
 import { PLAYERTYPE } from '@/types/playerTypes'

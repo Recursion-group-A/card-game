@@ -1,6 +1,7 @@
 import Card from '@/models/common/Card'
 import Hand from '@/models/common/Hand'
 import { PLAYERTYPE } from '@/types/playerTypes'
+import { GAMETYPE } from '@/types/gameTypes';
 
 export class Player {
   private playerName: string;
