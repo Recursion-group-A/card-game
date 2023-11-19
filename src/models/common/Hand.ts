@@ -4,12 +4,10 @@ import Card from '@/models/common/Card'
 export default class Hand {
   private hand: Card[]
   private score: number
-  private blackjack: boolean
 
   constructor() {
     this.hand = []
     this.score = 0
-    this.blackjack = false
   }
 
   // 外部で変更されないようにコピーを返す
@@ -76,10 +74,9 @@ export default class Hand {
     return rankArr.includes("A") && /(10|J|Q|K)/.test(rankArr.join(" "));
   }
 
-  public setBlackjack(): void {
+  public setToBlackjackScore(): void {
     if(this.isBlackjack()) {
       this.score = 21;
-      this.blackjack = true;
     }
   }
 
