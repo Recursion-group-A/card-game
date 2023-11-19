@@ -1,18 +1,15 @@
 import { Rank } from '@/types/ranks'
 import { RankStrategy } from '@/models/common/RankStrategy'
+import rankValues from '@/models/blackjack/rankValues'
 
 export default class BlackjackRankStrategy implements RankStrategy {
+  // eslint-disable-next-line
   public getRankNumber(rank: Rank): number {
-    // eslint-disable-line
-    if (rank === 'Joker') {
-      return 0 // ジョーカーの場合は0とする（ブラックジャックでは使用されない）
+    const value: number | undefined = rankValues[rank]
+    if (value === undefined) {
+      throw new Error(`Invalid rank: ${rank}`)
     }
-    if (rank === 'A') {
-      return 1
-    }
-    if (rank === 'K' || rank === 'Q' || rank === 'J') {
-      return 10
-    }
-    return parseInt(rank, 10)
+
+    return value
   }
 }
