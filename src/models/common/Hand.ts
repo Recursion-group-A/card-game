@@ -1,4 +1,4 @@
-import Card from '@/components/Card'
+import Card from '@/models/common/Card'
 
 export default class Hand {
   private hand: Card[]

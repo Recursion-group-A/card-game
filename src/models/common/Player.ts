@@ -6,25 +6,25 @@ import { PLAYERTYPE } from '@/types/playerTypes'
 // abstractを削除しました！
 
 export default class Player {
-  private playerName: string
+  protected playerName: string
 
-  private playerType: PLAYERTYPE
+  protected playerType: PLAYERTYPE
 
-  private gameType: string
+  protected gameType: string
 
-  private chips: number
+  protected chips: number
 
-  private bet: number
+  protected bet: number
 
-  private winAmount: number
+  protected winAmount: number
 
-  private currentTurn: number
+  protected currentTurn: number
 
-  private hand: Hand
+  protected hand: Hand
 
-  private status: string
+  protected status: string
 
-  private blackjack: boolean
+  protected blackjack: boolean
 
   constructor(
     playerName: string,
@@ -44,115 +44,116 @@ export default class Player {
     this.blackjack = false
   }
 
-  public initializeChips(): void {
+  protected initializeChips(): void {
     this.chips = 1000
   }
 
-  public initializeBet(): void {
+  protected initializeBet(): void {
     this.bet = 0
   }
 
-  public initializeWinAmount(): void {
+  protected initializeWinAmount(): void {
     this.winAmount = 0
   }
 
-  public initializeCurrentTurn(): void {
+  protected initializeCurrentTurn(): void {
     this.currentTurn = 1
   }
 
-  public initializeHand(): void {
-    this.hand.cleanHand()
-  }
-
-  public initializeStatus(): void {
+  protected initializeStatus(): void {
     this.status = 'betting'
   }
 
   // 1ゲーム終了ごとに、ベット、ターン、状態、を初期化する
-  public prepareForNextRound(): void {
+  protected initialize(): void {
     this.initializeBet()
     this.initializeCurrentTurn()
-    this.initializeHand()
     this.initializeStatus()
   }
 
-  public getPlayerName(): string {
+  protected getPlayerName(): string {
     return this.playerName
   }
 
-  public getPlayerType(): PLAYERTYPE {
+  protected getPlayerType(): PLAYERTYPE {
     return this.playerType
   }
 
-  public getHand(): Card[] {
-    return this.hand.getHand()
+  protected getHand(): Hand {
+    return this.hand
   }
 
-  public getChips(): number {
+  protected getChips(): number {
     return this.chips
   }
 
-  public getBet(): number {
+  protected getBet(): number {
     return this.bet
   }
 
-  public getWinAmount(): number {
+  protected getWinAmount(): number {
     return this.winAmount
   }
 
-  public getCurrentTurn(): number {
+  protected getCurrentTurn(): number {
     return this.currentTurn
   }
 
-  public getStatus(): string {
+  protected getStatus(): string {
     return this.status
   }
 
-  public getHandTotalScore(): number {
-    return this.hand.getHandTotalScore()
+  protected getHandScore(): number {
+    const currentHand: Card[] = this.hand.getHand()
+    const handScore: number = currentHand.reduce(
+      (totalScore, card) => totalScore + card.getRankNumber(),
+      0
+    )
+
+    return handScore
   }
 
-  public addHand(card: Card): void {
+  protected addHand(card: Card): void {
     this.hand.addOne(card)
   }
 
-  public addChips(amount: number): void {
+  protected addChips(amount: number): void {
     this.chips += amount
   }
 
-  public addBet(amount: number): void {
+  protected addBet(amount: number): void {
     this.bet += amount
   }
 
-  public incrementCurrentTurn(): void {
+  protected addCurrentTurn(): void {
     this.currentTurn += 1
   }
 
-  public removeBet(amount: number): void {
+  protected removeBet(amount: number): void {
     this.bet -= amount
   }
 
-  public removeChips(amount: number): void {
+  protected removeChips(amount: number): void {
     this.chips -= amount
   }
 
-  public changeBet(amount: number): void {
+  protected changeBet(amount: number): void {
     this.bet = amount
   }
 
-  public changeStatus(status: string): void {
+  protected changeStatus(status: string): void {
     this.status = status
   }
 
-  public isFirstTurn(): boolean {
+  protected isFirstTurn(): boolean {
     return this.currentTurn === 1
   }
 
-  public canBet(bet: number): boolean {
+  protected canBet(bet: number): boolean {
     return this.bet + bet <= this.chips
   }
 
-  public decideAiPlayerBetAmount(): void {
+  protected decideAiPlayerBetAmount(): void {
     // chipsが1000に設定されていたので、1割-2割の間でベット額が決まるようにしました。
     // Recursionの課題通りchipsを400で行うのであれば変更します！
     const max: number = Math.floor(this.chips * 0.2)
@@ -162,69 +163,85 @@ export default class Player {
     this.bet = betAmount
   }
 
-  public setToBroken(): void {
+  protected setToBroken(): void {
     this.changeStatus('broken')
   }
 
-  public setToBetting(): void {
+  protected setToBetting(): void {
     this.changeStatus('betting')
   }
 
-  public setToWaiting(): void {
+  protected setToWaiting(): void {
     this.changeStatus('waiting')
   }
 
-  public setToStand(): void {
+  protected setToStand(): void {
     this.changeStatus('stand')
   }
 
-  public setToHit(): void {
+  protected setToHit(): void {
     this.changeStatus('hit')
   }
 
-  public setToDouble(): void {
+  protected setToDouble(): void {
     this.changeStatus('double')
   }
 
-  public setToSurrender(): void {
+  protected setToSurrender(): void {
     this.changeStatus('surrender')
   }
 
-  public setToBust(): void {
+  protected setToBust(): void {
     this.changeStatus('bust')
   }
 
-  public setToBlackjack(): void {
+  protected setToBlackjack(): void {
     this.changeStatus('blackjack')
   }
 
-  public setBlackjack(): void {
-    if (this.hand.isBlackjack()) this.blackjack = true
+  protected setBlackjack(): void {
+    if (this.isFirstTurn()) {
+      const rankArr: Rank[] = []
+
+      this.hand.getHand().forEach((card: Card) => {
+        rankArr.push(card.getRank())
+      })
+
+      if (this.isBlackjackSet(rankArr)) {
+        this.blackjack = true
+        this.setToBlackjack()
+      }
+    }
   }
 
-  public isBlackjack(): boolean {
+  protected isBlackjackSet(rankArr: Rank[]): boolean {
+    // eslint-disable-line
+    return rankArr.includes('A') && /(10|J|Q|K)/.test(rankArr.join(' '))
+  }
+
+  protected isBlackjack(): boolean {
     return this.blackjack
   }
 
   // ディーラーの場合を考慮する
-  public isBroken(): boolean {
+  protected isBroken(): boolean {
     return this.chips <= 0
   }
 
-  public isBust(): boolean {
-    const currentScore = this.getHandTotalScore()
+  protected isBust(): boolean {
+    const currentScore = this.getHandScore()
     return currentScore > 21
   }
 
-  public canHit(): boolean {
+  protected canHit(): boolean {
     if (this.blackjack) return false
 
-    const currentScore: number = this.getHandTotalScore()
+    const currentScore: number = this.getHandScore()
 
     return currentScore < 21
   }
 
-  public canDouble(): boolean {
+  protected canDouble(): boolean {
     if (this.blackjack) return false
 
     const doubleBet: number = this.getBet() * 2
@@ -233,7 +250,7 @@ export default class Player {
     return this.isFirstTurn() && doubleBet <= currentChips
   }
 
-  public canSurrender(): boolean {
+  protected canSurrender(): boolean {
     if (this.blackjack) return false
 
     const halfBet: number = Math.floor(this.getBet() / 2)
@@ -241,29 +258,29 @@ export default class Player {
     return this.isFirstTurn() && halfBet > 0
   }
 
-  public broken(): void {
+  protected broken(): void {
     this.setToBroken()
   }
 
-  public bust(): void {
+  protected bust(): void {
     this.setToBust()
   }
 
-  public hit(): void {
+  protected hit(): void {
     this.setToHit()
   }
 
-  public stand(): void {
+  protected stand(): void {
     this.setToStand()
   }
 
-  public double(): void {
+  protected double(): void {
     this.removeChips(this.bet)
     this.addBet(this.bet)
     this.setToDouble()
   }
 
-  public surrender(): void {
+  protected surrender(): void {
     const currentBet: number = this.bet
 
     this.removeBet(Math.floor(currentBet / 2))

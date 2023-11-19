@@ -1,7 +1,7 @@
-import Card from '@/components/Card'
-import Hand from '@/components/Hand'
-import Deck from '@/components/Deck'
-import { PLAYER_STATES } from '@/constants/constants'
+import Card from '@/models/common/Card'
+import Hand from '@/models/common/Hand'
+import Deck from '@/models/common/Deck'
+import { PLAYER_STATES } from '@/constants/playerStates'
 
 export default class House {
   private hand: Hand
