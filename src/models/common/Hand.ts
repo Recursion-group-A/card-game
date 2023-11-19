@@ -1,10 +1,15 @@
+import { Rank } from '@/types/ranks'
 import Card from '@/models/common/Card'
 
 export default class Hand {
   private hand: Card[]
+  private score: number
+  private blackjack: boolean
 
   constructor() {
     this.hand = []
+    this.score = 0
+    this.blackjack = false
   }
 
   // 外部で変更されないようにコピーを返す
@@ -12,8 +17,17 @@ export default class Hand {
     return [...this.hand]
   }
 
+  public getScore(): number {
+    return this.score;
+  }
+
   public addOne(card: Card): void {
     this.hand.push(card)
+    this.addScore(card.getRankNumber());
+  }
+
+  public addScore(rankNumber: number): void {
+    this.score += rankNumber;
   }
 
   // 呼び出し元でハンドリングを行う
@@ -50,7 +64,23 @@ export default class Hand {
   }
 
   public isBlackjack(): boolean {
-    return this.getHandTotalScore() === 21 && this.getCardCount() === 2
+    // 1ターン目でなければfalse
+    if(this.getCardCount() !== 2) return false;
+
+    // Rankを配列に保存
+    const rankArr: Rank[] = this.hand.map(card => card.getRank());
+
+    // 1 includesでAが入っているか確認
+    // 2 joinで配列を文字列にし、文字列に10、J、Q、Kのいずれかが含まれているか確認
+    // 3 1,2がどちらもtrueならばblackjack
+    return rankArr.includes("A") && /(10|J|Q|K)/.test(rankArr.join(" "));
+  }
+
+  public setBlackjack(): void {
+    if(this.isBlackjack()) {
+      this.score = 21;
+      this.blackjack = true;
+    }
   }
 
   public isBust(): boolean {
