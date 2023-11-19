@@ -16,16 +16,23 @@ export default class Hand {
   }
 
   public getScore(): number {
-    return this.score;
+    return this.score
+  }
+
+  // 呼び出し元でハンドリングを行う
+  public setToBlackjackScore(): void {
+    if(this.isBlackjack()) {
+      this.score = 21
+    }
   }
 
   public addOne(card: Card): void {
     this.hand.push(card)
-    this.addScore(card.getRankNumber());
+    this.addScore(card.getRankNumber())
   }
 
   public addScore(rankNumber: number): void {
-    this.score += rankNumber;
+    this.score += rankNumber
   }
 
   // 呼び出し元でハンドリングを行う
@@ -63,21 +70,15 @@ export default class Hand {
 
   public isBlackjack(): boolean {
     // 1ターン目でなければfalse
-    if(this.getCardCount() !== 2) return false;
+    if(this.getCardCount() !== 2) return false
 
     // Rankを配列に保存
-    const rankArr: Rank[] = this.hand.map(card => card.getRank());
+    const rankArr: Rank[] = this.hand.map(card => card.getRank())
 
     // 1 includesでAが入っているか確認
     // 2 joinで配列を文字列にし、文字列に10、J、Q、Kのいずれかが含まれているか確認
     // 3 1,2がどちらもtrueならばblackjack
-    return rankArr.includes("A") && /(10|J|Q|K)/.test(rankArr.join(" "));
-  }
-
-  public setToBlackjackScore(): void {
-    if(this.isBlackjack()) {
-      this.score = 21;
-    }
+    return rankArr.includes("A") && /(10|J|Q|K)/.test(rankArr.join(" "))
   }
 
   public isBust(): boolean {
