@@ -2,6 +2,7 @@ import { SETTINGPAGE } from "@/config";
 
 export class settingPage{
     public static render(): void{
+        // 長濱
         SETTINGPAGE?.innerHTML =
         `
             <div class="img-set-blackjack flex justify-center items-center py-5 bg-cover h-screen w-screen">
