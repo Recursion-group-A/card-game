@@ -1,4 +1,5 @@
-import { Suit, Rank } from '@/constants/constants'
+import { Suit } from '@/types/suits'
+import { Rank } from '@/types/ranks'
 
 export default class Card {
   private suit?: Suit

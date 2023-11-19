@@ -1,5 +1,6 @@
-import Card from '@/components/Card'
-import { SUITS, RANKS, GAMESWITHJOKER, GAMETYPE } from '@/constants/constants'
+import Card from '@/models/common/Card'
+import { SUITS, RANKS } from '@/constants/cards'
+import { GAMETYPE, GAMESWITHJOKER } from '@/types/gameTypes'
 
 export default class Deck {
   private gameType: GAMETYPE
