@@ -1,6 +1,6 @@
-import { GAMETYPE, PLAYERTYPE } from "@/constants/constants";
-import  Card  from "@/components/Card";
-import Hand from "@/components/Hand";
+import Card from '@/models/common/Card'
+import Hand from '@/models/common/Hand'
+import { PLAYERTYPE } from '@/types/playerTypes'
 
 export class Player {
   private playerName: string;
