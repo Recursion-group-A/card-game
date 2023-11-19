@@ -1,6 +1,6 @@
 import { PLAYERTYPE, Rank } from "@/constants/constants";
 import  Card  from "@/components/Card";
-import { Hand } from "@/components/Hand";
+import Hand from "@/components/Hand";
 
 // 一旦ブラックジャック特有のPlayerクラスです！
 // abstractを削除しました！
@@ -75,7 +75,7 @@ export class Player {
     return this.playerType;
   }
 
-  public getHand(): Hand {
+  public getHand(): Card[] {
     return this.hand.getHand();
   }
 
