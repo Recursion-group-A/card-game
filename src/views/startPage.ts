@@ -1,11 +1,9 @@
 import { STARTPAGE } from "@/config";
+import React from "react";
 
 export class startPage{
     public static render():void{
 
-
-        // testtesttest
-        // naoto nishimura
 
 
         STARTPAGE?.innerHTML = 
