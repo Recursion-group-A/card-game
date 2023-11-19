@@ -1,43 +1,50 @@
 import { Suit } from '@/types/suits'
 import { Rank } from '@/types/ranks'
+import { RankStrategy } from '@/models/common/RankStrategy'
 
 export default class Card {
   private suit?: Suit
 
   private rank: Rank
 
-  constructor(suit: Suit | undefined, rank: Rank) {
+  private rankStrategy: RankStrategy
+
+  constructor(suit: Suit | undefined, rank: Rank, rankStrategy: RankStrategy) {
     this.suit = suit
 
     this.rank = rank
+
+    this.rankStrategy = rankStrategy
   }
 
-  // ファクトリメソッドを使ったジョーカーインスタンスの作成
-  public static createJoker(): Card {
-    return new Card(undefined, 'Joker')
+  /**
+   * ファクトリメソッドを使用してジョーカーのカードインスタンスを作成します。
+   * ジョーカーは特殊なカードであり、通常のスートやランクを持ちません。
+   *
+   * @param rankStrategy - ランクを計算するための戦略
+   * @returns ジョーカーのカードインスタンス
+   */
+  public static createJoker(rankStrategy: RankStrategy): Card {
+    return new Card(undefined, 'Joker', rankStrategy)
   }
 
   public getSuit(): Suit | undefined {
     return this.suit
   }
 
-  // TODO: 必要ないかも
   public getRank(): Rank {
     return this.rank
   }
 
-  // TODO: 後で実装する ゲームごとに違う 今はブラックジャック用
+  /**
+   * カードのランクを数値で取得します。
+   * このメソッドは、ストラテジーパターンを使用してランクを計算し、
+   * ゲームごとに異なるランクの計算ロジックを適用します。
+   *
+   * @returns カードのランクに対応する数値
+   */
   public getRankNumber(): number {
-    if (this.rank === 'Joker') {
-      return 0 // ジョーカーの場合は0とする（ブラックジャックでは使用されない）
-    }
-    if (this.rank === 'A') {
-      return 1
-    }
-    if (this.rank === 'K' || this.rank === 'Q' || this.rank === 'J') {
-      return 10
-    }
-    return parseInt(this.rank, 10)
+    return this.rankStrategy.getRankNumber(this.rank)
   }
 
   public toString(): string {
