@@ -1,0 +1,55 @@
+import Card from '@/components/Card'
+import Hand from '@/components/Hand'
+import Deck from '@/components/Deck'
+import { PLAYER_STATES } from '@/constants/constants'
+
+export default class House {
+  private hand: Hand
+
+  constructor() {
+    this.hand = new Hand()
+  }
+
+  // TODO: START Playerクラスと共通する処理 → 後で抽象クラス Participant クラスを作る
+  public addCard(card: Card): void {
+    this.hand.addOne(card)
+  }
+
+  public isBlackjack(): boolean {
+    return this.hand.isBlackjack()
+  }
+  // TODO: END Playerクラスと共通する処理
+
+  // House 特有のアクション
+  // public revealHand(): void {
+  //     TODO: 伏せたカードを表向きにするアクション
+  // }
+
+  public drawUntilSeventeen(deck: Deck): string {
+    while (this.hand.getHandTotalScore() < 17) {
+      const card = House.getCardFromDeck(deck)
+
+      this.addCard(card)
+
+      if (this.hand.getHandTotalScore() > 21) {
+        return PLAYER_STATES.BUST
+      }
+    }
+    return PLAYER_STATES.STAND
+  }
+
+  private static getCardFromDeck(deck: Deck): Card {
+    let card = deck.drawOne()
+
+    if (!card) {
+      deck.resetDeck()
+      card = deck.drawOne()
+
+      if (!card) {
+        throw new Error('Deck is empty after reset, unable to draw card.')
+      }
+    }
+
+    return card
+  }
+}
