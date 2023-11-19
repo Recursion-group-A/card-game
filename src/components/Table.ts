@@ -25,7 +25,7 @@ export class Table {
         this.players = [];
         this.resultLog = [];
 
-        this.setToPlayers();
+        this.initializePlayers();
         this.addPlayersHand();
     }
 
@@ -37,7 +37,7 @@ export class Table {
         this.round = 1;
     }
 
-    public initializePlayers(): void {
+    public preparePlayersForNextRound(): void {
         this.players.forEach(player => {
             player.prepareForNextRound();
         });
@@ -46,7 +46,7 @@ export class Table {
     public prepareForNextRound(): void {
         this.initializeDeck();
         this.initializeRound();
-        this.initializePlayers();
+        this.preparePlayersForNextRound();
     }
 
     public getGameType(): GAMETYPE {
@@ -65,7 +65,7 @@ export class Table {
         return this.resultLog;
     }
 
-    public addRound(): void {
+    public incrementRound(): void {
         this.round++;
     }
 
@@ -73,17 +73,17 @@ export class Table {
         this.house.drawUntilSeventeen(this.deck);
     }
 
-    public setToPlayer(playerName: string, playerType: PLAYERTYPE): void {
+    public addPlayer(playerName: string, playerType: PLAYERTYPE): void {
         this.players.push(new Player(playerName, playerType, this.gameType));
     }
 
-    public setToPlayers(): void {
+    public initializePlayers(): void {
         // 人間のplayerは常に一人という設定です
-        this.setToPlayer("Player", "player");
+        this.addPlayer("Player", "player");
 
         for(let i = 1; i < this.playerNumber; i++) {
             const computerName = "Computer_" + String(i);
-            this.setToPlayer(computerName, "ai");
+            this.addPlayer(computerName, "ai");
         }
     }
 

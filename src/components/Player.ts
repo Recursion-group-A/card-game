@@ -115,7 +115,7 @@ export class Player {
     this.bet += amount;
   }
 
-  public addCurrentTurn(): void {
+  public incrementCurrentTurn(): void {
     this.currentTurn++;
   }
 
