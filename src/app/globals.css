@@ -25,3 +25,11 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
+
+.img-set-blackjack{
+  background-image: url("./public/image/blackjack.jpg");
+}
+
+.img-start{
+  background-image: url("./src/app/globals.css");
+} 
