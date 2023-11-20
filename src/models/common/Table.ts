@@ -1,9 +1,10 @@
 import Card from '@/models/common/Card'
 import Deck from '@/models/common/Deck'
-import { Player } from '@/models/common/Player'
+import Player from '@/models/common/Player'
 import House from '@/models/common/House'
 import { GAMETYPE } from '@/types/gameTypes'
 import { PLAYERTYPE } from '@/types/playerTypes'
+import GAMEPHASE from '@/constants/gamePhases'
 
 export default class Table {
   private gameType: GAMETYPE
@@ -11,6 +12,8 @@ export default class Table {
   private playerNumber: number
 
   private betDenominations: number[]
+
+  private gamePhase: string
 
   private deck: Deck
 
@@ -26,6 +29,7 @@ export default class Table {
     this.gameType = gameType
     this.playerNumber = playerNumber
     this.betDenominations = [5, 20, 50, 100]
+    this.gamePhase = GAMEPHASE.BETTING
     this.deck = new Deck(this.gameType)
     this.round = 1
     this.house = new House()
@@ -33,7 +37,7 @@ export default class Table {
     this.resultLog = []
 
     this.initializePlayers()
-    this.addPlayersHand()
+    this.initializeParticipantsHand()
   }
 
   public initializeDeck(): void {
@@ -42,6 +46,26 @@ export default class Table {
 
   public initializeRound(): void {
     this.round = 1
+  }
+
+  public initializePlayers(): void {
+    this.addPlayer('Player', 'player')
+
+    for (let i = 1; i < this.playerNumber; i += 1) {
+      const computerName = `Bot_${i}`
+      this.addPlayer(computerName, 'ai')
+    }
+  }
+
+  public initializeParticipantsHand(): void {
+    // 各々（house含む）に一枚ずつ配る行為を2巡する
+    for (let i = 0; i < 2; i += 1) {
+      this.players.forEach((player: Player) => {
+        this.addParticipantHand(player)
+      })
+
+      this.addParticipantHand(this.house)
+    }
   }
 
   public preparePlayersForNextRound(): void {
@@ -64,6 +88,10 @@ export default class Table {
     return this.playerNumber
   }
 
+  public getGamePhase(): string {
+    return this.gamePhase;
+  }
+
   public getRound(): number {
     return this.round
   }
@@ -77,43 +105,41 @@ export default class Table {
   }
 
   public changeHouseTurn(): void {
-    this.house.drawUntilSeventeen(this.deck)
+    // 一旦保存
+    // drawUntilSeventeenでは「17になるまでカードを引き続ける処理」のみを行ったほうが良いかもしれません
+    const houseStatus: string = this.house.drawUntilSeventeen(this.deck)
   }
 
   public addPlayer(playerName: string, playerType: PLAYERTYPE): void {
     this.players.push(new Player(playerName, playerType, this.gameType))
   }
 
-  public initializePlayers(): void {
-    // 人間のplayerは常に一人という設定です
-    this.addPlayer('Player', 'player')
-
-    for (let i = 1; i < this.playerNumber; i += 1) {
-      const computerName = `Bot_${i}`
-      this.addPlayer(computerName, 'ai')
-    }
-  }
-
-  public addHouseHand(): void {
+  public addParticipantHand(participant: Player | House): void {
     const card: Card | undefined = this.deck.drawOne()
 
-    if (card !== undefined) {
-      this.house.addCard(card)
+    if (card) {
+      // addCardはPlayerとHouseの共通のメソッド
+      participant.addCard(card)
     }
   }
 
-  public addPlayersHand(): void {
-    // 各々（house含む）に一枚ずつ配る行為を2巡する
-    for (let i = 0; i < 2; i += 1) {
-      this.players.forEach((player: Player) => {
-        const card: Card | undefined = this.deck.drawOne()
+  public setToBetting(): void {
+    this.gamePhase = GAMEPHASE.BETTING
+  }
 
-        if (card) {
-          player.addHand(card)
-        }
-      })
+  public setToActing(): void {
+    this.gamePhase = GAMEPHASE.ACTING
+  }
 
-      this.addHouseHand()
-    }
+  public setToEvaluating(): void {
+    this.gamePhase = GAMEPHASE.EVALUATING
+  }
+
+  public setToSettlement(): void {
+    this.gamePhase = GAMEPHASE.SETTLEMENT
+  }
+
+  public setToPreparation(): void {
+    this.gamePhase = GAMEPHASE.PREPARATION
   }
 }
