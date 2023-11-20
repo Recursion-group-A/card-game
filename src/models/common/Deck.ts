@@ -1,31 +1,40 @@
 import Card from '@/models/common/Card'
 import { SUITS, RANKS } from '@/constants/cards'
 import { GAMETYPE, GAMESWITHJOKER } from '@/types/gameTypes'
+import { RankStrategy } from '@/models/common/RankStrategy'
 
 export default class Deck {
   private gameType: GAMETYPE
 
+  private rankStrategy: RankStrategy
+
   private deck: Card[]
 
-  constructor(gameType: GAMETYPE) {
+  constructor(gameType: GAMETYPE, rankStrategy: RankStrategy) {
     this.gameType = gameType
-    this.deck = Deck.generateDeck(GAMESWITHJOKER.includes(this.gameType))
+    this.rankStrategy = rankStrategy
+    this.deck = Deck.generateDeck(
+      this.rankStrategy,
+      GAMESWITHJOKER.includes(this.gameType)
+    )
   }
 
   // デッキ作成 ジョーカー追加
-  public static generateDeck(addJoker: boolean = false): Card[] {
+  public static generateDeck(
+    rankStrategy: RankStrategy,
+    addJoker: boolean = false
+  ): Card[] {
     const newDeck: Card[] = []
 
-    // イテレーター/ジェネレーターの使用を避ける
     SUITS.forEach((suit) => {
       RANKS.forEach((rank) => {
-        newDeck.push(new Card(suit, rank))
+        newDeck.push(new Card(suit, rank, rankStrategy))
       })
     })
 
     if (addJoker) {
-      newDeck.push(Card.createJoker())
-      newDeck.push(Card.createJoker())
+      newDeck.push(Card.createJoker(rankStrategy))
+      newDeck.push(Card.createJoker(rankStrategy))
     }
     return newDeck
   }
@@ -44,7 +53,10 @@ export default class Deck {
   }
 
   public resetDeck(): void {
-    this.deck = Deck.generateDeck(GAMESWITHJOKER.includes(this.gameType))
+    this.deck = Deck.generateDeck(
+      this.rankStrategy,
+      GAMESWITHJOKER.includes(this.gameType)
+    )
     this.shuffle()
   }
 
