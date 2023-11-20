@@ -1,7 +1,7 @@
 import React from 'react'
 
-const Page = () => (
-  <div className="flex h-screen w-screen items-center justify-center bg-cover py-5 text-center">
+export default function Home() {
+  ;<div className="flex h-screen w-screen items-center justify-center bg-cover py-5 text-center">
     <form id="startGameForm">
       <h1 className="mb-2 block p-5 text-5xl font-bold text-green-600">
         Welcom to Card Game station!
@@ -41,6 +41,4 @@ const Page = () => (
       </div>
     </form>
   </div>
-)
-
-export default Page
+}
