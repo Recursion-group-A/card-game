@@ -27,7 +27,11 @@ export default class House {
 
   public drawUntilSeventeen(deck: Deck): string {
     while (this.hand.getHandTotalScore() < 17) {
-      const card = House.getCardFromDeck(deck)
+      const card: Card | undefined = deck.drawOne()
+
+      if (!card) {
+        throw new Error('Deck is empty.')
+      }
 
       this.addCard(card)
 
@@ -36,20 +40,5 @@ export default class House {
       }
     }
     return PLAYER_STATES.STAND
-  }
-
-  private static getCardFromDeck(deck: Deck): Card {
-    let card = deck.drawOne()
-
-    if (!card) {
-      deck.resetDeck()
-      card = deck.drawOne()
-
-      if (!card) {
-        throw new Error('Deck is empty after reset, unable to draw card.')
-      }
-    }
-
-    return card
   }
 }
