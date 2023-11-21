@@ -253,14 +253,14 @@ export default class Player {
       }
 
       this.addCard(card)
-    }
 
-    if(this.getHandTotalScore() > 21) {
-      this.setToBust()
-    } else {
-      this.setToStand()
+      if(this.getHandTotalScore() > 21) {
+        this.setToBust()
+        return this.states
+      }
     }
-
+    
+    this.setToStand()
     return this.states
   }
 }
