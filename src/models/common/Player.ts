@@ -160,10 +160,6 @@ export default class Player {
     this.changeStates(PLAYER_STATES.STAND)
   }
 
-  public setToHit(): void {
-    this.changeStates(PLAYER_STATES.HIT)
-  }
-
   public setToDouble(): void {
     this.changeStates(PLAYER_STATES.DOUBLE_DOWN)
   }
@@ -227,10 +223,6 @@ export default class Player {
 
   public bust(): void {
     this.setToBust()
-  }
-
-  public hit(): void {
-    this.setToHit()
   }
 
   public stand(): void {
