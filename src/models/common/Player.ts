@@ -1,5 +1,7 @@
 import Card from '@/models/common/Card'
 import Hand from '@/models/common/Hand'
+import Deck from '@/models/common/Deck'
+import { PLAYER_STATES } from '@/constants/playerStates'
 import { PLAYERTYPE } from '@/types/playerTypes'
 import { GAMETYPE } from '@/types/gameTypes'
 
@@ -60,7 +62,7 @@ export default class Player {
   }
 
   public initializeStatus(): void {
-    this.status = 'betting'
+    this.status = PLAYER_STATES.WAITING
   }
 
   public prepareForNextRound(): void {
@@ -147,31 +149,35 @@ export default class Player {
   }
 
   public setToBroken(): void {
-    this.changeStatus('broken')
+    this.changeStatus(PLAYER_STATES.BROKEN)
+  }
+
+  public setToWaiting(): void {
+    this.changeStatus(PLAYER_STATES.WAITING)
   }
 
   public setToStand(): void {
-    this.changeStatus('stand')
+    this.changeStatus(PLAYER_STATES.STAND)
   }
 
   public setToHit(): void {
-    this.changeStatus('hit')
+    this.changeStatus(PLAYER_STATES.HIT)
   }
 
   public setToDouble(): void {
-    this.changeStatus('double')
+    this.changeStatus(PLAYER_STATES.DOUBLE_DOWN)
   }
 
   public setToSurrender(): void {
-    this.changeStatus('surrender')
+    this.changeStatus(PLAYER_STATES.SURRENDER)
   }
 
   public setToBust(): void {
-    this.changeStatus('bust')
+    this.changeStatus(PLAYER_STATES.BUST)
   }
 
   public setToBlackjack(): void {
-    this.changeStatus('blackjack')
+    this.changeStatus(PLAYER_STATES.BLACKJACK)
   }
 
   public isFirstTurn(): boolean {
@@ -243,5 +249,23 @@ export default class Player {
     this.removeBet(Math.floor(currentBet / 2))
     this.addChips(Math.floor(currentBet / 2))
     this.setToSurrender()
+  }
+
+  public drawUntilSeventeen(deck: Deck): void {
+    while (this.getHandTotalScore() < 17) {
+      const card: Card | undefined = deck.drawOne()
+
+      if (!card) {
+        throw new Error('Deck is empty.')
+      }
+
+      this.addCard(card)
+    }
+
+    if(this.getHandTotalScore() > 21) {
+      this.setToBust();
+    } else {
+      this.setToStand();
+    }
   }
 }

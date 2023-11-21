@@ -1,9 +1,13 @@
 export const PLAYER_STATES = {
+  // broken, waiting, hitを追加
+  BROKEN: 'Broken',
+  WAITING: 'Waiting',
   STAND: 'Stand',
-  BUST: 'Bust',
+  HIT: 'Hit',
   DOUBLE_DOWN: 'Double',
   SURRENDER: 'Surrender',
-  BLACKJACK: 'Blackjack'
+  BUST: 'Bust',
+  BLACKJACK: 'Blackjack',
   // その他の状態も必要に応じて追加
 }
 
