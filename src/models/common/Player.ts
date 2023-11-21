@@ -1,5 +1,7 @@
 import Card from '@/models/common/Card'
 import Hand from '@/models/common/Hand'
+import Deck from '@/models/common/Deck'
+import { PLAYER_STATES } from '@/constants/playerStates'
 import { PLAYERTYPE } from '@/types/playerTypes'
 import { GAMETYPE } from '@/types/gameTypes'
 
@@ -20,7 +22,7 @@ export default class Player {
 
   private hand: Hand
 
-  private status: string
+  private states: string
 
   constructor(
     playerName: string,
@@ -36,7 +38,7 @@ export default class Player {
     this.winAmount = 0
     this.currentTurn = 1
     this.hand = new Hand()
-    this.status = ''
+    this.states = PLAYER_STATES.WAIT
   }
 
   public initializeChips(): void {
@@ -59,15 +61,15 @@ export default class Player {
     this.hand.cleanHand()
   }
 
-  public initializeStatus(): void {
-    this.status = 'betting'
+  public initializeStates(): void {
+    this.states = PLAYER_STATES.WAIT
   }
 
   public prepareForNextRound(): void {
     this.initializeBet()
     this.initializeCurrentTurn()
     this.initializeHand()
-    this.initializeStatus()
+    this.initializeStates()
   }
 
   public getPlayerName(): string {
@@ -98,8 +100,8 @@ export default class Player {
     return this.hand.getHand()
   }
 
-  public getStatus(): string {
-    return this.status
+  public getStates(): string {
+    return this.states
   }
 
   public getHandTotalScore(): number {
@@ -134,8 +136,8 @@ export default class Player {
     this.bet = amount
   }
 
-  public changeStatus(status: string): void {
-    this.status = status
+  public changeStates(states: string): void {
+    this.states = states
   }
 
   public decideAiPlayerBetAmount(): void {
@@ -147,31 +149,31 @@ export default class Player {
   }
 
   public setToBroken(): void {
-    this.changeStatus('broken')
+    this.changeStates(PLAYER_STATES.BROKEN)
+  }
+
+  public setToWait(): void {
+    this.changeStates(PLAYER_STATES.WAIT)
   }
 
   public setToStand(): void {
-    this.changeStatus('stand')
-  }
-
-  public setToHit(): void {
-    this.changeStatus('hit')
+    this.changeStates(PLAYER_STATES.STAND)
   }
 
   public setToDouble(): void {
-    this.changeStatus('double')
+    this.changeStates(PLAYER_STATES.DOUBLE_DOWN)
   }
 
   public setToSurrender(): void {
-    this.changeStatus('surrender')
+    this.changeStates(PLAYER_STATES.SURRENDER)
   }
 
   public setToBust(): void {
-    this.changeStatus('bust')
+    this.changeStates(PLAYER_STATES.BUST)
   }
 
   public setToBlackjack(): void {
-    this.changeStatus('blackjack')
+    this.changeStates(PLAYER_STATES.BLACKJACK)
   }
 
   public isFirstTurn(): boolean {
@@ -223,10 +225,6 @@ export default class Player {
     this.setToBust()
   }
 
-  public hit(): void {
-    this.setToHit()
-  }
-
   public stand(): void {
     this.setToStand()
   }
@@ -243,5 +241,26 @@ export default class Player {
     this.removeBet(Math.floor(currentBet / 2))
     this.addChips(Math.floor(currentBet / 2))
     this.setToSurrender()
+  }
+
+  // aiがhitのみをする場合の処理となっています。
+  public drawUntilSeventeen(deck: Deck): string {
+    while (this.getHandTotalScore() < 17) {
+      const card: Card | undefined = deck.drawOne()
+
+      if (!card) {
+        throw new Error('Deck is empty.')
+      }
+
+      this.addCard(card)
+
+      if(this.getHandTotalScore() > 21) {
+        this.setToBust()
+        return this.states
+      }
+    }
+    
+    this.setToStand()
+    return this.states
   }
 }
