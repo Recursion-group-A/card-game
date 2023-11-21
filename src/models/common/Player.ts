@@ -106,7 +106,7 @@ export default class Player {
     return this.hand.getHandTotalScore()
   }
 
-  public addHand(card: Card): void {
+  public addCard(card: Card): void {
     this.hand.addOne(card)
   }
 
