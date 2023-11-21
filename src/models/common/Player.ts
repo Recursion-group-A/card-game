@@ -243,7 +243,8 @@ export default class Player {
     this.setToSurrender()
   }
 
-  public drawUntilSeventeen(deck: Deck): void {
+  // aiがhitのみをする場合の処理となっています。
+  public drawUntilSeventeen(deck: Deck): string {
     while (this.getHandTotalScore() < 17) {
       const card: Card | undefined = deck.drawOne()
 
@@ -255,9 +256,11 @@ export default class Player {
     }
 
     if(this.getHandTotalScore() > 21) {
-      this.setToBust();
+      this.setToBust()
     } else {
-      this.setToStand();
+      this.setToStand()
     }
+
+    return this.states
   }
 }
