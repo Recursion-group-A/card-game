@@ -38,7 +38,7 @@ export default class Player {
     this.winAmount = 0
     this.currentTurn = 1
     this.hand = new Hand()
-    this.states = ''
+    this.states = PLAYER_STATES.WAIT
   }
 
   public initializeChips(): void {
@@ -62,7 +62,7 @@ export default class Player {
   }
 
   public initializeStates(): void {
-    this.states = PLAYER_STATES.WAITING
+    this.states = PLAYER_STATES.WAIT
   }
 
   public prepareForNextRound(): void {
@@ -152,8 +152,8 @@ export default class Player {
     this.changeStates(PLAYER_STATES.BROKEN)
   }
 
-  public setToWaiting(): void {
-    this.changeStates(PLAYER_STATES.WAITING)
+  public setToWait(): void {
+    this.changeStates(PLAYER_STATES.WAIT)
   }
 
   public setToStand(): void {

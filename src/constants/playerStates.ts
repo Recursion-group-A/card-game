@@ -1,7 +1,7 @@
 export const PLAYER_STATES = {
   // broken, waiting, hitを追加
   BROKEN: 'Broken',
-  WAITING: 'Waiting',
+  WAIT: 'Wait',
   STAND: 'Stand',
   HIT: 'Hit',
   DOUBLE_DOWN: 'Double',
