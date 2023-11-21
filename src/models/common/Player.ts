@@ -22,7 +22,7 @@ export default class Player {
 
   private hand: Hand
 
-  private status: string
+  private states: string
 
   constructor(
     playerName: string,
@@ -38,7 +38,7 @@ export default class Player {
     this.winAmount = 0
     this.currentTurn = 1
     this.hand = new Hand()
-    this.status = ''
+    this.states = ''
   }
 
   public initializeChips(): void {
@@ -61,15 +61,15 @@ export default class Player {
     this.hand.cleanHand()
   }
 
-  public initializeStatus(): void {
-    this.status = PLAYER_STATES.WAITING
+  public initializeStates(): void {
+    this.states = PLAYER_STATES.WAITING
   }
 
   public prepareForNextRound(): void {
     this.initializeBet()
     this.initializeCurrentTurn()
     this.initializeHand()
-    this.initializeStatus()
+    this.initializeStates()
   }
 
   public getPlayerName(): string {
@@ -100,8 +100,8 @@ export default class Player {
     return this.hand.getHand()
   }
 
-  public getStatus(): string {
-    return this.status
+  public getStates(): string {
+    return this.states
   }
 
   public getHandTotalScore(): number {
@@ -136,8 +136,8 @@ export default class Player {
     this.bet = amount
   }
 
-  public changeStatus(status: string): void {
-    this.status = status
+  public changeStates(states: string): void {
+    this.states = states
   }
 
   public decideAiPlayerBetAmount(): void {
@@ -149,35 +149,35 @@ export default class Player {
   }
 
   public setToBroken(): void {
-    this.changeStatus(PLAYER_STATES.BROKEN)
+    this.changeStates(PLAYER_STATES.BROKEN)
   }
 
   public setToWaiting(): void {
-    this.changeStatus(PLAYER_STATES.WAITING)
+    this.changeStates(PLAYER_STATES.WAITING)
   }
 
   public setToStand(): void {
-    this.changeStatus(PLAYER_STATES.STAND)
+    this.changeStates(PLAYER_STATES.STAND)
   }
 
   public setToHit(): void {
-    this.changeStatus(PLAYER_STATES.HIT)
+    this.changeStates(PLAYER_STATES.HIT)
   }
 
   public setToDouble(): void {
-    this.changeStatus(PLAYER_STATES.DOUBLE_DOWN)
+    this.changeStates(PLAYER_STATES.DOUBLE_DOWN)
   }
 
   public setToSurrender(): void {
-    this.changeStatus(PLAYER_STATES.SURRENDER)
+    this.changeStates(PLAYER_STATES.SURRENDER)
   }
 
   public setToBust(): void {
-    this.changeStatus(PLAYER_STATES.BUST)
+    this.changeStates(PLAYER_STATES.BUST)
   }
 
   public setToBlackjack(): void {
-    this.changeStatus(PLAYER_STATES.BLACKJACK)
+    this.changeStates(PLAYER_STATES.BLACKJACK)
   }
 
   public isFirstTurn(): boolean {
