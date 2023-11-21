@@ -27,9 +27,9 @@ body {
 }
 
 .img-set-blackjack{
-  background-image: url("./public/image/blackjack.jpg");
+  background-image: url("/image/blackjack.jpg");
 }
 
 .img-start{
-  background-image: url("./src/app/globals.css");
-} 
+  background-image: url("/image/start.jpg");
+}  
