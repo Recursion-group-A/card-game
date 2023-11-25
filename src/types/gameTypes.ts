@@ -1,5 +1,6 @@
-export const GAMESWITHJOKER: GAMETYPE[] = []
 export enum GAMETYPE {
   Blackjack = 'blackjack',
-  Poker = 'poker'
+  Poker = 'poker',
+  Speed = 'speed'
 }
+export const GAMESWITHJOKER: GAMETYPE[] = [GAMETYPE.Speed]
