@@ -3,9 +3,9 @@ import { Rank } from '@/types/ranks'
 import { RankStrategy } from '@/models/common/RankStrategy'
 
 export default class Card {
-  private suit?: Suit
+  private readonly suit?: Suit
 
-  private rank: Rank
+  private readonly rank: Rank
 
   private rankStrategy: RankStrategy
 
