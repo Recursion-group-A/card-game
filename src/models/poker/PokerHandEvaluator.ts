@@ -1,37 +1,36 @@
 import Card from '@/models/common/Card'
-import PokerHand from '@/models/poker/PokerHand'
 import { Suit } from '@/types/suits'
+import PokerHand from '@/models/poker/PokerHand'
 
-// TODO: テスト
-export default class HandEvaluator {
+export default class PokerHandEvaluator {
   public static evaluateHand(hand: Card[], communityCards: Card[]): PokerHand {
     const combinedCards: Card[] = [...hand, ...communityCards]
 
-    if (HandEvaluator.isRoyalStraightFlush(combinedCards)) {
+    if (PokerHandEvaluator.isRoyalStraightFlush(combinedCards)) {
       return PokerHand.RoyalStraightFlush
     }
-    if (HandEvaluator.isStraightFlush(combinedCards)) {
+    if (PokerHandEvaluator.isStraightFlush(combinedCards)) {
       return PokerHand.StraightFlush
     }
-    if (HandEvaluator.isFourOfAKind(combinedCards)) {
+    if (PokerHandEvaluator.isFourOfAKind(combinedCards)) {
       return PokerHand.FourOfAKind
     }
-    if (HandEvaluator.isFullHouse(combinedCards)) {
+    if (PokerHandEvaluator.isFullHouse(combinedCards)) {
       return PokerHand.FullHouse
     }
-    if (HandEvaluator.isFlush(combinedCards)) {
+    if (PokerHandEvaluator.isFlush(combinedCards)) {
       return PokerHand.Flush
     }
-    if (HandEvaluator.isStraight(combinedCards)) {
+    if (PokerHandEvaluator.isStraight(combinedCards)) {
       return PokerHand.Straight
     }
-    if (HandEvaluator.isThreeOfAKind(combinedCards)) {
+    if (PokerHandEvaluator.isThreeOfAKind(combinedCards)) {
       return PokerHand.ThreeOfAKind
     }
-    if (HandEvaluator.isTwoPair(combinedCards)) {
+    if (PokerHandEvaluator.isTwoPair(combinedCards)) {
       return PokerHand.TwoPair
     }
-    if (HandEvaluator.isOnePair(combinedCards)) {
+    if (PokerHandEvaluator.isOnePair(combinedCards)) {
       return PokerHand.OnePair
     }
     return PokerHand.HighCard
@@ -39,30 +38,30 @@ export default class HandEvaluator {
 
   private static isRoyalStraightFlush(cards: Card[]): boolean {
     const cardsAboveTen: Card[] = cards.filter(
-      (c: Card) => c.getRankNumber() >= 10
+      (card: Card) => card.getRankNumber() >= 10
     )
-    return HandEvaluator.isStraightFlush(cardsAboveTen)
+    return PokerHandEvaluator.isStraightFlush(cardsAboveTen)
   }
 
   private static isStraightFlush(cards: Card[]): boolean {
-    const suitCountMap: Map<Suit, number> = HandEvaluator.getSuitCountMap(cards)
+    const suitCountMap: Map<Suit, number> =
+      PokerHandEvaluator.getSuitCountMap(cards)
 
-    //  eslint-disable-next-line
-    for (const [suit, count] of suitCountMap) {
+    let straightFlushExists: boolean = false
+    suitCountMap.forEach((count: number, suit: Suit) => {
       if (count >= 5) {
-        const suitCards: Card[] = cards.filter(
-          (c: Card) => c.getSuit() === suit
+        const sameSuitCards: Card[] = cards.filter(
+          (card: Card) => card.getSuit() === suit
         )
-        if (HandEvaluator.isStraight(suitCards)) {
-          return true
-        }
+        straightFlushExists = PokerHandEvaluator.isStraight(sameSuitCards)
       }
-    }
-    return false
+    })
+    return straightFlushExists
   }
 
   private static isFourOfAKind(cards: Card[]): boolean {
-    const rankCountMap = HandEvaluator.getRankCountMap(cards)
+    const rankCountMap: Map<number, number> =
+      PokerHandEvaluator.getRankCountMap(cards)
     let fourOfAKindExists: boolean = false
 
     rankCountMap.forEach((count: number) => {
@@ -74,7 +73,8 @@ export default class HandEvaluator {
   }
 
   private static isFullHouse(cards: Card[]): boolean {
-    const rankCountMap = HandEvaluator.getRankCountMap(cards)
+    const rankCountMap: Map<number, number> =
+      PokerHandEvaluator.getRankCountMap(cards)
 
     let threeOfAKindExists: boolean = false
     let onePairExists: boolean = false
@@ -93,7 +93,7 @@ export default class HandEvaluator {
   }
 
   private static isFlush(cards: Card[]): boolean {
-    const suitCountMap = HandEvaluator.getSuitCountMap(cards)
+    const suitCountMap = PokerHandEvaluator.getSuitCountMap(cards)
     let flushExits: boolean = false
 
     suitCountMap.forEach((count: number) => {
@@ -105,33 +105,37 @@ export default class HandEvaluator {
   }
 
   private static isStraight(cards: Card[]): boolean {
-    const uniqueRanks = Array.from(
-      new Set(cards.map((card) => card.getRankNumber()))
+    const rankCountMap: Map<number, number> =
+      PokerHandEvaluator.getRankCountMap(cards)
+
+    const sortedArrayByRank: number[] = Array.from(rankCountMap.keys()).sort(
+      (a: number, b: number) => a - b
     )
-    uniqueRanks.sort((a, b) => a - b)
 
-    if (uniqueRanks.includes(14) && !uniqueRanks.includes(1)) {
-      uniqueRanks.unshift(1) // エースをランク1として先頭に追加
-    }
-
-    // 連続する5枚のカードを探す
-    for (let i = 0; i < uniqueRanks.length - 4; i += 1) {
-      let isSequential = true
-      for (let j = i; j < i + 4; j += 1) {
-        if (uniqueRanks[j] + 1 !== uniqueRanks[j + 1]) {
-          isSequential = false
-          break
+    let sequences: number = 1
+    for (let i = 0; i < sortedArrayByRank.length - 1; i += 1) {
+      if (sortedArrayByRank[i] + 1 === sortedArrayByRank[i + 1]) {
+        sequences += 1
+        if (sequences >= 5) {
+          return true
         }
-      }
-      if (isSequential) {
-        return true
+      } else {
+        sequences = 1
       }
     }
-    return false
+    return (
+      sequences < 5 &&
+      rankCountMap.has(14) &&
+      sortedArrayByRank[0] === 2 &&
+      sortedArrayByRank[1] === 3 &&
+      sortedArrayByRank[2] === 4 &&
+      sortedArrayByRank[3] === 5
+    )
   }
 
   private static isThreeOfAKind(cards: Card[]): boolean {
-    const rankCountMap = HandEvaluator.getRankCountMap(cards)
+    const rankCountMap: Map<number, number> =
+      PokerHandEvaluator.getRankCountMap(cards)
     let threeOfAKindExists: boolean = false
 
     rankCountMap.forEach((count: number) => {
@@ -143,7 +147,8 @@ export default class HandEvaluator {
   }
 
   private static isTwoPair(cards: Card[]): boolean {
-    const rankCountMap = HandEvaluator.getRankCountMap(cards)
+    const rankCountMap: Map<number, number> =
+      PokerHandEvaluator.getRankCountMap(cards)
 
     let pairsFound: number = 0
     rankCountMap.forEach((count: number) => {
@@ -155,7 +160,8 @@ export default class HandEvaluator {
   }
 
   private static isOnePair(cards: Card[]): boolean {
-    const rankCountMap = HandEvaluator.getRankCountMap(cards)
+    const rankCountMap: Map<number, number> =
+      PokerHandEvaluator.getRankCountMap(cards)
     let onePairExists: boolean = false
 
     rankCountMap.forEach((count: number) => {
@@ -167,29 +173,28 @@ export default class HandEvaluator {
   }
 
   private static getSuitCountMap(cards: Card[]): Map<Suit, number> {
-    const suitCountMap = new Map<Suit, number>()
+    const suitCountMap: Map<Suit, number> = new Map<Suit, number>()
 
-    // eslint-disable-next-line
-    for (const card of cards) {
-      const suit = card.getSuit()
+    cards.forEach((card: Card) => {
+      const suit: Suit | undefined = card.getSuit()
 
       if (suit !== undefined) {
-        const updatedCount: number = (suitCountMap.get(suit) || 0) + 1
-        suitCountMap.set(suit, updatedCount)
+        const currentCount: number = suitCountMap.get(suit) || 0
+        suitCountMap.set(suit, currentCount + 1)
       }
-    }
+    })
     return suitCountMap
   }
 
   private static getRankCountMap(cards: Card[]): Map<number, number> {
-    const rankCountMap = new Map<number, number>()
+    const rankCountMap: Map<number, number> = new Map<number, number>()
 
-    // eslint-disable-next-line
-    for (const card of cards) {
+    cards.forEach((card: Card) => {
       const rank: number = card.getRankNumber()
-      const updatedCount: number = (rankCountMap.get(rank) || 0) + 1
-      rankCountMap.set(rank, updatedCount)
-    }
+      const currentCount: number = rankCountMap.get(rank) || 0
+
+      rankCountMap.set(rank, currentCount + 1)
+    })
     return rankCountMap
   }
 }
