@@ -1,7 +1,6 @@
 export default class PlayerBetView {
   public static render() {
     return `
-    
         <div className="flex flex-col justify-center items-center px-7 py-3">
             <div className="flex flex-justify-around py-6">
                 <div className="px-2">
