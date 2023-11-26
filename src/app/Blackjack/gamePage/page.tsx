@@ -1,4 +1,5 @@
 import React from 'react'
+import { cardView } from './cardView'
 
 export default function createBlackjackMainPage() {
   return (
@@ -19,40 +20,7 @@ export default function createBlackjackMainPage() {
           </p>
         </div>
         <div id="dealorCard" className="relative flex justify-center py-2">
-          <div className="relative mx-1 h-28  w-20 cursor-pointer rounded bg-white text-red-500">
-            <div className="absolute flex items-center justify-center shadow-xl">
-              <div className="absolute left-1 top-0 w-4 text-center">
-                <p className="h-4 text-xl">10</p>
-                <p className="mt-1 h-4">♥</p>
-              </div>
-            </div>
-
-            <div className="absolute inset-0 flex items-center justify-center">
-              <p className="text-2xl">♥</p>
-            </div>
-
-            <div className="absolute bottom-0 right-1 w-4 rotate-180 text-center">
-              <p className="h-4 text-xl">10</p>
-              <p className="mt-1 h-4">♥</p>
-            </div>
-          </div>
-          <div className="relative mx-1 h-28  w-20 cursor-pointer rounded bg-white text-red-500">
-            <div className="absolute flex items-center justify-center shadow-xl">
-              <div className="absolute left-1 top-0 w-4 text-center">
-                <p className="h-4 text-xl">10</p>
-                <p className="mt-1 h-4">♥</p>
-              </div>
-            </div>
-
-            <div className="absolute inset-0 flex items-center justify-center">
-              <p className="text-2xl">♥</p>
-            </div>
-
-            <div className="absolute bottom-0 right-1 w-4 rotate-180 text-center">
-              <p className="h-4 text-xl">10</p>
-              <p className="mt-1 h-4">♥</p>
-            </div>
-          </div>
+          ${cardView.render()}${cardView.render()}
         </div>
 
         <div id="player" className="flex justify-center  pt-6">
@@ -72,40 +40,7 @@ export default function createBlackjackMainPage() {
               </p>
             </div>
             <div id="CP1Card" className="relative flex justify-center py-2">
-              <div className="relative mx-1 h-28  w-20 cursor-pointer rounded bg-white text-red-500">
-                <div className="absolute flex items-center justify-center shadow-xl">
-                  <div className="absolute left-1 top-0 w-4 text-center">
-                    <p className="h-4 text-xl">10</p>
-                    <p className="mt-1 h-4">♥</p>
-                  </div>
-                </div>
-
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <p className="text-2xl">♥</p>
-                </div>
-
-                <div className="absolute bottom-0 right-1 w-4 rotate-180 text-center">
-                  <p className="h-4 text-xl">10</p>
-                  <p className="mt-1 h-4">♥</p>
-                </div>
-              </div>
-              <div className="relative mx-1 h-28  w-20 cursor-pointer rounded bg-white text-red-500">
-                <div className="absolute flex items-center justify-center shadow-xl">
-                  <div className="absolute left-1 top-0 w-4 text-center">
-                    <p className="h-4 text-xl">10</p>
-                    <p className="mt-1 h-4">♥</p>
-                  </div>
-                </div>
-
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <p className="text-2xl">♥</p>
-                </div>
-
-                <div className="absolute bottom-0 right-1 w-4 rotate-180 text-center">
-                  <p className="h-4 text-xl">10</p>
-                  <p className="mt-1 h-4">♥</p>
-                </div>
-              </div>
+              ${cardView.render()}${cardView.render()}
             </div>
           </div>
 
@@ -125,37 +60,7 @@ export default function createBlackjackMainPage() {
               </p>
             </div>
             <div id="userCard" className="relative flex justify-center py-2">
-              <div className="relative mx-1 h-28  w-20 cursor-pointer rounded bg-white text-red-500">
-                <div className="absolute flex items-center justify-center shadow-xl">
-                  <div className="absolute left-1 top-0 w-4 text-center">
-                    <p className="h-4 text-xl">10</p>
-                    <p className="mt-1 h-4">♥</p>
-                  </div>
-                </div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <p className="text-2xl">♥</p>
-                </div>
-                <div className="absolute bottom-0 right-1 w-4 rotate-180 text-center">
-                  <p className="h-4 text-xl">10</p>
-                  <p className="mt-1 h-4">♥</p>
-                </div>
-              </div>
-              <div className="relative mx-1 h-28  w-20 cursor-pointer rounded bg-white text-red-500">
-                <div className="absolute flex items-center justify-center shadow-xl">
-                  <div className="absolute left-1 top-0 w-4 text-center">
-                    <p className="h-4 text-xl">10</p>
-                    <p className="mt-1 h-4">♥</p>
-                  </div>
-                </div>
-
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <p className="text-2xl">♥</p>
-                </div>
-                <div className="absolute bottom-0 right-1 w-4 rotate-180 text-center">
-                  <p className="h-4 text-xl">10</p>
-                  <p className="mt-1 h-4">♥</p>
-                </div>
-              </div>
+              ${cardView.render()}${cardView.render()}
             </div>
             <div id="userAction">
               <div className="flex items-center justify-around">
@@ -214,36 +119,7 @@ export default function createBlackjackMainPage() {
               </p>
             </div>
             <div id="CP2Card" className="relative flex justify-center py-2">
-              <div className="relative mx-1 h-28  w-20 cursor-pointer rounded bg-white text-red-500">
-                <div className="absolute flex items-center justify-center shadow-xl">
-                  <div className="absolute left-1 top-0 w-4 text-center">
-                    <p className="h-4 text-xl">10</p>
-                    <p className="mt-1 h-4">♥</p>
-                  </div>
-                </div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <p className="text-2xl">♥</p>
-                </div>
-                <div className="absolute bottom-0 right-1 w-4 rotate-180 text-center">
-                  <p className="h-4 text-xl">10</p>
-                  <p className="mt-1 h-4">♥</p>
-                </div>
-              </div>
-              <div className="relative mx-1 h-28  w-20 cursor-pointer rounded bg-white text-red-500">
-                <div className="absolute flex items-center justify-center shadow-xl">
-                  <div className="absolute left-1 top-0 w-4 text-center">
-                    <p className="h-4 text-xl">10</p>
-                    <p className="mt-1 h-4">♥</p>
-                  </div>
-                </div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <p className="text-2xl">♥</p>
-                </div>
-                <div className="absolute bottom-0 right-1 w-4 rotate-180 text-center">
-                  <p className="h-4 text-xl">10</p>
-                  <p className="mt-1 h-4">♥</p>
-                </div>
-              </div>
+              ${cardView.render()}${cardView.render()}
             </div>
           </div>
         </div>
