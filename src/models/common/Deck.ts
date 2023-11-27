@@ -4,9 +4,9 @@ import { GAMETYPE, GAMESWITHJOKER } from '@/types/gameTypes'
 import { RankStrategy } from '@/models/common/RankStrategy'
 
 export default class Deck {
-  private gameType: GAMETYPE
+  private readonly gameType: GAMETYPE
 
-  private rankStrategy: RankStrategy
+  private readonly rankStrategy: RankStrategy
 
   private deck: Card[]
 
@@ -14,6 +14,22 @@ export default class Deck {
     this.gameType = gameType
     this.rankStrategy = rankStrategy
     this.deck = this.generateDeck(GAMESWITHJOKER.includes(this.gameType))
+  }
+
+  public getGameType(): GAMETYPE {
+    return this.gameType
+  }
+
+  public getRankStrategy(): RankStrategy {
+    return this.rankStrategy
+  }
+
+  public getDeckSize(): number {
+    return this.deck.length
+  }
+
+  public getCardAt(index: number): Card {
+    return this.deck[index]
   }
 
   // デッキ作成 ジョーカー追加
@@ -42,7 +58,7 @@ export default class Deck {
   private performShuffle(): void {
     for (let i = this.deck.length - 1; i >= 0; i -= 1) {
       const j: number = Math.floor(Math.random() * (i + 1))
-      ;[this.deck[i], this.deck[j]] = [this.deck[j], this.deck[i]] // eslint-disable-line
+      ;[this.deck[i], this.deck[j]] = [this.deck[j], this.deck[i]]
     }
   }
 

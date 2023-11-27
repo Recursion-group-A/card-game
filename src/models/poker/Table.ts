@@ -4,10 +4,10 @@ import Hand from '@/models/common/Hand'
 import Player from '@/models/poker/Player'
 import Pot from '@/models/poker/Pot'
 import PokerRound from '@/models/poker/rounds'
-import PokerHand from '@/models/poker/PokerHand'
-import HandEvaluator from '@/models/poker/HandEvaluator'
+import PokerHandEvaluator from '@/models/poker/PokerHandEvaluator'
 import { GAMETYPE } from '@/types/gameTypes'
 import { RankStrategy } from '@/models/common/RankStrategy'
+import PokerHand from '@/models/poker/PokerHand'
 
 export default class Table {
   private readonly gameType: GAMETYPE
@@ -128,7 +128,7 @@ export default class Table {
       const playerHand: Card[] = player.getHand()
       const communityCard: Card[] = this.communityCards.getHand()
 
-      const playerBestHand: PokerHand = HandEvaluator.evaluateHand(
+      const playerBestHand: PokerHand = PokerHandEvaluator.evaluateHand(
         playerHand,
         communityCard
       )
