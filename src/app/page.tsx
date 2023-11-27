@@ -40,12 +40,5 @@ export default function Home() {
         </div>
       </form>
     </div>
-    // <div className="flex h-screen h-screen justify-center bg-green-500 text-white items-center">
-    //   <div className="pb-3 comtainer">
-    //     <p id="dealor" className="text-3xl text-center items-center justify-center">Dealorrrr</p>
-
-    //   </div>
-
-    // </div>
   )
 }
