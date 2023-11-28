@@ -2,6 +2,7 @@ import Card from '@/models/common/Card'
 import { SUITS, RANKS } from '@/constants/cards'
 import { GAMETYPE, GAMESWITHJOKER } from '@/types/gameTypes'
 import { RankStrategy } from '@/models/common/RankStrategy'
+import getRankStrategy from '@/utils/getRankStrategy'
 
 export default class Deck {
   private readonly gameType: GAMETYPE
@@ -10,9 +11,9 @@ export default class Deck {
 
   private deck: Card[]
 
-  constructor(gameType: GAMETYPE, rankStrategy: RankStrategy) {
+  constructor(gameType: GAMETYPE) {
     this.gameType = gameType
-    this.rankStrategy = rankStrategy
+    this.rankStrategy = getRankStrategy(gameType)
     this.deck = this.generateDeck(GAMESWITHJOKER.includes(this.gameType))
   }
 

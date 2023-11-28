@@ -1,44 +1,46 @@
+import Card from '@/models/common/Card'
 import Deck from '@/models/common/Deck'
 import { RANKS, SUITS } from '@/constants/cards'
 import { GAMESWITHJOKER, GAMETYPE } from '@/types/gameTypes'
-import { RankStrategy } from '@/models/common/RankStrategy'
-import Card from '@/models/common/Card'
-
-const mockRankStrategy: RankStrategy = {
-  getRankNumber: jest.fn()
-}
+import getRankStrategy from '@/utils/getRankStrategy'
 
 describe('Deck constructor', () => {
   it('should create a Poker-Deck instance with correct properties', () => {
-    const deck: Deck = new Deck(GAMETYPE.Poker, mockRankStrategy)
+    const deck: Deck = new Deck(GAMETYPE.Poker)
 
     expect(deck).toBeInstanceOf(Deck)
     expect(deck.getGameType()).toBe(GAMETYPE.Poker)
-    expect(deck.getRankStrategy()).toBe(mockRankStrategy)
+    expect(deck.getRankStrategy()).toStrictEqual(
+      getRankStrategy(GAMETYPE.Poker)
+    )
     expect(GAMESWITHJOKER.includes(deck.getGameType())).toBeFalsy()
   })
   it('should create a Blackjack-Deck instance with correct properties', () => {
-    const deck: Deck = new Deck(GAMETYPE.Blackjack, mockRankStrategy)
+    const deck: Deck = new Deck(GAMETYPE.Blackjack)
 
     expect(deck).toBeInstanceOf(Deck)
     expect(deck.getGameType()).toBe(GAMETYPE.Blackjack)
-    expect(deck.getRankStrategy()).toBe(mockRankStrategy)
+    expect(deck.getRankStrategy()).toStrictEqual(
+      getRankStrategy(GAMETYPE.Blackjack)
+    )
     expect(GAMESWITHJOKER.includes(deck.getGameType())).toBeFalsy()
   })
   it('should create a Speed-Deck instance with correct properties', () => {
-    const deck: Deck = new Deck(GAMETYPE.Speed, mockRankStrategy)
+    const deck: Deck = new Deck(GAMETYPE.Speed)
 
     expect(deck).toBeInstanceOf(Deck)
     expect(deck.getGameType()).toBe(GAMETYPE.Speed)
-    expect(deck.getRankStrategy()).toBe(mockRankStrategy)
+    expect(deck.getRankStrategy()).toStrictEqual(
+      getRankStrategy(GAMETYPE.Speed)
+    )
     expect(GAMESWITHJOKER.includes(deck.getGameType())).toBeTruthy()
   })
 })
 
 describe('generateDeck', () => {
-  const speedDeck: Deck = new Deck(GAMETYPE.Speed, mockRankStrategy)
-  const blackjackDeck: Deck = new Deck(GAMETYPE.Blackjack, mockRankStrategy)
-  const pokerDeck: Deck = new Deck(GAMETYPE.Poker, mockRankStrategy)
+  const speedDeck: Deck = new Deck(GAMETYPE.Speed)
+  const blackjackDeck: Deck = new Deck(GAMETYPE.Blackjack)
+  const pokerDeck: Deck = new Deck(GAMETYPE.Poker)
 
   const combinations = SUITS.flatMap((suit) =>
     RANKS.map((rank) => [suit, rank])
@@ -79,7 +81,7 @@ describe('generateDeck', () => {
 })
 
 describe('performShuffle', () => {
-  const deck: Deck = new Deck(GAMETYPE.Poker, mockRankStrategy)
+  const deck: Deck = new Deck(GAMETYPE.Poker)
 
   it('should change the order of cards in the deck', () => {
     const originalDeck: Card[] = deck.generateDeck()
@@ -95,7 +97,7 @@ describe('performShuffle', () => {
 
 describe('drawOne', () => {
   it('should return a Card instance until 52 times call', () => {
-    const deck: Deck = new Deck(GAMETYPE.Poker, mockRankStrategy)
+    const deck: Deck = new Deck(GAMETYPE.Poker)
 
     for (let i = 0; i < deck.getDeckSize(); i += 1) {
       const card: Card | undefined = deck.drawOne()
@@ -103,7 +105,7 @@ describe('drawOne', () => {
     }
   })
   it('should return undefined after 52 times call', () => {
-    const deck: Deck = new Deck(GAMETYPE.Poker, mockRankStrategy)
+    const deck: Deck = new Deck(GAMETYPE.Poker)
 
     let times: number = deck.getDeckSize()
     while (times > 0) {
@@ -114,14 +116,14 @@ describe('drawOne', () => {
     expect(card).toBeUndefined()
   })
   it('should draw different cards on consecutive calls', () => {
-    const deck: Deck = new Deck(GAMETYPE.Poker, mockRankStrategy)
+    const deck: Deck = new Deck(GAMETYPE.Poker)
     const firstDraw: Card | undefined = deck.drawOne()
     const secondDraw: Card | undefined = deck.drawOne()
 
     expect(firstDraw).not.toBe(secondDraw)
   })
   it('should draw exactly one card from deck', () => {
-    const deck: Deck = new Deck(GAMETYPE.Poker, mockRankStrategy)
+    const deck: Deck = new Deck(GAMETYPE.Poker)
     const initialSize: number = deck.getDeckSize()
 
     deck.drawOne()
