@@ -140,20 +140,8 @@ export default class Player {
     this.states = states
   }
 
-  public decideAiPlayerBetAmount(): void {
-    const max: number = Math.floor(this.chips * 0.2)
-    const min: number = Math.floor(this.chips * 0.1)
-    const betAmount: number = Math.floor(Math.random() * (max - min) + min)
-
-    this.bet = betAmount
-  }
-
   public setToBroken(): void {
     this.changeStates(PLAYER_STATES.BROKEN)
-  }
-
-  public setToWait(): void {
-    this.changeStates(PLAYER_STATES.WAIT)
   }
 
   public setToStand(): void {
@@ -190,6 +178,14 @@ export default class Player {
 
   public isBust(): boolean {
     return this.hand.isBust()
+  }
+
+  public isPlayerScoreSame(houseScore: number) {
+    return houseScore === this.getHandTotalScore()
+  }
+
+  public isPlayerScoreHigh(houseScore: number) {
+    return houseScore < this.getHandTotalScore()
   }
 
   public canBet(bet: number): boolean {
@@ -243,8 +239,20 @@ export default class Player {
     this.setToSurrender()
   }
 
-  // aiがhitのみをする場合の処理となっています。
-  public drawUntilSeventeen(deck: Deck): string {
+  public settlement(houseScore: number) {
+    if(this.isPlayerScoreSame(houseScore)) this.addChips(this.bet)
+    else if(this.isPlayerScoreHigh(houseScore)) this.addChips(this.bet*2)
+  }
+
+  public decideAiPlayerBetAmount(): void {
+    const max: number = Math.floor(this.chips * 0.2)
+    const min: number = Math.floor(this.chips * 0.1)
+    const betAmount: number = Math.floor(Math.random() * (max - min) + min)
+
+    this.bet = betAmount
+  }
+
+  public drawUntilSeventeen(deck: Deck): void {
     while (this.getHandTotalScore() < 17) {
       const card: Card | undefined = deck.drawOne()
 
@@ -253,14 +261,15 @@ export default class Player {
       }
 
       this.addCard(card)
+      this.incrementCurrentTurn()
 
       if(this.getHandTotalScore() > 21) {
         this.setToBust()
-        return this.states
+        break
+      } else if(this.getHandTotalScore() >= 17) {
+        this.setToStand()
+        break
       }
     }
-    
-    this.setToStand()
-    return this.states
   }
 }

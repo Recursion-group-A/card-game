@@ -5,6 +5,7 @@ import House from '@/models/common/House'
 import { GAMETYPE } from '@/types/gameTypes'
 import { PLAYERTYPE } from '@/types/playerTypes'
 import GAMEPHASE from '@/constants/gamePhases'
+import { RankStrategy } from './RankStrategy'
 
 export default class Table {
   private gameType: GAMETYPE
@@ -25,27 +26,20 @@ export default class Table {
 
   private resultLog: string[]
 
-  constructor(gameType: GAMETYPE, playerNumber: number) {
+  constructor(gameType: GAMETYPE, playerNumber: number, rankStrategy: RankStrategy) {
     this.gameType = gameType
     this.playerNumber = playerNumber
     this.betDenominations = [5, 20, 50, 100]
     this.gamePhase = GAMEPHASE.BETTING
-    this.deck = new Deck(this.gameType)
+    this.deck = new Deck(this.gameType, rankStrategy)
     this.round = 1
     this.house = new House()
     this.players = []
     this.resultLog = []
-
-    this.initializePlayers()
-    this.initializeParticipantsHand()
   }
 
   public initializeDeck(): void {
     this.deck.resetDeck()
-  }
-
-  public initializeRound(): void {
-    this.round = 1
   }
 
   public initializePlayers(): void {
@@ -74,10 +68,19 @@ export default class Table {
     })
   }
 
+  public prepareHouseForNextRound(): void {
+    this.house.prepareForNextRound()
+  }
+
   public prepareForNextRound(): void {
+    this.setToPreparation()
     this.initializeDeck()
-    this.initializeRound()
+    this.incrementRound()
     this.preparePlayersForNextRound()
+    this.prepareHouseForNextRound()
+    this.initializeParticipantsHand()
+    this.decideAiPlayersBetAmount()
+    this.setToBetting()
   }
 
   public getGameType(): GAMETYPE {
@@ -89,7 +92,7 @@ export default class Table {
   }
 
   public getGamePhase(): string {
-    return this.gamePhase;
+    return this.gamePhase
   }
 
   public getRound(): number {
@@ -105,9 +108,15 @@ export default class Table {
   }
 
   public changeHouseTurn(): void {
-    // 一旦保存
-    // drawUntilSeventeenでは「17になるまでカードを引き続ける処理」のみを行ったほうが良いかもしれません
-    const houseStatus: string = this.house.drawUntilSeventeen(this.deck)
+    this.house.drawUntilSeventeen(this.deck)
+  }
+
+  public changeAiPlayerTurn(): void {
+    const aiPlayers: Player[] = this.players.slice(1)
+
+    aiPlayers.forEach(aiPlayer => {
+      aiPlayer.drawUntilSeventeen(this.deck)
+    })
   }
 
   public addPlayer(playerName: string, playerType: PLAYERTYPE): void {
@@ -120,6 +129,77 @@ export default class Table {
     if (card) {
       // addCardはPlayerとHouseの共通のメソッド
       participant.addCard(card)
+    }
+  }
+
+  public addPlayerBet(amount: number) {
+    const player: Player = this.players[0]
+    if(player.canBet(amount)) {
+      player.addBet(amount)
+    }
+  }
+
+  public resetPlayerBet(): void {
+    const player: Player = this.players[0]
+    player.initializeBet()
+  }
+
+  public decideAiPlayersBetAmount(): void {
+    const aiPlayers: Player[] = this.players.slice(1)
+
+    aiPlayers.forEach(aiPlayer => {
+      aiPlayer.decideAiPlayerBetAmount()
+    })
+  }
+
+  public settlementPlayers(): void {
+    const houseScore: number = this.house.getHandTotalScore()
+    this.players.forEach(player => {
+      player.settlement(houseScore)
+    })
+  }
+
+  public startGame(): void {
+    this.setToActing()
+    this.initializePlayers()
+    this.initializeParticipantsHand()
+    this.decideAiPlayersBetAmount()
+  }
+
+  public commonProcess(player: Player): void {
+    this.addParticipantHand(player)
+    player.incrementCurrentTurn()
+    if(player.isBust()) player.bust()
+  }
+
+  public standProcess(): void {
+    const player: Player = this.players[0]
+    player.stand()
+  }
+
+  public hitProcess(): void {
+    const player: Player = this.players[0]
+
+    if(player.canHit()) {
+      this.commonProcess(player)
+    }
+  }
+
+  public doubleProcess(): void {
+    const player: Player = this.players[0]
+
+    if(player.canDouble()) {
+      player.double()
+      this.commonProcess(player)
+    }
+  }
+
+  public surrenderProcess(): void {
+    const player: Player = this.players[0]
+
+    if(player.canSurrender()) {
+      player.surrender()
+      this.commonProcess(player)
     }
   }
 
