@@ -1,44 +1,27 @@
+'use client'
+
+import Link from 'next/link'
+
 export default function Home() {
   return (
-    <div className="img-start flex h-screen w-screen items-center justify-center bg-cover py-5 text-center">
-      <form id="startGameForm">
-        <h1 className="mb-2 block p-5 text-5xl font-bold text-green-600">
-          Welcom to Card Game station!
-        </h1>
-        <p className="block text-2xl font-bold text-white">
-          Which game do you want to play? Click!
-        </p>
-        <div className="flex p-3">
-          <button
-            id="startBlackjack"
-            type="button"
-            className="m-3 flex-1 rounded border bg-yellow-500 p-3 text-2xl font-bold hover:bg-yellow-400"
-          >
-            Black Jack
-          </button>
-          <button
-            id="startPoker"
-            type="button"
-            className="m-3 flex-1 rounded border bg-yellow-500 p-3 text-2xl font-bold hover:bg-yellow-400"
-          >
-            Poker
-          </button>
-          <button
-            id="startSpeed"
-            type="button"
-            className="m-3 flex-1 rounded border bg-yellow-500 p-3 text-2xl font-bold hover:bg-yellow-400"
-          >
-            Speed
-          </button>
-          <button
-            id="startComingSoon"
-            type="button"
-            className="m-3 flex-1 rounded border bg-yellow-500 p-3 text-2xl font-bold hover:bg-yellow-400"
-          >
-            Coming soon..
-          </button>
-        </div>
-      </form>
+    <div>
+      <h1>Hello, World!</h1>
+      <Link href="/games/blackjack/">
+        <button
+          type="button"
+          className="mb-2 me-2 rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+        >
+          BlackJack
+        </button>
+      </Link>
+      <Link href="/games/poker/">
+        <button
+          type="button"
+          className="mb-2 me-2 rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700"
+        >
+          Poker
+        </button>
+      </Link>
     </div>
   )
 }
