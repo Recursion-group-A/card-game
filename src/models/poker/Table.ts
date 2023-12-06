@@ -6,7 +6,6 @@ import Pot from '@/models/poker/Pot'
 import PokerRound from '@/models/poker/rounds'
 import PokerHandEvaluator from '@/models/poker/PokerHandEvaluator'
 import { GAMETYPE } from '@/types/gameTypes'
-import { RankStrategy } from '@/models/common/RankStrategy'
 import PokerHand from '@/models/poker/PokerHand'
 
 export default class Table {
@@ -38,11 +37,10 @@ export default class Table {
 
   private readonly limit: number = 50
 
-  // TODO: gameTypeを受け取って rankStrategyを返す関数があってもいいかも
-  constructor(gameType: GAMETYPE, rankStrategy: RankStrategy) {
+  constructor(gameType: GAMETYPE) {
     this.gameType = gameType
     this.players = Table.generatePlayers(6)
-    this.deck = new Deck(this.gameType, rankStrategy)
+    this.deck = new Deck(this.gameType)
     this.pot = new Pot()
     // すべての Index を０で初期化する
     this.dealerIndex = 0
@@ -55,18 +53,23 @@ export default class Table {
     this.round = PokerRound.PreFlop
   }
 
-  // ----- START ゲームの開始 -------
+  public getSbIndex(): number {
+    return this.sbIndex
+  }
+
+  public getUtgIndex(): number {
+    return this.utgIndex
+  }
+
   public assignRandomDealerButton(): void {
     if (this.players.length === 0) {
       return
     }
-
     // ディーラーボタンの開始位置をランダムに決定する
     this.dealerIndex = Math.floor(Math.random() * this.players.length)
     this.players[this.dealerIndex].setAsDealer(true)
 
-    // 他のプレイヤーの位置を更新
-    this.assignPlayerPositions()
+    this.assignOtherPlayersPosition()
   }
 
   public collectBlinds(): void {
@@ -89,9 +92,6 @@ export default class Table {
     }
   }
 
-  // ----- END ゲームの開始 -------
-
-  // ----- ラウンドの処理 ------
   public async startRound(start: number, cardsToAdd: number): Promise<void> {
     if (cardsToAdd > 0) {
       this.dealCommunityCards(cardsToAdd)
@@ -118,8 +118,8 @@ export default class Table {
   }
 
   public showDown(): void {
-    const activePlayers: Player[] = this.players.filter((p: Player) =>
-      p.getIsActive()
+    const activePlayers: Player[] = this.players.filter((player: Player) =>
+      player.getIsActive()
     )
     let bestHandRank: PokerHand = PokerHand.HighCard
     let winners: Player[] = []
@@ -162,7 +162,7 @@ export default class Table {
     this.communityCards.cleanHand()
     this.currentMaxBet = this.bigBlind
     this.dealerIndex = (this.dealerIndex + 1) % this.players.length
-    this.assignPlayerPositions()
+    this.assignOtherPlayersPosition()
     this.round = PokerRound.PreFlop
   }
 
@@ -180,7 +180,7 @@ export default class Table {
   // private getUserInput(): Promise<string> {
   //   // TODO: View との連携
   //   return new Promise<string>((resolve) => {
-  //     例）resolve(selectedAction)
+  //     // 例）resolve(selectedAction)
   //   })
   // }
 
@@ -259,7 +259,7 @@ export default class Table {
     return card
   }
 
-  private assignPlayerPositions(): void {
+  private assignOtherPlayersPosition(): void {
     const numOfPlayers: number = this.players.length
 
     this.sbIndex = (this.dealerIndex + 1) % numOfPlayers

@@ -1,9 +1,21 @@
+'use client'
+
+import React from 'react'
+import Link from 'next/link'
+import Controller from '@/controllers/poker/Controller'
+import { GAMETYPE } from '@/types/gameTypes'
+
 export default function Home() {
+  const handlePokerStart = () => {
+    const controller: Controller = new Controller(GAMETYPE.Poker)
+    controller.startPoker()
+  }
+
   return (
     <div className="img-start flex h-screen w-screen items-center justify-center bg-cover py-5 text-center">
       <form id="startGameForm">
         <h1 className="mb-2 block p-5 text-5xl font-bold text-green-600">
-          Welcom to Card Game station!
+          Welcome to Card Game station!
         </h1>
         <p className="block text-2xl font-bold text-white">
           Which game do you want to play? Click!
@@ -16,13 +28,16 @@ export default function Home() {
           >
             Black Jack
           </button>
-          <button
-            id="startPoker"
-            type="button"
-            className="m-3 flex-1 rounded border bg-yellow-500 p-3 text-2xl font-bold hover:bg-yellow-400"
-          >
-            Poker
-          </button>
+          <Link href="/games/poker/">
+            <button
+              id="startPoker"
+              type="button"
+              className="m-3 flex-1 rounded border bg-yellow-500 p-3 text-2xl font-bold hover:bg-yellow-400"
+              onClick={handlePokerStart}
+            >
+              Poker
+            </button>
+          </Link>
           <button
             id="startSpeed"
             type="button"
