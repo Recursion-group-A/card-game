@@ -5,6 +5,7 @@ import { HOUSE_STATES } from '@/constants/houseStates'
 
 export default class House {
   private hand: Hand
+
   private states: string
 
   constructor() {
@@ -61,7 +62,7 @@ export default class House {
   }
 
   public drawUntilSeventeen(deck: Deck): void {
-    if(this.getHandTotalScore() === 21) this.setToBlackjack()
+    if (this.getHandTotalScore() === 21) this.setToBlackjack()
 
     while (this.getHandTotalScore() < 17) {
       const card: Card | undefined = deck.drawOne()
@@ -75,7 +76,7 @@ export default class House {
       if (this.getHandTotalScore() > 21) {
         this.setToBust()
         break
-      } else if(this.getHandTotalScore() >= 17) {
+      } else if (this.getHandTotalScore() >= 17) {
         this.setToStand()
         break
       }

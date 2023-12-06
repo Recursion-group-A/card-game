@@ -26,13 +26,10 @@ body {
     rgb(var(--background-start-rgb));
 }
 
-.img-set-blackjack{
-  background-image: url("/image/blackjack.jpg");
+.img-set-blackjack {
+  background-image: url('/image/blackjack.jpg');
 }
 
-.img-start{
-  background-image: url("/image/start.jpg");
-}  
-
-
-
+.img-start {
+  background-image: url('/image/start.jpg');
+}

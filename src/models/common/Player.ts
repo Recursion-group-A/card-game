@@ -240,8 +240,8 @@ export default class Player {
   }
 
   public settlement(houseScore: number) {
-    if(this.isPlayerScoreSame(houseScore)) this.addChips(this.bet)
-    else if(this.isPlayerScoreHigh(houseScore)) this.addChips(this.bet*2)
+    if (this.isPlayerScoreSame(houseScore)) this.addChips(this.bet)
+    else if (this.isPlayerScoreHigh(houseScore)) this.addChips(this.bet * 2)
   }
 
   public decideAiPlayerBetAmount(): void {
@@ -263,10 +263,10 @@ export default class Player {
       this.addCard(card)
       this.incrementCurrentTurn()
 
-      if(this.getHandTotalScore() > 21) {
+      if (this.getHandTotalScore() > 21) {
         this.setToBust()
         break
-      } else if(this.getHandTotalScore() >= 17) {
+      } else if (this.getHandTotalScore() >= 17) {
         this.setToStand()
         break
       }

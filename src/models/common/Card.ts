@@ -9,12 +9,21 @@ export default class Card {
 
   private rankStrategy: RankStrategy
 
-  constructor(suit: Suit | undefined, rank: Rank, rankStrategy: RankStrategy) {
+  private isFaceDown: boolean
+
+  constructor(
+    suit: Suit | undefined,
+    rank: Rank,
+    rankStrategy: RankStrategy,
+    isFaceDown: boolean = true
+  ) {
     this.suit = suit
 
     this.rank = rank
 
     this.rankStrategy = rankStrategy
+
+    this.isFaceDown = isFaceDown
   }
 
   /**
@@ -36,6 +45,14 @@ export default class Card {
     return this.rank
   }
 
+  public getIsFaceDown(): boolean {
+    return this.isFaceDown
+  }
+
+  public setIsFaceDown(bool: boolean): void {
+    this.isFaceDown = bool
+  }
+
   /**
    * カードのランクを数値で取得します。
    * このメソッドは、ストラテジーパターンを使用してランクを計算し、
@@ -48,9 +65,22 @@ export default class Card {
   }
 
   public toString(): string {
-    if (this.rank === 'Joker') {
+    if (!this.suit) {
       return 'Joker'
     }
-    return this.suit ? `${this.suit}${this.rank}` : this.rank
+
+    const FACE_CARDS: string[] = ['10', 'J', 'Q', 'K', 'A']
+    const suitMap: { [key in Suit]: string } = {
+      S: 'spades',
+      C: 'clubs',
+      H: 'hearts',
+      D: 'diamonds'
+    }
+    const suitName: string = suitMap[this.suit]
+    const rankName: string = FACE_CARDS.includes(this.rank)
+      ? this.rank
+      : `0${this.rank.toString()}`
+
+    return `${suitName}_${rankName}`
   }
 }

@@ -26,7 +26,11 @@ export default class Table {
 
   private resultLog: string[]
 
-  constructor(gameType: GAMETYPE, playerNumber: number, rankStrategy: RankStrategy) {
+  constructor(
+    gameType: GAMETYPE,
+    playerNumber: number,
+    rankStrategy: RankStrategy
+  ) {
     this.gameType = gameType
     this.playerNumber = playerNumber
     this.betDenominations = [5, 20, 50, 100]
@@ -114,7 +118,7 @@ export default class Table {
   public changeAiPlayerTurn(): void {
     const aiPlayers: Player[] = this.players.slice(1)
 
-    aiPlayers.forEach(aiPlayer => {
+    aiPlayers.forEach((aiPlayer) => {
       aiPlayer.drawUntilSeventeen(this.deck)
     })
   }
@@ -134,7 +138,7 @@ export default class Table {
 
   public addPlayerBet(amount: number) {
     const player: Player = this.players[0]
-    if(player.canBet(amount)) {
+    if (player.canBet(amount)) {
       player.addBet(amount)
     }
   }
@@ -147,14 +151,14 @@ export default class Table {
   public decideAiPlayersBetAmount(): void {
     const aiPlayers: Player[] = this.players.slice(1)
 
-    aiPlayers.forEach(aiPlayer => {
+    aiPlayers.forEach((aiPlayer) => {
       aiPlayer.decideAiPlayerBetAmount()
     })
   }
 
   public settlementPlayers(): void {
     const houseScore: number = this.house.getHandTotalScore()
-    this.players.forEach(player => {
+    this.players.forEach((player) => {
       player.settlement(houseScore)
     })
   }
@@ -169,7 +173,7 @@ export default class Table {
   public commonProcess(player: Player): void {
     this.addParticipantHand(player)
     player.incrementCurrentTurn()
-    if(player.isBust()) player.bust()
+    if (player.isBust()) player.bust()
   }
 
   public standProcess(): void {
@@ -180,7 +184,7 @@ export default class Table {
   public hitProcess(): void {
     const player: Player = this.players[0]
 
-    if(player.canHit()) {
+    if (player.canHit()) {
       this.commonProcess(player)
     }
   }
@@ -188,7 +192,7 @@ export default class Table {
   public doubleProcess(): void {
     const player: Player = this.players[0]
 
-    if(player.canDouble()) {
+    if (player.canDouble()) {
       player.double()
       this.commonProcess(player)
     }
@@ -197,7 +201,7 @@ export default class Table {
   public surrenderProcess(): void {
     const player: Player = this.players[0]
 
-    if(player.canSurrender()) {
+    if (player.canSurrender()) {
       player.surrender()
       this.commonProcess(player)
     }
