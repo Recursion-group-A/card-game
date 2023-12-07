@@ -9,56 +9,68 @@ import { GAMETYPE } from '@/types/gameTypes'
 import PokerHand from '@/models/poker/PokerHand'
 
 export default class Table {
-  private readonly gameType: GAMETYPE
+  private readonly _gameType: GAMETYPE
 
-  private readonly players: Player[]
+  private readonly _players: Player[]
 
-  private deck: Deck
+  private readonly _deck: Deck
 
-  private pot: Pot
+  private readonly _pot: Pot
 
-  private dealerIndex: number
+  private _dealerIndex: number
 
-  private sbIndex: number
+  private _sbIndex: number
 
-  private bbIndex: number
+  private _bbIndex: number
 
-  private utgIndex: number
+  private _utgIndex: number
 
-  private readonly smallBlind: number = 25
+  private readonly _smallBlind: number = 25
 
-  private readonly bigBlind: number = 50
+  private readonly _bigBlind: number = 50
 
-  private currentMaxBet: number
+  private _currentMaxBet: number
 
-  private communityCards: Hand
+  private _communityCards: Hand
 
-  private round: PokerRound
+  private _round: PokerRound
 
-  private readonly limit: number = 50
+  private readonly _limit: number = 50
 
   constructor(gameType: GAMETYPE) {
-    this.gameType = gameType
-    this.players = Table.generatePlayers(6)
-    this.deck = new Deck(this.gameType)
-    this.pot = new Pot()
+    this._gameType = gameType
+    this._players = Table.generatePlayers(6)
+    this._deck = new Deck(this.gameType)
+    this._pot = new Pot()
     // すべての Index を０で初期化する
-    this.dealerIndex = 0
-    this.sbIndex = 0
-    this.bbIndex = 0
-    this.utgIndex = 0
+    this._dealerIndex = 0
+    this._sbIndex = 0
+    this._bbIndex = 0
+    this._utgIndex = 0
     // すべての Index を０で初期化する
-    this.currentMaxBet = this.bigBlind
-    this.communityCards = new Hand()
-    this.round = PokerRound.PreFlop
+    this._currentMaxBet = this._bigBlind
+    this._communityCards = new Hand()
+    this._round = PokerRound.PreFlop
   }
 
-  public getSbIndex(): number {
-    return this.sbIndex
+  get gameType(): GAMETYPE {
+    return this._gameType
   }
 
-  public getUtgIndex(): number {
-    return this.utgIndex
+  get players(): Player[] {
+    return this._players
+  }
+
+  get deck(): Deck {
+    return this._deck
+  }
+
+  get sbIndex(): number {
+    return this._sbIndex
+  }
+
+  get utgIndex(): number {
+    return this._utgIndex
   }
 
   public assignRandomDealerButton(): void {
@@ -66,8 +78,8 @@ export default class Table {
       return
     }
     // ディーラーボタンの開始位置をランダムに決定する
-    this.dealerIndex = Math.floor(Math.random() * this.players.length)
-    this.players[this.dealerIndex].setAsDealer(true)
+    this._dealerIndex = Math.floor(Math.random() * this.players.length)
+    this.players[this._dealerIndex].setAsDealer(true)
 
     this.assignOtherPlayersPosition()
   }
@@ -77,11 +89,11 @@ export default class Table {
       return
     }
 
-    const sbPlayer: Player = this.players[this.sbIndex]
-    const bbPlayer: Player = this.players[this.bbIndex]
+    const sbPlayer: Player = this.players[this._sbIndex]
+    const bbPlayer: Player = this.players[this._bbIndex]
 
-    this.pot.addPot(sbPlayer.placeBet(this.smallBlind))
-    this.pot.addPot(bbPlayer.placeBet(this.bigBlind))
+    this._pot.addPot(sbPlayer.placeBet(this._smallBlind))
+    this._pot.addPot(bbPlayer.placeBet(this._bigBlind))
   }
 
   public dealCardsToPlayers(): void {
@@ -126,7 +138,7 @@ export default class Table {
 
     activePlayers.forEach((player: Player) => {
       const playerHand: Card[] = player.getHand()
-      const communityCard: Card[] = this.communityCards.getHand()
+      const communityCard: Card[] = this._communityCards.getHand()
 
       const playerBestHand: PokerHand = PokerHandEvaluator.evaluateHand(
         playerHand,
@@ -141,7 +153,7 @@ export default class Table {
       }
     })
 
-    const potPerWinner: number = this.pot.getTotalPot() / winners.length
+    const potPerWinner: number = this._pot.getTotalPot() / winners.length
     winners.forEach((winner: Player) => {
       winner.addChips(potPerWinner)
     })
@@ -158,16 +170,16 @@ export default class Table {
 
     // テーブルに関する操作
     this.deck.resetDeck()
-    this.pot.resetPot()
-    this.communityCards.cleanHand()
-    this.currentMaxBet = this.bigBlind
-    this.dealerIndex = (this.dealerIndex + 1) % this.players.length
+    this._pot.resetPot()
+    this._communityCards.cleanHand()
+    this._currentMaxBet = this._bigBlind
+    this._dealerIndex = (this._dealerIndex + 1) % this.players.length
     this.assignOtherPlayersPosition()
-    this.round = PokerRound.PreFlop
+    this._round = PokerRound.PreFlop
   }
 
   private async getPlayerAction(player: Player): Promise<string> {
-    if (player.getPlayerType() === 'player') {
+    if (player.playerType === 'player') {
       // const userInput = await this.getUserInput()
       const userInput = '未実装'
       return userInput
@@ -198,9 +210,9 @@ export default class Table {
         break
       case 'call':
         {
-          const amountToCall: number = this.currentMaxBet - player.getBet()
+          const amountToCall: number = this._currentMaxBet - player.getBet()
           player.placeBet(amountToCall)
-          this.pot.addPot(amountToCall)
+          this._pot.addPot(amountToCall)
         }
         break
       case 'raise':
@@ -208,8 +220,8 @@ export default class Table {
           const amountToRaise: number = this.getRaiseAmount()
           const totalBet: number = amountToRaise + player.getBet()
           player.placeBet(amountToRaise)
-          this.currentMaxBet = totalBet
-          this.pot.addPot(amountToRaise)
+          this._currentMaxBet = totalBet
+          this._pot.addPot(amountToRaise)
         }
         break
       case 'check':
@@ -227,7 +239,7 @@ export default class Table {
     if (activePlayers.length === 1) {
       const winner: Player = activePlayers[0]
       // TODO: ハンドが終了したときの処理
-      winner.addChips(this.pot.getTotalPot())
+      winner.addChips(this._pot.getTotalPot())
     }
 
     this.resetGame()
@@ -245,7 +257,7 @@ export default class Table {
 
   private dealCommunityCards(communityCardsToAdd: number): void {
     for (let i = 0; i < communityCardsToAdd; i += 1) {
-      this.communityCards.addOne(this.drawValidCardFromDeck())
+      this._communityCards.addOne(this.drawValidCardFromDeck())
     }
   }
 
@@ -262,21 +274,21 @@ export default class Table {
   private assignOtherPlayersPosition(): void {
     const numOfPlayers: number = this.players.length
 
-    this.sbIndex = (this.dealerIndex + 1) % numOfPlayers
-    this.bbIndex = (this.dealerIndex + 2) % numOfPlayers
-    this.utgIndex = (this.dealerIndex + 3) % numOfPlayers
+    this._sbIndex = (this._dealerIndex + 1) % numOfPlayers
+    this._bbIndex = (this._dealerIndex + 2) % numOfPlayers
+    this._utgIndex = (this._dealerIndex + 3) % numOfPlayers
   }
 
   private getRaiseAmount(): number {
-    switch (this.round) {
+    switch (this._round) {
       case PokerRound.PreFlop:
       case PokerRound.Flop:
-        return this.limit
+        return this._limit
       case PokerRound.Turn:
       case PokerRound.River:
-        return this.limit * 2
+        return this._limit * 2
       default:
-        throw new Error(`Invalid round: ${this.round}`)
+        throw new Error(`Invalid round: ${this._round}`)
     }
   }
 

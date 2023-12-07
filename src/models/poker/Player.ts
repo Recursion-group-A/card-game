@@ -3,65 +3,65 @@ import Hand from '@/models/common/Hand'
 import { PLAYERTYPE } from '@/types/playerTypes'
 
 export default class Player {
-  private readonly playerType: PLAYERTYPE
+  private readonly _playerType: PLAYERTYPE
 
-  private hand: Hand
+  private _hand: Hand
 
-  private chips: number
+  private _chips: number
 
-  private bet: number
+  private _bet: number
 
-  private isDealer: boolean
+  private _isDealer: boolean
 
-  private isActive: boolean
+  private _isActive: boolean
 
   constructor() {
-    this.playerType = 'player'
-    this.hand = new Hand()
-    this.chips = 1000
-    this.bet = 0
-    this.isDealer = false
-    this.isActive = true
+    this._playerType = 'player'
+    this._hand = new Hand()
+    this._chips = 1000
+    this._bet = 0
+    this._isDealer = false
+    this._isActive = true
   }
 
-  public getPlayerType(): PLAYERTYPE {
-    return this.playerType
+  get playerType(): PLAYERTYPE {
+    return this._playerType
   }
 
-  public getHand(): Card[] {
-    return this.hand.getHand()
+  get hand(): Card[] {
+    return this._hand.getHand()
   }
 
-  public getChips(): number {
-    return this.chips
+  get chips(): number {
+    return this._chips
   }
 
-  public getBet(): number {
-    return this.bet
+  get bet(): number {
+    return this._bet
   }
 
-  public getIsDealer(): boolean {
-    return this.isDealer
+  get isDealer(): boolean {
+    return this._isDealer
   }
 
-  public getIsActive(): boolean {
-    return this.isActive
+  get isActive(): boolean {
+    return this._isActive
   }
 
   public addHand(card: Card): void {
-    this.hand.addOne(card)
+    this._hand.addOne(card)
   }
 
   public addChips(amount: number): void {
-    this.chips += amount
+    this._chips += amount
   }
 
   public clearHand(): void {
-    this.hand = new Hand()
+    this._hand = new Hand()
   }
 
   public resetBet(): void {
-    this.bet = 0
+    this._bet = 0
   }
 
   public placeBet(amount: number): number {
@@ -72,16 +72,16 @@ export default class Player {
       )
     }
 
-    this.chips -= amount
-    this.bet += amount
+    this._chips -= amount
+    this._bet += amount
     return amount
   }
 
   public setAsDealer(bool: boolean): void {
-    this.isDealer = bool
+    this._isDealer = bool
   }
 
   public setAsActive(bool: boolean): void {
-    this.isActive = bool
+    this._isActive = bool
   }
 }

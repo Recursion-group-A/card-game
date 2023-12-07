@@ -1,5 +1,13 @@
 import Phaser from 'phaser'
 
+type Props = {
+  width: number
+  height: number
+  onClick: () => void
+  fontSize: string
+  color: string
+}
+
 export default class ButtonView extends Phaser.GameObjects.Container {
   private readonly container: Phaser.GameObjects.Graphics
 
@@ -10,25 +18,33 @@ export default class ButtonView extends Phaser.GameObjects.Container {
     x: number,
     y: number,
     text: string,
-    onClick: () => void
+    props: Props,
+    background: number
   ) {
     super(scene, x, y)
 
+    const {
+      width = props.width,
+      height = props.height,
+      onClick,
+      fontSize = props.fontSize,
+      color = props.color
+    } = props
+
     this.container = scene.add.graphics()
-    this.container.fillStyle(0x0000ff, 1)
-    this.container.fillRoundedRect(-75, -25, 150, 50, 20)
+    this.container.fillStyle(background, 1)
+    this.container.fillRoundedRect(0, 0, width, height, 20)
+    this.container.setPosition(-width / 2, -height / 2)
 
     this.text = scene.add
-      .text(0, 0, text, {
-        fontSize: '1rem',
-        color: '#ffffff'
-      })
+      .text(0, 0, text, { fontSize, color })
       .setOrigin(0.5, 0.5)
 
     this.add([this.container, this.text])
 
-    this.setSize(150, 50)
-    this.setInteractive({ useHandCursor: true }).on('pointerdown', onClick)
+    this.setSize(width, height)
+    this.setInteractive({ useHandCursor: true })
+    this.on('pointerdown', onClick)
 
     scene.add.existing(this)
   }

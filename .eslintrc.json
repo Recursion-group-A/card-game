@@ -27,6 +27,7 @@
   "rules": {
     "linebreak-style": ["error", "unix"],
     "react/react-in-jsx-scope": "off",
+    "no-underscore-dangle": "off",
     // "react/function-component-definition": [
     //   2,
     //   {

@@ -1,11 +1,15 @@
 import Table from '@/models/poker/Table'
+import TableView from '@/phaser/poker/TableView'
 import { GAMETYPE } from '@/types/gameTypes'
 
 export default class Controller {
   private table: Table
 
-  constructor(gameType: GAMETYPE) {
+  private tableView: TableView | undefined
+
+  constructor(gameType: GAMETYPE, tableView: TableView | undefined) {
     this.table = new Table(gameType)
+    this.tableView = tableView
   }
 
   public startPoker(): void {
@@ -15,28 +19,28 @@ export default class Controller {
   }
 
   public async startPreFlopRound(): Promise<void> {
-    const startingIndex: number = this.table.getUtgIndex()
+    const startingIndex: number = this.table.utgIndex
 
     await this.table.startRound(startingIndex, 0)
     this.table.checkForWinner()
   }
 
   public async startFlopRound(): Promise<void> {
-    const startingIndex: number = this.table.getSbIndex()
+    const startingIndex: number = this.table.sbIndex
 
     await this.table.startRound(startingIndex, 3)
     this.table.checkForWinner()
   }
 
   public async startTurnRound(): Promise<void> {
-    const startingIndex: number = this.table.getSbIndex()
+    const startingIndex: number = this.table.sbIndex
 
     await this.table.startRound(startingIndex, 1)
     this.table.checkForWinner()
   }
 
   public async startRiverRound(): Promise<void> {
-    const startingIndex: number = this.table.getSbIndex()
+    const startingIndex: number = this.table.sbIndex
 
     await this.table.startRound(startingIndex, 1)
     this.table.checkForWinner()
