@@ -3,13 +3,13 @@ import { Rank } from '@/types/ranks'
 import { RankStrategy } from '@/models/common/RankStrategy'
 
 export default class Card {
-  private readonly suit?: Suit
+  private readonly _suit?: Suit
 
-  private readonly rank: Rank
+  private readonly _rank: Rank
 
-  private rankStrategy: RankStrategy
+  private readonly _rankStrategy: RankStrategy
 
-  private isFaceDown: boolean
+  private _isFaceDown: boolean
 
   constructor(
     suit: Suit | undefined,
@@ -17,13 +17,13 @@ export default class Card {
     rankStrategy: RankStrategy,
     isFaceDown: boolean = true
   ) {
-    this.suit = suit
+    this._suit = suit
 
-    this.rank = rank
+    this._rank = rank
 
-    this.rankStrategy = rankStrategy
+    this._rankStrategy = rankStrategy
 
-    this.isFaceDown = isFaceDown
+    this._isFaceDown = isFaceDown
   }
 
   /**
@@ -37,20 +37,20 @@ export default class Card {
     return new Card(undefined, 'Joker', rankStrategy)
   }
 
-  public getSuit(): Suit | undefined {
-    return this.suit
+  get suit(): Suit | undefined {
+    return this._suit
   }
 
-  public getRank(): Rank {
-    return this.rank
+  get rank(): Rank {
+    return this._rank
   }
 
-  public getIsFaceDown(): boolean {
-    return this.isFaceDown
+  get isFaceDown(): boolean {
+    return this._isFaceDown
   }
 
-  public setIsFaceDown(bool: boolean): void {
-    this.isFaceDown = bool
+  set isFaceDown(bool: boolean) {
+    this._isFaceDown = bool
   }
 
   /**
@@ -61,7 +61,7 @@ export default class Card {
    * @returns カードのランクに対応する数値
    */
   public getRankNumber(): number {
-    return this.rankStrategy.getRankNumber(this.rank)
+    return this._rankStrategy.getRankNumber(this.rank)
   }
 
   public toString(): string {

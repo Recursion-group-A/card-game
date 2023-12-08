@@ -23,6 +23,7 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image('card-back', 'cards/card_back.png')
     this.load.image('joker-black', 'cards/card_joker_black.png')
     this.load.image('joker-red', 'cards/card_joker_red.png')
+    this.load.image('dealer-btn', 'dealerBtn.png')
 
     this.load.image('button', 'Default.png')
 

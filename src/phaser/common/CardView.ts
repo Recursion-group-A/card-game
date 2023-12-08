@@ -2,30 +2,22 @@ import Phaser from 'phaser'
 import Card from '@/models/common/Card'
 
 export default class CardView extends Phaser.GameObjects.Image {
-  private cardModel: Card
+  private readonly _cardModel: Card
 
   constructor(scene: Phaser.Scene, x: number, y: number, cardModel: Card) {
     super(scene, x, y, 'card-back')
-    this.cardModel = cardModel
+    this._cardModel = cardModel
 
     this.scene.add.existing(this)
-    this.setInteractive({ useHandCursor: true })
-    this.on('pointerdown', () => {
-      if (this.cardModel.getIsFaceDown()) {
-        this.open()
-      } else {
-        this.close()
-      }
-    })
   }
 
   public setFaceUp(): void {
-    this.cardModel.setIsFaceDown(false)
+    this._cardModel.isFaceDown = false
     this.setTexture(this.getAtlasFrame())
   }
 
   public setFaceDown(): void {
-    this.cardModel.setIsFaceDown(true)
+    this._cardModel.isFaceDown = true
     this.setTexture('card-back')
   }
 
@@ -40,7 +32,7 @@ export default class CardView extends Phaser.GameObjects.Image {
         this.scene.tweens.add({
           targets: this,
           scaleX: 1,
-          duration: 150,
+          duration: 250,
           ease: 'Linear'
         })
       }
@@ -76,7 +68,7 @@ export default class CardView extends Phaser.GameObjects.Image {
   }
 
   private getAtlasFrame(): string {
-    const suitAndRank: string = this.cardModel.toString()
+    const suitAndRank: string = this._cardModel.toString()
     return `card_${suitAndRank}`
   }
 }

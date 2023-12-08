@@ -1,12 +1,13 @@
 import Card from '@/models/common/Card'
 import Deck from '@/models/common/Deck'
 import Hand from '@/models/common/Hand'
-import Player from '@/models/poker/Player'
 import Pot from '@/models/poker/Pot'
+import Player from '@/models/poker/Player'
+import PokerHand from '@/models/poker/PokerHand'
+import { GAMETYPE } from '@/types/gameTypes'
 import PokerRound from '@/models/poker/rounds'
 import PokerHandEvaluator from '@/models/poker/PokerHandEvaluator'
-import { GAMETYPE } from '@/types/gameTypes'
-import PokerHand from '@/models/poker/PokerHand'
+import PLAYERTYPES from '@/types/playerTypes'
 
 export default class Table {
   private readonly _gameType: GAMETYPE
@@ -65,12 +66,43 @@ export default class Table {
     return this._deck
   }
 
+  get dealerIndex(): number {
+    return this._dealerIndex
+  }
+
   get sbIndex(): number {
     return this._sbIndex
   }
 
+  get bbIndex(): number {
+    return this._bbIndex
+  }
+
   get utgIndex(): number {
     return this._utgIndex
+  }
+
+  get smallBlind(): number {
+    return this._smallBlind
+  }
+
+  get bigBlind(): number {
+    return this._bigBlind
+  }
+
+  private static generatePlayers(numOfPlayers: number): Player[] {
+    const players: Player[] = []
+
+    for (let i = 0; i < numOfPlayers; i += 1) {
+      const index: number = i > 2 ? i : i + 1
+      if (i === 2) {
+        players.push(new Player('you', PLAYERTYPES.PLAYER))
+      } else {
+        players.push(new Player(`bot${index}`, PLAYERTYPES.AI))
+      }
+    }
+
+    return players
   }
 
   public assignRandomDealerButton(): void {
@@ -79,7 +111,7 @@ export default class Table {
     }
     // ディーラーボタンの開始位置をランダムに決定する
     this._dealerIndex = Math.floor(Math.random() * this.players.length)
-    this.players[this._dealerIndex].setAsDealer(true)
+    this.players[this._dealerIndex].isDealer = true
 
     this.assignOtherPlayersPosition()
   }
@@ -99,7 +131,8 @@ export default class Table {
   public dealCardsToPlayers(): void {
     for (let i = 0; i < 2; i += 1) {
       this.players.forEach((player: Player) => {
-        player.addHand(this.drawValidCardFromDeck())
+        const card: Card = this.drawValidCardFromDeck()
+        player.addHand(card)
       })
     }
   }
@@ -116,7 +149,7 @@ export default class Table {
       const currentPlayer: Player = this.players[index]
 
       // 各プレイヤーのアクションを処理する
-      if (currentPlayer.getIsActive()) {
+      if (currentPlayer.isActive) {
         const action = await this.getPlayerAction(currentPlayer) // eslint-disable-line
         this.handleAction(currentPlayer, action)
 
@@ -130,14 +163,14 @@ export default class Table {
   }
 
   public showDown(): void {
-    const activePlayers: Player[] = this.players.filter((player: Player) =>
-      player.getIsActive()
+    const activePlayers: Player[] = this.players.filter(
+      (player: Player) => player.isActive
     )
     let bestHandRank: PokerHand = PokerHand.HighCard
     let winners: Player[] = []
 
     activePlayers.forEach((player: Player) => {
-      const playerHand: Card[] = player.getHand()
+      const playerHand: Card[] = player.hand
       const communityCard: Card[] = this._communityCards.getHand()
 
       const playerBestHand: PokerHand = PokerHandEvaluator.evaluateHand(
@@ -206,11 +239,11 @@ export default class Table {
   private handleAction(player: Player, action: string): void {
     switch (action) {
       case 'fold':
-        player.setAsActive(false)
+        player.isActive = false // eslint-disable-line
         break
       case 'call':
         {
-          const amountToCall: number = this._currentMaxBet - player.getBet()
+          const amountToCall: number = this._currentMaxBet - player.bet
           player.placeBet(amountToCall)
           this._pot.addPot(amountToCall)
         }
@@ -218,7 +251,7 @@ export default class Table {
       case 'raise':
         {
           const amountToRaise: number = this.getRaiseAmount()
-          const totalBet: number = amountToRaise + player.getBet()
+          const totalBet: number = amountToRaise + player.bet
           player.placeBet(amountToRaise)
           this._currentMaxBet = totalBet
           this._pot.addPot(amountToRaise)
@@ -232,8 +265,8 @@ export default class Table {
   }
 
   public checkForWinner(): void {
-    const activePlayers: Player[] = this.players.filter((p: Player) =>
-      p.getIsActive()
+    const activePlayers: Player[] = this.players.filter(
+      (p: Player) => p.isActive
     )
 
     if (activePlayers.length === 1) {
@@ -245,16 +278,6 @@ export default class Table {
     this.resetGame()
   }
 
-  private static generatePlayers(numOfPlayers: number): Player[] {
-    const players: Player[] = []
-
-    for (let i = 0; i < numOfPlayers; i += 1) {
-      players.push(new Player())
-    }
-
-    return players
-  }
-
   private dealCommunityCards(communityCardsToAdd: number): void {
     for (let i = 0; i < communityCardsToAdd; i += 1) {
       this._communityCards.addOne(this.drawValidCardFromDeck())
@@ -262,7 +285,7 @@ export default class Table {
   }
 
   // デッキからカードを得るためのヘルパー関数
-  private drawValidCardFromDeck(): Card {
+  public drawValidCardFromDeck(): Card {
     const card: Card | undefined = this.deck.drawOne()
 
     if (!card) {
@@ -301,10 +324,16 @@ export default class Table {
   }
 
   private resetDealerStatus(): void {
-    this.players.forEach((p: Player) => p.setAsDealer(false))
+    // eslint-disable-next-line
+    for (const p of this.players) {
+      p.isDealer = false
+    }
   }
 
   private resetActiveStatus(): void {
-    this.players.forEach((p: Player) => p.setAsActive(true))
+    // eslint-disable-next-line
+    for (const p of this.players) {
+      p.isActive = true
+    }
   }
 }

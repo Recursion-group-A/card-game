@@ -1,1 +1,7 @@
-export type PLAYERTYPE = 'player' | 'house' | 'ai'
+enum PLAYERTYPES {
+  HOUSE = 'house',
+  PLAYER = 'player',
+  AI = 'ai'
+}
+
+export default PLAYERTYPES

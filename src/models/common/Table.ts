@@ -3,9 +3,8 @@ import Deck from '@/models/common/Deck'
 import Player from '@/models/common/Player'
 import House from '@/models/common/House'
 import { GAMETYPE } from '@/types/gameTypes'
-import { PLAYERTYPE } from '@/types/playerTypes'
+import PLAYERTYPE from '@/types/playerTypes'
 import GAMEPHASE from '@/constants/gamePhases'
-import { RankStrategy } from './RankStrategy'
 
 export default class Table {
   private gameType: GAMETYPE
@@ -26,16 +25,12 @@ export default class Table {
 
   private resultLog: string[]
 
-  constructor(
-    gameType: GAMETYPE,
-    playerNumber: number,
-    rankStrategy: RankStrategy
-  ) {
+  constructor(gameType: GAMETYPE, playerNumber: number) {
     this.gameType = gameType
     this.playerNumber = playerNumber
     this.betDenominations = [5, 20, 50, 100]
     this.gamePhase = GAMEPHASE.BETTING
-    this.deck = new Deck(this.gameType, rankStrategy)
+    this.deck = new Deck(this.gameType)
     this.round = 1
     this.house = new House()
     this.players = []

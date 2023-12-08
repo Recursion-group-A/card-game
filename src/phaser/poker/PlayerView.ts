@@ -4,49 +4,64 @@ import Player from '@/models/poker/Player'
 import CardView from '@/phaser/common/CardView'
 
 export default class PlayerView extends Phaser.GameObjects.Container {
-  private playerModel: Player
+  private readonly _playerModel: Player
 
-  private readonly playerNameText: Phaser.GameObjects.Text
+  private readonly _handCardViews: CardView[] = []
 
-  private readonly chipsText: Phaser.GameObjects.Text
+  private readonly _playerNameText: Phaser.GameObjects.Text
 
-  constructor(scene: Phaser.Scene, x: number, y: number, playerModel: Player) {
-    super(scene, x, y)
-    this.playerModel = playerModel
+  private readonly _chipsText: Phaser.GameObjects.Text
 
-    this.playerNameText = this.scene.add.text(
-      30,
+  private _dealerBtn: Phaser.GameObjects.Image | undefined | null
+
+  constructor(
+    scene: Phaser.Scene,
+    playerModel: Player,
+    playerPos: { x: number; y: number }
+  ) {
+    super(scene, playerPos.x, playerPos.y)
+    this._playerModel = playerModel
+
+    this._playerNameText = this.scene.add.text(
+      40,
       0,
-      `${this.playerModel.playerType.toUpperCase()}`
+      `${this._playerModel.playerName.toUpperCase()}`
+    )
+    this._chipsText = this.scene.add.text(
+      5,
+      64 + 40, // カードの高さ → 64
+      `CHIPS: ${this._playerModel.chips}`
     )
 
-    const cardHeight: number = 64
-    this.chipsText = this.scene.add.text(
-      10,
-      cardHeight + 40,
-      `Chips: ${this.playerModel.chips}`
-    )
-
-    this.add([this.playerNameText, this.chipsText])
+    this.add([this._playerNameText, this._chipsText])
     this.updateHand()
 
     scene.add.existing(this)
   }
 
+  get playerModel(): Player {
+    return this._playerModel
+  }
+
+  get handCardViews(): CardView[] {
+    return this._handCardViews
+  }
+
   public update(): void {
-    this.chipsText.setText(`Chips: ${this.playerModel.chips}`)
+    this._chipsText.setText(`CHIPS: ${this._playerModel.chips}`)
     this.updateHand()
   }
 
   private updateHand(): void {
     this.removeAllCards()
 
-    const { hand } = this.playerModel
+    const { hand } = this._playerModel
     hand.forEach((card: Card, index: number) => {
       const cardView: CardView = new CardView(this.scene, 0, 0, card)
       cardView.x = index * 25 + 45
-      cardView.y = this.playerNameText.y + 60
+      cardView.y = this._playerNameText.y + 64
       this.add(cardView)
+      this._handCardViews.push(cardView)
     })
   }
 
@@ -57,5 +72,73 @@ export default class PlayerView extends Phaser.GameObjects.Container {
       ),
       true
     )
+  }
+
+  public addCardToHand(
+    deckPosition: { x: number; y: number },
+    card: Card,
+    i: number,
+    delay: number
+  ): void {
+    const cardView: CardView = new CardView(
+      this.scene,
+      deckPosition.x,
+      deckPosition.y,
+      card
+    )
+    this.scene.add.existing(cardView)
+    this._handCardViews.push(cardView)
+
+    setTimeout(() => {
+      cardView.animateCardMove(this.x + (i + 1) * 25 + 20, this.y + 60)
+    }, delay)
+  }
+
+  public revealHand(): void {
+    this._handCardViews.forEach((cardView: CardView) => {
+      cardView.open()
+    })
+  }
+
+  public addDealerBtn(): void {
+    this._dealerBtn = this.scene.add
+      .image(
+        this._playerNameText.x + 60,
+        this._playerNameText.y + 7,
+        'dealer-btn'
+      )
+      .setScale(0.08)
+    this.add(this._dealerBtn)
+    this.dealerBtnRotateAnimation()
+  }
+
+  public removeDealerBtn(): void {
+    if (this._dealerBtn) {
+      this._dealerBtn.destroy()
+      this._dealerBtn = null
+    }
+  }
+
+  private dealerBtnRotateAnimation(): void {
+    this.scene.tweens.add({
+      targets: this._dealerBtn,
+      scaleX: 0,
+      duration: 400,
+      ease: 'Power2',
+      onComplete: (): void => {
+        this._dealerBtn?.setTexture('dealer-btn')
+        this.scene.tweens.add({
+          targets: this._dealerBtn,
+          scaleX: 0.08,
+          duration: 300,
+          ease: 'Power2'
+        })
+      }
+    })
+  }
+
+  public animatePlaceBet(amount: number): void {
+    this._playerModel.placeBet(amount)
+    this._chipsText.setText(`CHIPS: ${this._playerModel.chips}`)
   }
 }

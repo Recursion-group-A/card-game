@@ -18,11 +18,11 @@ describe('getSuit', () => {
     ['C', 'C']
   ])('should return %s as %s', (suit, expected) => {
     const card: Card = new Card(suit as Suit, 'A', mockRankStrategy)
-    expect(card.getSuit()).toBe(expected)
+    expect(card.suit).toBe(expected)
   })
   it('should return undefined', () => {
     const card: Card = new Card(undefined, 'Joker', mockRankStrategy)
-    expect(card.getSuit()).toBeUndefined()
+    expect(card.suit).toBeUndefined()
   })
 })
 
@@ -44,7 +44,7 @@ describe('getRank', () => {
     ['Joker', 'Joker']
   ])('should return %s as %s', (rank, expected) => {
     const card: Card = new Card('H', rank as Rank, mockRankStrategy)
-    expect(card.getRank()).toBe(expected)
+    expect(card.rank).toBe(expected)
   })
 })
 
@@ -99,8 +99,8 @@ describe('createJoker', () => {
     const jokerCard: Card = Card.createJoker(mockRankStrategy)
 
     expect(jokerCard).toBeInstanceOf(Card)
-    expect(jokerCard.getSuit()).toBeUndefined()
-    expect(jokerCard.getRank()).toBe('Joker')
+    expect(jokerCard.suit).toBeUndefined()
+    expect(jokerCard.rank).toBe('Joker')
     expect(jokerCard.getRankNumber()).toBe(0)
   })
 })

@@ -1,9 +1,11 @@
 import Card from '@/models/common/Card'
 import Hand from '@/models/common/Hand'
-import { PLAYERTYPE } from '@/types/playerTypes'
+import { PLAYERTYPES } from '@/types/playerTypes'
 
 export default class Player {
-  private readonly _playerType: PLAYERTYPE
+  private readonly _playerName: string
+
+  private readonly _playerType: PLAYERTYPES
 
   private _hand: Hand
 
@@ -15,8 +17,9 @@ export default class Player {
 
   private _isActive: boolean
 
-  constructor() {
-    this._playerType = 'player'
+  constructor(playerName: string, playerType: PLAYERTYPES) {
+    this._playerName = playerName
+    this._playerType = playerType
     this._hand = new Hand()
     this._chips = 1000
     this._bet = 0
@@ -24,7 +27,11 @@ export default class Player {
     this._isActive = true
   }
 
-  get playerType(): PLAYERTYPE {
+  get playerName(): string {
+    return this._playerName
+  }
+
+  get playerType(): PLAYERTYPES {
     return this._playerType
   }
 
@@ -44,8 +51,16 @@ export default class Player {
     return this._isDealer
   }
 
+  set isDealer(bool: boolean) {
+    this._isDealer = bool
+  }
+
   get isActive(): boolean {
     return this._isActive
+  }
+
+  set isActive(bool: boolean) {
+    this._isActive = bool
   }
 
   public addHand(card: Card): void {
@@ -75,13 +90,5 @@ export default class Player {
     this._chips -= amount
     this._bet += amount
     return amount
-  }
-
-  public setAsDealer(bool: boolean): void {
-    this._isDealer = bool
-  }
-
-  public setAsActive(bool: boolean): void {
-    this._isActive = bool
   }
 }
