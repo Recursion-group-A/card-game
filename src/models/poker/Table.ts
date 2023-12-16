@@ -26,9 +26,9 @@ export default class Table {
 
   private _utgIndex: number
 
-  private readonly _smallBlind: number = 25
+  private readonly _smallBlind: number = 1
 
-  private readonly _bigBlind: number = 50
+  private readonly _bigBlind: number = 2
 
   private _currentMaxBet: number
 
@@ -36,19 +36,17 @@ export default class Table {
 
   private _round: PokerRound
 
-  private readonly _limit: number = 50
+  private readonly _limit: number = this._bigBlind
 
   constructor(gameType: GAMETYPE) {
     this._gameType = gameType
     this._players = Table.generatePlayers(6)
     this._deck = new Deck(this.gameType)
     this._pot = new Pot()
-    // すべての Index を０で初期化する
     this._dealerIndex = 0
     this._sbIndex = 0
     this._bbIndex = 0
     this._utgIndex = 0
-    // すべての Index を０で初期化する
     this._currentMaxBet = this._bigBlind
     this._communityCards = new Hand()
     this._round = PokerRound.PreFlop
@@ -90,6 +88,10 @@ export default class Table {
     return this._bigBlind
   }
 
+  get pot(): Pot {
+    return this._pot
+  }
+
   private static generatePlayers(numOfPlayers: number): Player[] {
     const players: Player[] = []
 
@@ -116,16 +118,13 @@ export default class Table {
     this.assignOtherPlayersPosition()
   }
 
-  public collectBlinds(): void {
+  public collectBlind(targetIndex: number, amount: number): void {
     if (this.players.length < 2) {
       return
     }
 
-    const sbPlayer: Player = this.players[this._sbIndex]
-    const bbPlayer: Player = this.players[this._bbIndex]
-
-    this._pot.addPot(sbPlayer.placeBet(this._smallBlind))
-    this._pot.addPot(bbPlayer.placeBet(this._bigBlind))
+    const player: Player = this.players[targetIndex]
+    this._pot.addPot(player.placeBet(amount))
   }
 
   public dealCardsToPlayers(): void {
@@ -137,28 +136,34 @@ export default class Table {
     }
   }
 
-  public async startRound(start: number, cardsToAdd: number): Promise<void> {
-    if (cardsToAdd > 0) {
-      this.dealCommunityCards(cardsToAdd)
-    }
+  // public async startRound(start: number, cardsToAdd: number): Promise<void> {
+  //   if (cardsToAdd > 0) {
+  //     this.dealCommunityCards(cardsToAdd)
+  //   }
+  //
+  //   let index: number = start
+  //   let actionCompleted: number = 0
+  //
+  //   while (actionCompleted < this.players.length) {
+  //     const currentPlayer: Player = this.players[index]
+  //
+  //     // 各プレイヤーのアクションを処理する
+  //     if (currentPlayer.isActive) {
+  //       // const action = await this.getPlayerAction(currentPlayer) // eslint-disable-line
+  //       this.handleAction(currentPlayer, action)
+  //
+  //       if (action === 'raise') {
+  //         actionCompleted = 0
+  //       }
+  //     }
+  //     index = (index + 1) % this.players.length
+  //     actionCompleted += 1
+  //   }
+  // }
 
-    let index: number = start
-    let actionCompleted: number = 0
-
-    while (actionCompleted < this.players.length) {
-      const currentPlayer: Player = this.players[index]
-
-      // 各プレイヤーのアクションを処理する
-      if (currentPlayer.isActive) {
-        const action = await this.getPlayerAction(currentPlayer) // eslint-disable-line
-        this.handleAction(currentPlayer, action)
-
-        if (action === 'raise') {
-          actionCompleted = 0
-        }
-      }
-      index = (index + 1) % this.players.length
-      actionCompleted += 1
+  private dealCommunityCards(communityCardsToAdd: number): void {
+    for (let i: number = 0; i < communityCardsToAdd; i += 1) {
+      this._communityCards.addOne(this.drawValidCardFromDeck())
     }
   }
 
@@ -194,7 +199,7 @@ export default class Table {
     this.resetGame()
   }
 
-  private resetGame(): void {
+  public resetGame(): void {
     // プレイヤーに関する操作
     this.resetPlayersHand()
     this.resetPlayersBet()
@@ -211,32 +216,13 @@ export default class Table {
     this._round = PokerRound.PreFlop
   }
 
-  private async getPlayerAction(player: Player): Promise<string> {
-    if (player.playerType === 'player') {
-      // const userInput = await this.getUserInput()
-      const userInput = '未実装'
-      return userInput
-    }
-    // AIのアクションを決定する
-    return this.determineAIAction()
+  // eslint-disable-next-line
+  public determineAIAction(): string {
+    const action: string[] = ['call']
+    return action[Math.floor(Math.random() * action.length)]
   }
 
-  // eslint-disable-next-line
-  // private getUserInput(): Promise<string> {
-  //   // TODO: View との連携
-  //   return new Promise<string>((resolve) => {
-  //     // 例）resolve(selectedAction)
-  //   })
-  // }
-
-  // eslint-disable-next-line
-  private determineAIAction(): string {
-    // TODO: AIのアクションを決定するロジック
-    const actions = ['call', 'raise', 'fold']
-    return actions[Math.floor(Math.random() * actions.length)]
-  }
-
-  private handleAction(player: Player, action: string): void {
+  public handleAction(player: Player, action: string): void {
     switch (action) {
       case 'fold':
         player.isActive = false // eslint-disable-line
@@ -250,7 +236,7 @@ export default class Table {
         break
       case 'raise':
         {
-          const amountToRaise: number = this.getRaiseAmount()
+          const amountToRaise: number = this.getRaiseAmount() * 2
           const totalBet: number = amountToRaise + player.bet
           player.placeBet(amountToRaise)
           this._currentMaxBet = totalBet
@@ -276,12 +262,6 @@ export default class Table {
     }
 
     this.resetGame()
-  }
-
-  private dealCommunityCards(communityCardsToAdd: number): void {
-    for (let i = 0; i < communityCardsToAdd; i += 1) {
-      this._communityCards.addOne(this.drawValidCardFromDeck())
-    }
   }
 
   // デッキからカードを得るためのヘルパー関数

@@ -1,6 +1,6 @@
 import Card from '@/models/common/Card'
 import Hand from '@/models/common/Hand'
-import { PLAYERTYPES } from '@/types/playerTypes'
+import PLAYERTYPES from '@/types/playerTypes'
 
 export default class Player {
   private readonly _playerName: string

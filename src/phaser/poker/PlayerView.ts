@@ -2,6 +2,7 @@ import Phaser from 'phaser'
 import Card from '@/models/common/Card'
 import Player from '@/models/poker/Player'
 import CardView from '@/phaser/common/CardView'
+import PLAYERTYPES from '@/types/playerTypes'
 
 export default class PlayerView extends Phaser.GameObjects.Container {
   private readonly _playerModel: Player
@@ -12,6 +13,8 @@ export default class PlayerView extends Phaser.GameObjects.Container {
 
   private readonly _chipsText: Phaser.GameObjects.Text
 
+  private _actionText: Phaser.GameObjects.Text | undefined
+
   private _dealerBtn: Phaser.GameObjects.Image | undefined | null
 
   constructor(
@@ -21,14 +24,13 @@ export default class PlayerView extends Phaser.GameObjects.Container {
   ) {
     super(scene, playerPos.x, playerPos.y)
     this._playerModel = playerModel
-
     this._playerNameText = this.scene.add.text(
-      40,
+      this._playerModel.playerType === PLAYERTYPES.PLAYER ? 44 : 40,
       0,
       `${this._playerModel.playerName.toUpperCase()}`
     )
     this._chipsText = this.scene.add.text(
-      5,
+      10,
       64 + 40, // カードの高さ → 64
       `CHIPS: ${this._playerModel.chips}`
     )
@@ -41,10 +43,6 @@ export default class PlayerView extends Phaser.GameObjects.Container {
 
   get playerModel(): Player {
     return this._playerModel
-  }
-
-  get handCardViews(): CardView[] {
-    return this._handCardViews
   }
 
   public update(): void {
@@ -65,7 +63,7 @@ export default class PlayerView extends Phaser.GameObjects.Container {
     })
   }
 
-  private removeAllCards(): void {
+  public removeAllCards(): void {
     this.remove(
       this.list.filter(
         (child: Phaser.GameObjects.GameObject) => child instanceof CardView
@@ -74,24 +72,12 @@ export default class PlayerView extends Phaser.GameObjects.Container {
     )
   }
 
-  public addCardToHand(
-    deckPosition: { x: number; y: number },
-    card: Card,
-    i: number,
-    delay: number
-  ): void {
-    const cardView: CardView = new CardView(
-      this.scene,
-      deckPosition.x,
-      deckPosition.y,
-      card
-    )
+  public addCardToHand(x: number, y: number, card: Card, i: number): void {
+    const cardView: CardView = new CardView(this.scene, x, y, card)
     this.scene.add.existing(cardView)
     this._handCardViews.push(cardView)
 
-    setTimeout(() => {
-      cardView.animateCardMove(this.x + (i + 1) * 25 + 20, this.y + 60)
-    }, delay)
+    cardView.animateCardMove(this.x + (i + 1) * 25 + 20, this.y + 60)
   }
 
   public revealHand(): void {
@@ -137,8 +123,62 @@ export default class PlayerView extends Phaser.GameObjects.Container {
     })
   }
 
-  public animatePlaceBet(amount: number): void {
-    this._playerModel.placeBet(amount)
+  public animatePlaceBet(): void {
     this._chipsText.setText(`CHIPS: ${this._playerModel.chips}`)
+    const chip = this.scene.add.image(this.x + 60, this.y + 60, 'chip')
+    this.animateChipMove(chip)
+  }
+
+  private animateChipMove(chip: Phaser.GameObjects.Image): void {
+    this.scene.tweens.add({
+      targets: chip,
+      x: 510,
+      y: 370,
+      duration: 400,
+      ease: 'Power2',
+      onComplete: (): void => {
+        chip.destroy()
+      }
+    })
+  }
+
+  public setInVisibleHandCards(): void {
+    this._handCardViews.forEach((card: CardView) => {
+      card.setVisible(false)
+    })
+  }
+
+  public showActionText(action: string): void {
+    const isFold: boolean = action === 'fold'
+    const isRaise: boolean = action === 'raise'
+
+    this.destroyActionText()
+
+    this._actionText = this.scene.add.text(
+      isRaise ? 27 : 36,
+      isFold ? 45 : -35,
+      action.toUpperCase(),
+      { font: '20px' }
+    )
+
+    if (isFold) {
+      this._actionText.setColor('#ff8c00')
+    } else if (isRaise) {
+      this._actionText.setColor('#ee82ee')
+    } else {
+      this._actionText.setColor('#ffd700')
+    }
+
+    this.add(this._actionText)
+
+    setTimeout(() => {
+      if (!isFold) this.destroyActionText()
+    }, 1500)
+  }
+
+  private destroyActionText(): void {
+    if (this._actionText) {
+      this._actionText.destroy()
+    }
   }
 }
