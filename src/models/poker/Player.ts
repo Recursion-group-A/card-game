@@ -1,6 +1,7 @@
 import Card from '@/models/common/Card'
 import Hand from '@/models/common/Hand'
 import PLAYERTYPES from '@/types/playerTypes'
+import PokerAction from '@/models/poker/PokerAction'
 
 export default class Player {
   private readonly _playerName: string
@@ -16,6 +17,8 @@ export default class Player {
   private _isDealer: boolean
 
   private _isActive: boolean
+
+  private _lastAction: PokerAction | undefined
 
   constructor(playerName: string, playerType: PLAYERTYPES) {
     this._playerName = playerName
@@ -47,10 +50,6 @@ export default class Player {
     return this._bet
   }
 
-  get isDealer(): boolean {
-    return this._isDealer
-  }
-
   set isDealer(bool: boolean) {
     this._isDealer = bool
   }
@@ -61,6 +60,14 @@ export default class Player {
 
   set isActive(bool: boolean) {
     this._isActive = bool
+  }
+
+  get lastAction(): PokerAction | undefined {
+    return this._lastAction
+  }
+
+  set lastAction(action: PokerAction) {
+    this._lastAction = action
   }
 
   public addHand(card: Card): void {
@@ -80,7 +87,6 @@ export default class Player {
   }
 
   public placeBet(amount: number): number {
-    // TODO: チップとベットの額の判定の処理
     if (amount > this.chips) {
       throw new Error(
         `Not enough chips to place the bet. Available: ${this.chips}, Tried to bet: ${amount}`

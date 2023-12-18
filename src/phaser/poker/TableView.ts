@@ -8,54 +8,58 @@ import PlayerView from '@/phaser/poker/PlayerView'
 import Table from '@/models/poker/Table'
 import PLAYERTYPES from '@/types/playerTypes'
 import { delay } from '@/utils/utils'
+import PokerHand from '@/models/poker/PokerHand'
+import PokerHandEvaluator from '@/models/poker/PokerHandEvaluator'
+import PokerAction from '@/models/poker/PokerAction'
+import PokerRound from '@/models/poker/rounds'
 
 export default class TableView extends Phaser.GameObjects.Container {
-  private readonly _tableModel: Table
+  private static readonly DELAY_TIME: number = 1500
 
-  private readonly _playerModels: Player[]
+  private readonly _sceneWidth: number
+
+  private readonly _sceneHeight: number
+
+  private readonly _tableModel: Table
 
   private readonly _playerViews: PlayerView[] = []
 
-  private readonly _deckModel: Deck
-
   private readonly _deckView: DeckView
-
-  private readonly _communityCards: Phaser.GameObjects.Container
 
   private readonly _potTotalText: Phaser.GameObjects.Text
 
-  private readonly _actionButtons: Phaser.GameObjects.Container
-
   private readonly _background: Phaser.GameObjects.Image
 
-  private _sceneWidth: number = this.scene.cameras.main.width
+  private readonly _communityCards: Phaser.GameObjects.Container
 
-  private _sceneHeight: number = this.scene.cameras.main.height
+  private readonly _actionButtons: Phaser.GameObjects.Container
+
+  private _promptText: Phaser.GameObjects.Text | null = null
 
   constructor(scene: Phaser.Scene, tableModel: Table) {
     super(scene)
+    this._sceneWidth = this.scene.cameras.main.width
+    this._sceneHeight = this.scene.cameras.main.height
     this._tableModel = tableModel
-    this._playerModels = this._tableModel.players
-    this._deckModel = this._tableModel.deck
     this._deckView = new DeckView(
       this.scene,
       this._sceneWidth / 2 + 150,
       this._sceneHeight / 2,
       new Deck(this._tableModel.gameType)
     )
-    this._communityCards = this.scene.add.container()
     this._potTotalText = this.scene.add.text(
-      this._sceneWidth / 2 - 35,
-      this._sceneHeight / 2 - 100,
+      this._sceneWidth / 2 - 40,
+      this._sceneHeight / 2 - 85,
       `POT: $${this._tableModel.pot.getTotalPot()}`,
       { font: '18px' }
     )
-    this._actionButtons = this.scene.add.container()
     this._background = this.scene.add.image(
       this._sceneWidth / 2,
       this._sceneHeight / 2,
       'table'
     )
+    this._communityCards = this.scene.add.container()
+    this._actionButtons = this.scene.add.container()
 
     this.add([
       this._background,
@@ -74,7 +78,7 @@ export default class TableView extends Phaser.GameObjects.Container {
       { x: 450, y: 100 }
     ]
 
-    this._playerModels.forEach((player: Player, index: number) => {
+    this._tableModel.players.forEach((player: Player, index: number) => {
       const playerView: PlayerView = new PlayerView(
         this.scene,
         player,
@@ -84,28 +88,28 @@ export default class TableView extends Phaser.GameObjects.Container {
       this.add(playerView)
     })
 
-    this._deckModel.shuffle()
     scene.add.existing(this)
   }
 
-  public update() {
-    this._potTotalText?.setText(`POT: $${this._tableModel.pot.getTotalPot()}`)
+  update() {
+    this._potTotalText.setText(`POT: $${this._tableModel.pot.getTotalPot()}`)
   }
 
-  public assignDealerBtn(): void {
-    this._tableModel.assignRandomDealerButton()
+  public assignDealerBtn(isFirstTime: boolean): void {
+    if (isFirstTime) {
+      this._tableModel.assignInitialDealer()
+      this._tableModel.assignOtherPlayersPosition()
+    }
 
-    // 全プレイヤーのディーラーボタンを削除する
     this._playerViews.forEach((player: PlayerView) => {
       player.removeDealerBtn()
     })
 
-    const { dealerIndex } = this._tableModel
-    const dealerPlayer: PlayerView = this._playerViews[dealerIndex]
-    dealerPlayer.addDealerBtn()
+    const dealer: PlayerView = this._playerViews[this._tableModel.dealerIndex]
+    dealer.addDealerBtn()
   }
 
-  public async animateCollectBlinds(): Promise<void> {
+  private async animateCollectBlinds(): Promise<void> {
     this._tableModel.collectBlind(
       this._tableModel.sbIndex,
       this._tableModel.smallBlind
@@ -113,7 +117,7 @@ export default class TableView extends Phaser.GameObjects.Container {
     const sbPlayer: PlayerView = this._playerViews[this._tableModel.sbIndex]
     sbPlayer.animatePlaceBet()
 
-    await delay(800)
+    await delay(TableView.DELAY_TIME / 2)
 
     this._tableModel.collectBlind(
       this._tableModel.bbIndex,
@@ -123,19 +127,19 @@ export default class TableView extends Phaser.GameObjects.Container {
     bbPlayer.animatePlaceBet()
   }
 
-  public async dealCardToPlayers(): Promise<void> {
-    const totalPlayers: number = this._playerModels.length
+  private async animateDealCardToPlayers(): Promise<void> {
+    const totalPlayers: number = this._tableModel.players.length
 
     for (let times: number = 0; times < 2; times += 1) {
       let currentIndex: number = this._tableModel.sbIndex
 
       for (let i: number = 0; i < totalPlayers; i += 1) {
-        const currentPlayer: PlayerView = this._playerViews[currentIndex]
+        const currentPlayerView: PlayerView = this._playerViews[currentIndex]
         const card: Card = this._tableModel.drawValidCardFromDeck()
-        currentPlayer.playerModel.addHand(card)
+        currentPlayerView.playerModel.addHand(card)
 
-        await delay(150) // eslint-disable-line
-        currentPlayer.addCardToHand(
+        await delay(TableView.DELAY_TIME / 10) // eslint-disable-line
+        currentPlayerView.animateAddHand(
           this._deckView.x,
           this._deckView.y - 14,
           card,
@@ -146,7 +150,7 @@ export default class TableView extends Phaser.GameObjects.Container {
     }
   }
 
-  public revealUserHand(): void {
+  private revealUserHand(): void {
     const user: PlayerView = this._playerViews.filter(
       (player: PlayerView) =>
         player.playerModel.playerType === PLAYERTYPES.PLAYER
@@ -154,8 +158,43 @@ export default class TableView extends Phaser.GameObjects.Container {
     user.revealHand()
   }
 
-  public async startRound(start: number, cardsToAdd: number): Promise<void> {
-    let index: number = start
+  public async startGame(): Promise<void> {
+    await this.processBeforePreFlop()
+    await this.processAllRounds()
+    await this.showDown()
+  }
+
+  private async processBeforePreFlop(): Promise<void> {
+    await delay(TableView.DELAY_TIME)
+    await this.animateCollectBlinds()
+    await delay(TableView.DELAY_TIME)
+    await this.animateDealCardToPlayers()
+    await delay(TableView.DELAY_TIME)
+    this.revealUserHand()
+  }
+
+  private async processAllRounds(): Promise<void> {
+    await this.processRound(PokerRound.PreFlop, this._tableModel.utgIndex, 3)
+    await this.processRound(PokerRound.Flop, this._tableModel.sbIndex, 1)
+    await this.processRound(PokerRound.Turn, this._tableModel.sbIndex, 1)
+    await this.processRound(PokerRound.River, this._tableModel.sbIndex, 0)
+  }
+
+  private async processRound(
+    round: PokerRound,
+    startIndex: number,
+    cards: number
+  ): Promise<void> {
+    await delay(TableView.DELAY_TIME)
+    this._tableModel.round = round
+    await this.startRound(startIndex, cards)
+  }
+
+  public async startRound(
+    startIndex: number,
+    cardsToAdd: number
+  ): Promise<void> {
+    let index: number = startIndex
     let actionCompleted: number = 0
 
     while (actionCompleted < this._tableModel.players.length) {
@@ -163,68 +202,80 @@ export default class TableView extends Phaser.GameObjects.Container {
       const currentPlayerModel: Player = currentPlayer.playerModel
 
       if (currentPlayerModel.isActive) {
-        await delay(600) // eslint-disable-line
-        if (currentPlayerModel.playerType === PLAYERTYPES.PLAYER) {
-          this.showActionButtons(currentPlayer.x - 60, currentPlayer.y)
-          const action: string = await this.getUserAction() // eslint-disable-line
+        // eslint-disable-next-line
+        await this.processPlayerAction(currentPlayerModel, currentPlayer)
 
-          this._tableModel.handleAction(currentPlayerModel, action)
-          this.handleAction(currentPlayer, action)
-
-          currentPlayer.showActionText(action)
-          this.removeActionButtons()
-
-          if (action === 'raise') {
-            actionCompleted = 0
-          }
-        } else {
-          const action: string = this._tableModel.determineAIAction()
-          this._tableModel.handleAction(currentPlayerModel, action)
-          this.handleAction(currentPlayer, action)
-          currentPlayer.showActionText(action)
-
-          if (action === 'raise') {
-            actionCompleted = 0
-          }
+        if (currentPlayerModel.lastAction === PokerAction.RAISE) {
+          actionCompleted = 0
         }
       }
       index = (index + 1) % this._tableModel.players.length
       actionCompleted += 1
     }
 
-    await delay(1000)
+    await delay(TableView.DELAY_TIME)
     if (cardsToAdd > 0) {
       await this.dealCommunityCards(cardsToAdd)
     }
   }
 
+  private async processPlayerAction(
+    playerModel: Player,
+    playerView: PlayerView
+  ): Promise<void> {
+    await delay(600)
+
+    if (playerModel.playerType === PLAYERTYPES.PLAYER) {
+      this.showActionButtons(playerView.x, playerView.y, playerModel)
+      const action: PokerAction = await this.getUserAction()
+      this.handleAction(playerView, action)
+      this._actionButtons.setVisible(false)
+    } else {
+      const action: PokerAction =
+        this._tableModel.determineAIAction(playerModel)
+      this.handleAction(playerView, action)
+    }
+  }
+
+  private handleAction(player: PlayerView, action: PokerAction): void {
+    this._tableModel.handleAction(player.playerModel, action)
+    this.executeActionEffect(player, action)
+    player.displayActionText(action)
+  }
+
   // eslint-disable-next-line
-  private handleAction(player: PlayerView, action: string): void {
+  private executeActionEffect(player: PlayerView, action: PokerAction): void {
     switch (action) {
-      case 'fold':
+      case PokerAction.FOLD:
         player.setInVisibleHandCards()
         break
-      case 'call':
+      case PokerAction.CALL:
         player.animatePlaceBet()
         break
-      case 'raise':
+      case PokerAction.RAISE:
         player.animatePlaceBet()
         break
-      case 'check':
+      case PokerAction.CHECK:
         break
       default:
         throw new Error(`Unknown action: ${action}`)
     }
   }
 
-  private showActionButtons(x: number, y: number): void {
+  private showActionButtons(x: number, y: number, player: Player): void {
+    const offset: number = 60
     const wspace: number = 120
     const hspace: number = 160
 
+    const callOrCheck: string =
+      this._tableModel.currentMaxBet - player.bet > 0
+        ? PokerAction.CALL
+        : PokerAction.CHECK
+
+    this.createButton(x - offset, y + hspace, PokerAction.FOLD)
+    this.createButton(x + wspace - offset, y + hspace, callOrCheck)
+    this.createButton(x + wspace * 2 - offset, y + hspace, PokerAction.RAISE)
     this._actionButtons.setVisible(true)
-    this.createButton(x, y + hspace, 'fold')
-    this.createButton(x + wspace, y + hspace, 'call')
-    this.createButton(x + wspace * 2, y + hspace, 'raise')
   }
 
   private createButton(x: number, y: number, textContent: string): void {
@@ -243,26 +294,22 @@ export default class TableView extends Phaser.GameObjects.Container {
     text.setName(textContent)
 
     container.add([button, text])
-    this._actionButtons.add(container)
     container.setSize(button.width, button.height)
+    this._actionButtons.add(container)
 
     button.on('pointerover', () => {
-      button.setScale(1.35, 0.9)
+      button.setScale(1.4, 0.9)
     })
     button.on('pointerout', () => {
       button.setScale(1.3, 0.8)
     })
   }
 
-  private removeActionButtons(): void {
-    this._actionButtons.setVisible(false)
-  }
-
-  private async getUserAction(): Promise<string> {
+  private async getUserAction(): Promise<PokerAction> {
     return new Promise((resolve) => {
       this._actionButtons.each((child: Phaser.GameObjects.Container) => {
         child.list[0].on('pointerdown', () => {
-          resolve(child.list[1].name)
+          resolve(child.list[1].name as PokerAction)
         })
       })
     })
@@ -270,24 +317,27 @@ export default class TableView extends Phaser.GameObjects.Container {
 
   private async dealCommunityCards(cardsToAdd: number): Promise<void> {
     const cardViews: CardView[] = []
+    const offset: number = 14
+
     for (let i: number = 0; i < cardsToAdd; i += 1) {
       const card: Card = this._tableModel.drawValidCardFromDeck()
       const cardView: CardView = new CardView(
         this.scene,
         this._deckView.x,
-        this._deckView.y - 2 * 7,
+        this._deckView.y - offset,
         card
       )
 
+      this._tableModel.communityCards.addOne(card)
+      cardViews.push(cardView)
       this.scene.add.existing(cardView)
       this._communityCards.add(cardView)
-      cardViews.push(cardView)
 
       cardView.animateCardMove(
         this._sceneWidth / 2 + this._communityCards.length * 45 - 140,
-        this._sceneHeight / 2 - 7
+        this._sceneHeight / 2 - offset / 2
       )
-      await delay(200) // eslint-disable-line
+      await delay(100) // eslint-disable-line
     }
     await delay(1000)
     cardViews.forEach((card: CardView) => {
@@ -295,11 +345,80 @@ export default class TableView extends Phaser.GameObjects.Container {
     })
   }
 
-  public showDown(): void {
-    this._playerViews.forEach((player: PlayerView) => {
-      player.revealHand()
-    })
+  public async showDown(): Promise<void> {
+    this._tableModel.round = PokerRound.Showdown
 
-    this._tableModel.showDown()
+    const activePlayers: PlayerView[] = this._playerViews.filter(
+      (player: PlayerView) => player.playerModel.isActive
+    )
+
+    const communityCard: Card[] = this._tableModel.communityCards.getHand()
+    let bestHandRank: PokerHand = PokerHand.HighCard
+    let winners: PlayerView[] = []
+
+    activePlayers.forEach((player: PlayerView) => {
+      player.revealHand()
+      const playerHand: Card[] = player.playerModel.hand
+      const playerBestHand: PokerHand = PokerHandEvaluator.evaluateHand(
+        playerHand,
+        communityCard
+      )
+
+      if (playerBestHand > bestHandRank) {
+        bestHandRank = playerBestHand
+        winners = [player]
+      } else if (playerBestHand === bestHandRank) {
+        winners.push(player)
+      }
+    })
+    this.refundToWinners(winners, bestHandRank)
+  }
+
+  private refundToWinners(winners: PlayerView[], bestHandRank: number): void {
+    const potPerWinner: number = Math.floor(
+      this._tableModel.pot.getTotalPot() / winners.length
+    )
+    winners.forEach((player: PlayerView) => {
+      player.playerModel.addChips(potPerWinner)
+      player.animateRefundToWinner()
+      player.displayResultTexts(potPerWinner, bestHandRank)
+    })
+  }
+
+  public resetGameView(): void {
+    this._tableModel.resetGame()
+    this._communityCards.removeAll(true)
+    this._playerViews.forEach((player: PlayerView) => {
+      player.prepareForNextGame()
+    })
+  }
+
+  public async waitForUserClick(): Promise<void> {
+    return new Promise<void>((resolve) => {
+      this.scene.input.once('pointerdown', () => {
+        resolve()
+      })
+    })
+  }
+
+  public displayPromptText(): void {
+    this._promptText = this.scene.add.text(
+      380,
+      450,
+      '(Press anywhere to continue)'
+    )
+    this.scene.tweens.add({
+      targets: this._promptText,
+      alpha: { start: 1, to: 0 },
+      duration: 800,
+      ease: 'Linear',
+      repeat: -1,
+      yoyo: true
+    })
+  }
+
+  public destroyPromptText(): void {
+    this._promptText?.destroy()
+    this._promptText = null
   }
 }
