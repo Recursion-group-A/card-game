@@ -1,10 +1,10 @@
 import Phaser from 'phaser'
-import Table from '@/models/common/Table'
-import Player from '@/models/common/Player'
+import Table from '@/models/blackjack/Table'
+import Player from '@/models/blackjack/Player'
 import PlayerView from '@/phaser/blackjack/PlayerView'
 import DeckView from '@/phaser/common/DeckView'
-import Deck from '@/models/common/Deck'
-import Card from '@/models/common/Card'
+import Deck from '@/models/blackjack/Deck'
+import Card from '@/models/blackjack/Card'
 
 export default class TableView extends Phaser.GameObjects.Container {
   private readonly _tableModel: Table
