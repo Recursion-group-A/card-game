@@ -1,5 +1,5 @@
 import Phaser from 'phaser'
-import Table from '@/models/common/Table'
+import Table from '@/models/blackjack/Table'
 import TableView from '@/phaser/blackjack/TableView'
 import { GAMETYPE } from '@/types/gameTypes'
 

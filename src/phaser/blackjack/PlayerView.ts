@@ -1,6 +1,6 @@
 import Phaser from 'phaser'
-import Card from '@/models/common/Card'
-import Player from '@/models/common/Player'
+import Card from '@/models/blackjack/Card'
+import Player from '@/models/blackjack/Player'
 import CardView from '@/phaser/common/CardView'
 
 export default class PlayerView extends Phaser.GameObjects.Container {
