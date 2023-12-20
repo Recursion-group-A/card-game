@@ -5,7 +5,7 @@ export const PLAYER_STATES = {
   DOUBLE_DOWN: 'Double',
   SURRENDER: 'Surrender',
   BUST: 'Bust',
-  BLACKJACK: 'Blackjack',
+  BLACKJACK: 'Blackjack'
   // その他の状態も必要に応じて追加
 }
 

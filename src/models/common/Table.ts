@@ -3,9 +3,8 @@ import Deck from '@/models/common/Deck'
 import Player from '@/models/common/Player'
 import House from '@/models/common/House'
 import { GAMETYPE } from '@/types/gameTypes'
-import { PLAYERTYPE } from '@/types/playerTypes'
+import PLAYERTYPE from '@/types/playerTypes'
 import GAMEPHASE from '@/constants/gamePhases'
-import { RankStrategy } from './RankStrategy'
 
 export default class Table {
   private gameType: GAMETYPE
@@ -26,12 +25,12 @@ export default class Table {
 
   private resultLog: string[]
 
-  constructor(gameType: GAMETYPE, playerNumber: number, rankStrategy: RankStrategy) {
+  constructor(gameType: GAMETYPE, playerNumber: number) {
     this.gameType = gameType
     this.playerNumber = playerNumber
     this.betDenominations = [5, 20, 50, 100]
     this.gamePhase = GAMEPHASE.BETTING
-    this.deck = new Deck(this.gameType, rankStrategy)
+    this.deck = new Deck(this.gameType)
     this.round = 1
     this.house = new House()
     this.players = []
@@ -43,11 +42,11 @@ export default class Table {
   }
 
   public initializePlayers(): void {
-    this.addPlayer('Player', 'player')
+    this.addPlayer('Player', PLAYERTYPE.PLAYER)
 
     for (let i = 1; i < this.playerNumber; i += 1) {
       const computerName = `Bot_${i}`
-      this.addPlayer(computerName, 'ai')
+      this.addPlayer(computerName, PLAYERTYPE.AI)
     }
   }
 
@@ -95,6 +94,14 @@ export default class Table {
     return this.gamePhase
   }
 
+  public getPlayers(): Player[] {
+    return this.players
+  }
+
+  public getDeck(): Deck {
+    return this.deck
+  }
+
   public getRound(): number {
     return this.round
   }
@@ -114,7 +121,7 @@ export default class Table {
   public changeAiPlayerTurn(): void {
     const aiPlayers: Player[] = this.players.slice(1)
 
-    aiPlayers.forEach(aiPlayer => {
+    aiPlayers.forEach((aiPlayer) => {
       aiPlayer.drawUntilSeventeen(this.deck)
     })
   }
@@ -134,7 +141,7 @@ export default class Table {
 
   public addPlayerBet(amount: number) {
     const player: Player = this.players[0]
-    if(player.canBet(amount)) {
+    if (player.canBet(amount)) {
       player.addBet(amount)
     }
   }
@@ -147,14 +154,14 @@ export default class Table {
   public decideAiPlayersBetAmount(): void {
     const aiPlayers: Player[] = this.players.slice(1)
 
-    aiPlayers.forEach(aiPlayer => {
+    aiPlayers.forEach((aiPlayer) => {
       aiPlayer.decideAiPlayerBetAmount()
     })
   }
 
   public settlementPlayers(): void {
     const houseScore: number = this.house.getHandTotalScore()
-    this.players.forEach(player => {
+    this.players.forEach((player) => {
       player.settlement(houseScore)
     })
   }
@@ -169,7 +176,7 @@ export default class Table {
   public commonProcess(player: Player): void {
     this.addParticipantHand(player)
     player.incrementCurrentTurn()
-    if(player.isBust()) player.bust()
+    if (player.isBust()) player.bust()
   }
 
   public standProcess(): void {
@@ -180,7 +187,7 @@ export default class Table {
   public hitProcess(): void {
     const player: Player = this.players[0]
 
-    if(player.canHit()) {
+    if (player.canHit()) {
       this.commonProcess(player)
     }
   }
@@ -188,7 +195,7 @@ export default class Table {
   public doubleProcess(): void {
     const player: Player = this.players[0]
 
-    if(player.canDouble()) {
+    if (player.canDouble()) {
       player.double()
       this.commonProcess(player)
     }
@@ -197,7 +204,7 @@ export default class Table {
   public surrenderProcess(): void {
     const player: Player = this.players[0]
 
-    if(player.canSurrender()) {
+    if (player.canSurrender()) {
       player.surrender()
       this.commonProcess(player)
     }
@@ -221,5 +228,15 @@ export default class Table {
 
   public setToPreparation(): void {
     this.gamePhase = GAMEPHASE.PREPARATION
+  }
+
+  // デッキからカードを得るためのヘルパー関数
+  public drawValidCardFromDeck(): Card {
+    const card: Card | undefined = this.deck.drawOne()
+
+    if (!card) {
+      throw new Error('At drawValidCardFromDeck: Deck is empty.')
+    }
+    return card
   }
 }

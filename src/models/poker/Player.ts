@@ -1,87 +1,108 @@
 import Card from '@/models/common/Card'
 import Hand from '@/models/common/Hand'
-import { PLAYERTYPE } from '@/types/playerTypes'
+import PLAYERTYPES from '@/types/playerTypes'
+import PokerAction from '@/models/poker/PokerAction'
+import PokerHand from '@/models/poker/PokerHand'
 
 export default class Player {
-  private readonly playerType: PLAYERTYPE
+  private readonly _playerType: PLAYERTYPES
 
-  private hand: Hand
+  private readonly _playerName: string
 
-  private chips: number
+  private _chips: number
 
-  private bet: number
+  private _bet: number
 
-  private isDealer: boolean
+  private _hand: Hand
 
-  private isActive: boolean
+  private _isActive: boolean
 
-  constructor() {
-    this.playerType = 'player'
-    this.hand = new Hand()
-    this.chips = 1000
-    this.bet = 0
-    this.isDealer = false
-    this.isActive = true
+  private _lastAction: PokerAction
+
+  private _bestHand: PokerHand | undefined
+
+  constructor(playerType: PLAYERTYPES, playerName: string) {
+    this._playerType = playerType
+    this._playerName = playerName
+    this._chips = 1000
+    this._bet = 0
+    this._hand = new Hand()
+    this._isActive = true
+    this._lastAction = PokerAction.NO_ACTION
   }
 
-  public getPlayerType(): PLAYERTYPE {
-    return this.playerType
+  get playerType(): PLAYERTYPES {
+    return this._playerType
   }
 
-  public getHand(): Card[] {
-    return this.hand.getHand()
+  get playerName(): string {
+    return this._playerName
   }
 
-  public getChips(): number {
-    return this.chips
+  get chips(): number {
+    return this._chips
   }
 
-  public getBet(): number {
-    return this.bet
+  get bet(): number {
+    return this._bet
   }
 
-  public getIsDealer(): boolean {
-    return this.isDealer
+  get hand(): Hand {
+    return this._hand
   }
 
-  public getIsActive(): boolean {
-    return this.isActive
+  get isActive(): boolean {
+    return this._isActive
+  }
+
+  set isActive(bool: boolean) {
+    this._isActive = bool
+  }
+
+  get lastAction(): PokerAction {
+    return this._lastAction
+  }
+
+  set lastAction(action: PokerAction) {
+    this._lastAction = action
+  }
+
+  get bestHand(): PokerHand | undefined {
+    return this._bestHand
+  }
+
+  set bestHand(bestHand: PokerHand | undefined) {
+    this._bestHand = bestHand
   }
 
   public addHand(card: Card): void {
-    this.hand.addOne(card)
+    this._hand.addOne(card)
   }
 
   public addChips(amount: number): void {
-    this.chips += amount
+    this._chips += amount
   }
 
   public clearHand(): void {
-    this.hand = new Hand()
+    this._hand = new Hand()
   }
 
   public resetBet(): void {
-    this.bet = 0
+    this._bet = 0
+  }
+
+  public isLastActionRaise(): boolean {
+    return this._lastAction === PokerAction.RAISE
   }
 
   public placeBet(amount: number): number {
-    // TODO: チップとベットの額の判定の処理
     if (amount > this.chips) {
       throw new Error(
         `Not enough chips to place the bet. Available: ${this.chips}, Tried to bet: ${amount}`
       )
     }
-
-    this.chips -= amount
-    this.bet += amount
+    this._chips -= amount
+    this._bet += amount
     return amount
-  }
-
-  public setAsDealer(bool: boolean): void {
-    this.isDealer = bool
-  }
-
-  public setAsActive(bool: boolean): void {
-    this.isActive = bool
   }
 }

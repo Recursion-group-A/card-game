@@ -2,7 +2,7 @@ import Card from '@/models/common/Card'
 import { SUITS, RANKS } from '@/constants/cards'
 import { GAMETYPE, GAMESWITHJOKER } from '@/types/gameTypes'
 import { RankStrategy } from '@/models/common/RankStrategy'
-import getRankStrategy from '@/utils/getRankStrategy'
+import { getRankStrategy } from '@/utils/utils'
 
 export default class Deck {
   private readonly gameType: GAMETYPE
@@ -50,12 +50,10 @@ export default class Deck {
     return newDeck
   }
 
-  // 呼び出しに使われるメソッド 公開
   public shuffle(): void {
     this.performShuffle()
   }
 
-  // // 実際にシャッフルを行うメソッド 非公開
   private performShuffle(): void {
     for (let i = this.deck.length - 1; i >= 0; i -= 1) {
       const j: number = Math.floor(Math.random() * (i + 1))
@@ -68,7 +66,6 @@ export default class Deck {
     this.shuffle()
   }
 
-  // スピードでは undefinedが必要になるかも
   public drawOne(): Card | undefined {
     return this.deck.shift()
   }

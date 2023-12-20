@@ -3,18 +3,19 @@ import { Rank } from '@/types/ranks'
 import { RankStrategy } from '@/models/common/RankStrategy'
 
 export default class Card {
-  private readonly suit?: Suit
+  private readonly _suit: Suit | undefined
 
-  private readonly rank: Rank
+  private readonly _rank: Rank
 
-  private rankStrategy: RankStrategy
+  private readonly _rankStrategy: RankStrategy
+
+  private _isFaceDown: boolean
 
   constructor(suit: Suit | undefined, rank: Rank, rankStrategy: RankStrategy) {
-    this.suit = suit
-
-    this.rank = rank
-
-    this.rankStrategy = rankStrategy
+    this._suit = suit
+    this._rank = rank
+    this._rankStrategy = rankStrategy
+    this._isFaceDown = true
   }
 
   /**
@@ -28,12 +29,20 @@ export default class Card {
     return new Card(undefined, 'Joker', rankStrategy)
   }
 
-  public getSuit(): Suit | undefined {
-    return this.suit
+  get suit(): Suit | undefined {
+    return this._suit
   }
 
-  public getRank(): Rank {
-    return this.rank
+  get rank(): Rank {
+    return this._rank
+  }
+
+  get isFaceDown(): boolean {
+    return this._isFaceDown
+  }
+
+  set isFaceDown(bool: boolean) {
+    this._isFaceDown = bool
   }
 
   /**
@@ -44,13 +53,26 @@ export default class Card {
    * @returns カードのランクに対応する数値
    */
   public getRankNumber(): number {
-    return this.rankStrategy.getRankNumber(this.rank)
+    return this._rankStrategy.getRankNumber(this.rank)
   }
 
   public toString(): string {
-    if (this.rank === 'Joker') {
+    if (!this.suit) {
       return 'Joker'
     }
-    return this.suit ? `${this.suit}${this.rank}` : this.rank
+
+    const FACE_CARDS: string[] = ['10', 'J', 'Q', 'K', 'A']
+    const suitMap: { [key in Suit]: string } = {
+      S: 'spades',
+      C: 'clubs',
+      H: 'hearts',
+      D: 'diamonds'
+    }
+    const suitName: string = suitMap[this.suit]
+    const rankName: string = FACE_CARDS.includes(this.rank)
+      ? this.rank
+      : `0${this.rank.toString()}`
+
+    return `${suitName}_${rankName}`
   }
 }

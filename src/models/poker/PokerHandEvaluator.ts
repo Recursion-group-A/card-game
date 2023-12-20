@@ -51,7 +51,7 @@ export default class PokerHandEvaluator {
     suitCountMap.forEach((count: number, suit: Suit) => {
       if (count >= 5) {
         const sameSuitCards: Card[] = cards.filter(
-          (card: Card) => card.getSuit() === suit
+          (card: Card) => card.suit === suit
         )
         straightFlushExists = PokerHandEvaluator.isStraight(sameSuitCards)
       }
@@ -176,7 +176,7 @@ export default class PokerHandEvaluator {
     const suitCountMap: Map<Suit, number> = new Map<Suit, number>()
 
     cards.forEach((card: Card) => {
-      const suit: Suit | undefined = card.getSuit()
+      const { suit } = card
 
       if (suit !== undefined) {
         const currentCount: number = suitCountMap.get(suit) || 0

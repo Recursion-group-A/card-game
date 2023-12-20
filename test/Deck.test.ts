@@ -2,7 +2,7 @@ import Card from '@/models/common/Card'
 import Deck from '@/models/common/Deck'
 import { RANKS, SUITS } from '@/constants/cards'
 import { GAMESWITHJOKER, GAMETYPE } from '@/types/gameTypes'
-import getRankStrategy from '@/utils/getRankStrategy'
+import { getRankStrategy } from '@/utils/utils'
 
 describe('Deck constructor', () => {
   it('should create a Poker-Deck instance with correct properties', () => {
@@ -57,7 +57,7 @@ describe('generateDeck', () => {
 
     expect(speedDeck.getDeckSize()).toBe(expectedSize)
     expect(
-      speedDeck.generateDeck(true).filter((card) => card.getRank() === 'Joker')
+      speedDeck.generateDeck(true).filter((card) => card.rank === 'Joker')
         .length
     ).toBe(2)
   })
@@ -68,10 +68,10 @@ describe('generateDeck', () => {
       const generatedDeckWithoutJoker = blackjackDeck.generateDeck()
 
       const foundCardWithJoker = generatedDeckWithJoker.find(
-        (card) => card.getSuit() === suit && card.getRank() === rank
+        (card) => card.suit === suit && card.rank === rank
       )
       const foundCardWithoutJoker = generatedDeckWithoutJoker.find(
-        (card) => card.getSuit() === suit && card.getRank() === rank
+        (card) => card.suit === suit && card.rank === rank
       )
 
       expect(foundCardWithJoker).toBeDefined()
