@@ -26,6 +26,9 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image('dealer-btn', 'dealerBtn.png')
     this.load.image('chip', 'coin-1-32.png')
     this.load.image('btn-dark', 'Rect-Dark-Default.png')
+    this.load.image('home', 'Home.png')
+    this.load.image('sound-on', 'sound_on.png')
+    this.load.image('sound-off', 'sound_off.png')
 
     const progressBar: Phaser.GameObjects.Graphics = this.add.graphics()
     const progressBox: Phaser.GameObjects.Graphics = this.add.graphics()

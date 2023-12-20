@@ -1,32 +1,22 @@
 import Card from '@/models/common/Card'
 
 export default class Hand {
-  private hand: Card[]
+  private _cards: Card[] = []
 
-  constructor() {
-    this.hand = []
-  }
-
-  // 外部で変更されないようにコピーを返す
-  public getHand(): Card[] {
-    return [...this.hand]
+  get cards(): Card[] {
+    return [...this._cards]
   }
 
   public addOne(card: Card): void {
-    this.hand.push(card)
-  }
-
-  // 呼び出し元でハンドリングを行う
-  public pickOne(): Card | undefined {
-    return this.hand.shift()
+    this._cards.push(card)
   }
 
   public cleanHand(): void {
-    this.hand = []
+    this._cards = []
   }
 
   public getCardCount(): number {
-    return this.hand.length
+    return this._cards.length
   }
 
   // TODO:ブラックジャックに特化
@@ -34,7 +24,7 @@ export default class Hand {
     let total = 0
     let aceCount = 0
 
-    this.hand.forEach((card: Card) => {
+    this._cards.forEach((card: Card) => {
       if (card.rank === 'A') {
         aceCount += 1
       }
@@ -47,6 +37,21 @@ export default class Hand {
     }
 
     return total
+  }
+
+  public getHandTotal(): number {
+    let total: number = 0
+    this._cards.forEach((card: Card) => {
+      total += card.getRankNumber()
+    })
+    return total
+  }
+
+  public getIndexAt(index: number): Card {
+    if (index >= this._cards.length) {
+      throw new Error(`Invalid index: Length of hand is ${this._cards.length}.`)
+    }
+    return this._cards[index]
   }
 
   public isBlackjack(): boolean {

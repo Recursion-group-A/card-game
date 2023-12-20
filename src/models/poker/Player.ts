@@ -2,44 +2,41 @@ import Card from '@/models/common/Card'
 import Hand from '@/models/common/Hand'
 import PLAYERTYPES from '@/types/playerTypes'
 import PokerAction from '@/models/poker/PokerAction'
+import PokerHand from '@/models/poker/PokerHand'
 
 export default class Player {
-  private readonly _playerName: string
-
   private readonly _playerType: PLAYERTYPES
 
-  private _hand: Hand
+  private readonly _playerName: string
 
   private _chips: number
 
   private _bet: number
 
-  private _isDealer: boolean
+  private _hand: Hand
 
   private _isActive: boolean
 
-  private _lastAction: PokerAction | undefined
+  private _lastAction: PokerAction
 
-  constructor(playerName: string, playerType: PLAYERTYPES) {
-    this._playerName = playerName
+  private _bestHand: PokerHand | undefined
+
+  constructor(playerType: PLAYERTYPES, playerName: string) {
     this._playerType = playerType
-    this._hand = new Hand()
+    this._playerName = playerName
     this._chips = 1000
     this._bet = 0
-    this._isDealer = false
+    this._hand = new Hand()
     this._isActive = true
-  }
-
-  get playerName(): string {
-    return this._playerName
+    this._lastAction = PokerAction.NO_ACTION
   }
 
   get playerType(): PLAYERTYPES {
     return this._playerType
   }
 
-  get hand(): Card[] {
-    return this._hand.getHand()
+  get playerName(): string {
+    return this._playerName
   }
 
   get chips(): number {
@@ -50,8 +47,8 @@ export default class Player {
     return this._bet
   }
 
-  set isDealer(bool: boolean) {
-    this._isDealer = bool
+  get hand(): Hand {
+    return this._hand
   }
 
   get isActive(): boolean {
@@ -62,12 +59,20 @@ export default class Player {
     this._isActive = bool
   }
 
-  get lastAction(): PokerAction | undefined {
+  get lastAction(): PokerAction {
     return this._lastAction
   }
 
   set lastAction(action: PokerAction) {
     this._lastAction = action
+  }
+
+  get bestHand(): PokerHand | undefined {
+    return this._bestHand
+  }
+
+  set bestHand(bestHand: PokerHand | undefined) {
+    this._bestHand = bestHand
   }
 
   public addHand(card: Card): void {
@@ -86,13 +91,16 @@ export default class Player {
     this._bet = 0
   }
 
+  public isLastActionRaise(): boolean {
+    return this._lastAction === PokerAction.RAISE
+  }
+
   public placeBet(amount: number): number {
     if (amount > this.chips) {
       throw new Error(
         `Not enough chips to place the bet. Available: ${this.chips}, Tried to bet: ${amount}`
       )
     }
-
     this._chips -= amount
     this._bet += amount
     return amount

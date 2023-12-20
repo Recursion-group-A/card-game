@@ -3,7 +3,7 @@ import { Rank } from '@/types/ranks'
 import { RankStrategy } from '@/models/common/RankStrategy'
 
 export default class Card {
-  private readonly _suit?: Suit
+  private readonly _suit: Suit | undefined
 
   private readonly _rank: Rank
 
@@ -11,19 +11,11 @@ export default class Card {
 
   private _isFaceDown: boolean
 
-  constructor(
-    suit: Suit | undefined,
-    rank: Rank,
-    rankStrategy: RankStrategy,
-    isFaceDown: boolean = true
-  ) {
+  constructor(suit: Suit | undefined, rank: Rank, rankStrategy: RankStrategy) {
     this._suit = suit
-
     this._rank = rank
-
     this._rankStrategy = rankStrategy
-
-    this._isFaceDown = isFaceDown
+    this._isFaceDown = true
   }
 
   /**

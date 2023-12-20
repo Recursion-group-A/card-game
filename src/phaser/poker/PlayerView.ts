@@ -11,43 +11,51 @@ export default class PlayerView extends Phaser.GameObjects.Container {
 
   private readonly _playerNameText: Phaser.GameObjects.Text
 
-  private readonly _handCardViews: Phaser.GameObjects.Container
-
   private readonly _chipsText: Phaser.GameObjects.Text
 
+  private readonly _dealerBtn: Phaser.GameObjects.Image
+
+  private readonly _handCardViews: Phaser.GameObjects.Container
+
+  private readonly _resultTextsContainer: Phaser.GameObjects.Container
+
   private _actionText: Phaser.GameObjects.Text | null = null
-
-  private _dealerBtn: Phaser.GameObjects.Image | null = null
-
-  private readonly _resultTexts: Phaser.GameObjects.Container
 
   constructor(
     scene: Phaser.Scene,
     player: Player,
-    pos: { x: number; y: number }
+    playerPosition: { x: number; y: number }
   ) {
-    super(scene, pos.x, pos.y)
+    super(scene, playerPosition.x, playerPosition.y)
     this._playerModel = player
     this._playerNameText = this.scene.add.text(
       this._playerModel.playerType === PLAYERTYPES.PLAYER ? 44 : 40,
       0,
       `${this._playerModel.playerName.toUpperCase()}`
     )
-    this._handCardViews = this.scene.add.container()
     this._chipsText = this.scene.add.text(
       10,
       64 + 40, // カードの高さ → 64
       `CHIPS: ${this._playerModel.chips}`
     )
-    this._resultTexts = this.scene.add.container()
+    this._dealerBtn = this.scene.add
+      .image(
+        this._playerNameText.x + 60,
+        this._playerNameText.y + 7,
+        'dealer-btn'
+      )
+      .setScale(0.08)
+      .setVisible(false)
+    this._handCardViews = this.scene.add.container()
+    this._resultTextsContainer = this.scene.add.container()
 
     this.add([
       this._playerNameText,
-      this._handCardViews,
       this._chipsText,
-      this._resultTexts
+      this._dealerBtn,
+      this._handCardViews,
+      this._resultTextsContainer
     ])
-    this.updateHand()
 
     scene.add.existing(this)
   }
@@ -58,43 +66,14 @@ export default class PlayerView extends Phaser.GameObjects.Container {
 
   update(): void {
     this._chipsText.setText(`CHIPS: ${this._playerModel.chips}`)
-    this.updateHand()
   }
 
-  private updateHand(): void {
-    const { hand } = this._playerModel
-    hand.forEach((card: Card, index: number) => {
-      const cardView: CardView = new CardView(this.scene, 0, 0, card)
-      cardView.x = index * 25 + 45
-      cardView.y = this._playerNameText.y + 64
-      this.add(cardView)
-      this._handCardViews.add(cardView)
-    })
-  }
-
-  public animateAddHand(x: number, y: number, card: Card, i: number): void {
-    const cardView: CardView = new CardView(this.scene, x, y, card)
-    this._handCardViews.add(cardView)
-    this.scene.add.existing(this._handCardViews)
-
-    cardView.animateCardMove(this.x + (i + 1) * 25 + 20, this.y + 60)
-  }
-
-  public revealHand(): void {
-    this._handCardViews.each((child: CardView) => {
-      child.open()
-    })
+  public removeDealerBtn(): void {
+    this._dealerBtn.setVisible(false)
   }
 
   public addDealerBtn(): void {
-    this._dealerBtn = this.scene.add
-      .image(
-        this._playerNameText.x + 60,
-        this._playerNameText.y + 7,
-        'dealer-btn'
-      )
-      .setScale(0.08)
-    this.add(this._dealerBtn)
+    this._dealerBtn.setVisible(true)
     this.dealerBtnRotateAnimation()
   }
 
@@ -105,7 +84,7 @@ export default class PlayerView extends Phaser.GameObjects.Container {
       duration: 400,
       ease: 'Power2',
       onComplete: (): void => {
-        this._dealerBtn?.setTexture('dealer-btn')
+        this._dealerBtn.setTexture('dealer-btn')
         this.scene.tweens.add({
           targets: this._dealerBtn,
           scaleX: 0.08,
@@ -116,15 +95,8 @@ export default class PlayerView extends Phaser.GameObjects.Container {
     })
   }
 
-  public removeDealerBtn(): void {
-    if (this._dealerBtn) {
-      this._dealerBtn.destroy()
-      this._dealerBtn = null
-    }
-  }
-
   public animatePlaceBet(): void {
-    this._chipsText.setText(`CHIPS: ${this._playerModel.chips}`)
+    this.update()
     this.animateChipMoveToPot()
   }
 
@@ -137,45 +109,26 @@ export default class PlayerView extends Phaser.GameObjects.Container {
     this.scene.tweens.add({
       targets: chip,
       x: 510,
-      y: 340,
+      y: 380,
       duration: 400,
       ease: 'Power2',
       onComplete: (): void => {
-        chip.destroy()
+        chip.destroy(true)
       }
     })
   }
 
-  public animateRefundToWinner(): void {
-    this._chipsText.setText(`CHIPS: ${this._playerModel.chips}`)
-    for (let i: number = 0; i < 4; i += 1) {
-      const chip: Phaser.GameObjects.Image = this.scene.add.image(
-        510 + i * 5,
-        325,
-        'chip'
-      )
-      this.scene.time.delayedCall(i * 50, () => {
-        this.animateChipMoveToPlayer(chip)
-      })
-    }
+  public animateAddHand(x: number, y: number, card: Card, i: number): void {
+    const cardView: CardView = new CardView(this.scene, x, y, card)
+
+    cardView.animateCardMove(this.x + (i + 1) * 25 + 20, this.y + 60)
+    this._handCardViews.add(cardView)
+    this.scene.add.existing(this._handCardViews)
   }
 
-  private animateChipMoveToPlayer(chip: Phaser.GameObjects.Image): void {
-    this.scene.tweens.add({
-      targets: chip,
-      x: this.x + 60,
-      y: this.y + 60,
-      duration: 600,
-      ease: 'Power2',
-      onComplete: (): void => {
-        chip.destroy()
-      }
-    })
-  }
-
-  public setInVisibleHandCards(): void {
-    this._handCardViews.each((card: CardView) => {
-      card.setVisible(false)
+  public revealHand(): void {
+    this._handCardViews.each((child: CardView) => {
+      child.open()
     })
   }
 
@@ -197,6 +150,13 @@ export default class PlayerView extends Phaser.GameObjects.Container {
     }
   }
 
+  private destroyActionText(): void {
+    if (this._actionText) {
+      this._actionText.destroy()
+      this._actionText = null
+    }
+  }
+
   // eslint-disable-next-line
   private getActionTextPosition(action: PokerAction): [number, number] {
     const x: number =
@@ -210,41 +170,66 @@ export default class PlayerView extends Phaser.GameObjects.Container {
       [PokerAction.FOLD]: '#ff8c00',
       [PokerAction.CALL]: '#ffd700',
       [PokerAction.RAISE]: '#ee82ee',
-      [PokerAction.CHECK]: '#aaf0d1'
+      [PokerAction.CHECK]: '#aaf0d1',
+      [PokerAction.NO_ACTION]: '#ffffff'
     }
-    this._actionText?.setColor(colorMap[action] || '#ffffff')
+    this._actionText?.setColor(colorMap[action])
   }
 
-  private destroyActionText(): void {
-    if (this._actionText) {
-      this._actionText.destroy()
-      this._actionText = null
-    }
+  public removeAllHand(): void {
+    this._handCardViews.removeAll(true)
   }
 
-  public displayResultTexts(winAmount: number, bestHandRank: number): void {
-    const winAmountText = this.scene.add.text(25, 130, `Win: $${winAmount}`, {
-      color: '#00ffff'
-    })
-    const bestHandText = this.scene.add.text(
+  public displayResultTexts(winAmount: number): void {
+    const winAmountText: Phaser.GameObjects.Text = this.scene.add.text(
       25,
-      155,
-      `${PokerHand[bestHandRank]}`,
+      130,
+      `Win: $${winAmount}`,
+      {
+        color: '#00ffff'
+      }
+    )
+    const bestHandText: Phaser.GameObjects.Text = this.scene.add.text(
+      winAmountText.x,
+      winAmountText.y + 25,
+      `${PokerHand[this._playerModel.bestHand!]}`,
       { color: '#00ff00' }
     )
-    this._resultTexts.add([winAmountText, bestHandText])
+    this._resultTextsContainer.add([winAmountText, bestHandText])
+    this.add(this._resultTextsContainer)
+  }
 
-    this.add(this._resultTexts)
+  public animateRefundToWinner(): void {
+    this.update()
+    for (let i: number = 0; i < 4; i += 1) {
+      this.scene.time.delayedCall(i * 100, () => {
+        this.animateChipMoveToPlayer(i)
+      })
+    }
+  }
+
+  private animateChipMoveToPlayer(offset: number): void {
+    const chip: Phaser.GameObjects.Image = this.scene.add.image(
+      510 + offset * 10,
+      325,
+      'chip'
+    )
+    this.scene.tweens.add({
+      targets: chip,
+      x: this.x + 60,
+      y: this.y + 60,
+      duration: 600,
+      ease: 'Power2',
+      onComplete: (): void => {
+        chip.destroy()
+      }
+    })
   }
 
   public prepareForNextGame(): void {
-    this._handCardViews.removeAll(true)
-
-    if (this._actionText) {
-      this._actionText.destroy()
-    }
-    this._resultTexts.each((child: Phaser.GameObjects.GameObject) => {
-      child.destroy()
-    })
+    this.removeAllHand()
+    this.removeDealerBtn()
+    this._actionText?.destroy()
+    this._resultTextsContainer.removeAll(true)
   }
 }

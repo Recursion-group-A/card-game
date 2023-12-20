@@ -1,9 +1,8 @@
-import Phaser from 'phaser'
-import Table from '@/models/poker/Table'
+import BaseScene from '@/phaser/common/BaseScene'
 import TableView from '@/phaser/poker/TableView'
 import { GAMETYPE } from '@/types/gameTypes'
 
-export default class PokerScene extends Phaser.Scene {
+export default class PokerScene extends BaseScene {
   private _tableView: TableView | undefined
 
   constructor() {
@@ -11,21 +10,13 @@ export default class PokerScene extends Phaser.Scene {
   }
 
   async create(): Promise<void> {
-    this._tableView = new TableView(this, new Table(GAMETYPE.Poker))
-    this._tableView.assignDealerBtn(true)
+    super.create()
+
+    this._tableView = new TableView(this, GAMETYPE.Poker)
 
     // eslint-disable-next-line
     while (true) {
-      // eslint-disable-next-line
-      await this._tableView.startGame()
-
-      this._tableView.displayPromptText()
-      // eslint-disable-next-line
-      await this._tableView.waitForUserClick()
-      this._tableView.destroyPromptText()
-
-      this._tableView.resetGameView()
-      this._tableView.assignDealerBtn(false)
+      await this._tableView.startGame() // eslint-disable-line
     }
   }
 
