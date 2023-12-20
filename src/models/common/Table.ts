@@ -42,11 +42,11 @@ export default class Table {
   }
 
   public initializePlayers(): void {
-    this.addPlayer('Player', 'player')
+    this.addPlayer('Player', PLAYERTYPE.PLAYER)
 
     for (let i = 1; i < this.playerNumber; i += 1) {
       const computerName = `Bot_${i}`
-      this.addPlayer(computerName, 'ai')
+      this.addPlayer(computerName, PLAYERTYPE.AI)
     }
   }
 
@@ -92,6 +92,14 @@ export default class Table {
 
   public getGamePhase(): string {
     return this.gamePhase
+  }
+
+  public getPlayers(): Player[] {
+    return this.players
+  }
+
+  public getDeck(): Deck {
+    return this.deck
   }
 
   public getRound(): number {
@@ -220,5 +228,15 @@ export default class Table {
 
   public setToPreparation(): void {
     this.gamePhase = GAMEPHASE.PREPARATION
+  }
+
+  // デッキからカードを得るためのヘルパー関数
+  public drawValidCardFromDeck(): Card {
+    const card: Card | undefined = this.deck.drawOne()
+
+    if (!card) {
+      throw new Error('At drawValidCardFromDeck: Deck is empty.')
+    }
+    return card
   }
 }

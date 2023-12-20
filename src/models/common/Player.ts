@@ -2,7 +2,7 @@ import Card from '@/models/common/Card'
 import Hand from '@/models/common/Hand'
 import Deck from '@/models/common/Deck'
 import { PLAYER_STATES } from '@/constants/playerStates'
-import { PLAYERTYPE } from '@/types/playerTypes'
+import PLAYERTYPE from '@/types/playerTypes'
 import { GAMETYPE } from '@/types/gameTypes'
 
 export default class Player {
