@@ -35,7 +35,7 @@ export default class Hand {
     let aceCount = 0
 
     this.hand.forEach((card: Card) => {
-      if (card.getRank() === 'A') {
+      if (card.rank === 'A') {
         aceCount += 1
       }
       total += card.getRankNumber()

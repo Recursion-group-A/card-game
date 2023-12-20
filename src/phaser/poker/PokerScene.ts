@@ -6,21 +6,30 @@ import { GAMETYPE } from '@/types/gameTypes'
 export default class PokerScene extends Phaser.Scene {
   private _tableView: TableView | undefined
 
-  private readonly _tableModel: Table
-
   constructor() {
     super('PokerScene')
-    this._tableModel = new Table(GAMETYPE.Poker)
   }
 
-  public create(): void {
-    this._tableView = new TableView(this, this._tableModel)
-    this._tableView.assignDealerBtn()
-    this._tableView.animateCollectBlinds()
+  async create(): Promise<void> {
+    this._tableView = new TableView(this, new Table(GAMETYPE.Poker))
+    this._tableView.assignDealerBtn(true)
 
-    this.time.delayedCall(2500, () => {
-      this._tableView?.dealCardAnimation()
-      this._tableView?.revealUserHand()
-    })
+    // eslint-disable-next-line
+    while (true) {
+      // eslint-disable-next-line
+      await this._tableView.startGame()
+
+      this._tableView.displayPromptText()
+      // eslint-disable-next-line
+      await this._tableView.waitForUserClick()
+      this._tableView.destroyPromptText()
+
+      this._tableView.resetGameView()
+      this._tableView.assignDealerBtn(false)
+    }
+  }
+
+  update() {
+    this._tableView?.update()
   }
 }

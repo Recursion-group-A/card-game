@@ -13,7 +13,7 @@ export default class CardView extends Phaser.GameObjects.Image {
 
   public setFaceUp(): void {
     this._cardModel.isFaceDown = false
-    this.setTexture(this.getAtlasFrame())
+    this.setTexture(`card_${this._cardModel.toString()}`)
   }
 
   public setFaceDown(): void {
@@ -62,13 +62,8 @@ export default class CardView extends Phaser.GameObjects.Image {
       targets: this,
       x: newX,
       y: newY,
-      duration: 500,
+      duration: 600,
       ease: 'Power2'
     })
-  }
-
-  private getAtlasFrame(): string {
-    const suitAndRank: string = this._cardModel.toString()
-    return `card_${suitAndRank}`
   }
 }
