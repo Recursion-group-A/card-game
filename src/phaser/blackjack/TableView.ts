@@ -5,6 +5,7 @@ import PlayerView from '@/phaser/blackjack/PlayerView'
 import DeckView from '@/phaser/common/DeckView'
 import Deck from '@/models/blackjack/Deck'
 import Card from '@/models/blackjack/Card'
+import PLAYERTYPES from '@/types/playerTypes'
 
 export default class TableView extends Phaser.GameObjects.Container {
   private readonly _tableModel: Table
@@ -52,9 +53,13 @@ export default class TableView extends Phaser.GameObjects.Container {
       { x: 450, y: 100 }
     ]
 
+    // 下のメソッドたちをきれいにする
     this._tableModel.initializePlayers()
     this._playerModels = this._tableModel.getPlayers()
     this._playerModels.forEach((player: Player, index: number) => {
+      if (player.getPlayerType() === PLAYERTYPES.AI) {
+        player.decideAiPlayerBetAmount()
+      }
       const playerView = new PlayerView(this.scene, player, playersPos[index])
       this._playerViews.push(playerView)
       this.add(playerView)
@@ -84,10 +89,90 @@ export default class TableView extends Phaser.GameObjects.Container {
     }
   }
 
+  public addCard(index: number): void {
+    const delayPerCard: number = 150
+
+    const card: Card = this._tableModel.drawValidCardFromDeck()
+    const handLength: number = this._playerModels[index].getHand().length
+
+    if (!card) {
+      throw new Error('Deck is empty.')
+    }
+
+    this._playerModels[index].addCard(card)
+
+    const deckPosition: { x: number; y: number } = {
+      x: this._deckView.x,
+      y: this._deckView.y - 2 * 8
+    }
+    const delay: number =
+      handLength * delayPerCard * this._playerModels.length +
+      index * delayPerCard
+
+    this._playerViews[index].addCardToHand(
+      deckPosition,
+      card,
+      handLength,
+      delay
+    )
+  }
+
+  public updateBlackjackPlayerStates(): void {
+    this._playerModels.forEach((playerModel: Player, index: number) => {
+      if (playerModel.isBlackjack()) {
+        playerModel.setToBlackjack()
+        this._playerViews[index].updateStates()
+        this._playerViews[index].changeBlackjackColor()
+      }
+    })
+  }
+
+  public updatePlayersStates(): void {
+    this._playerViews.forEach((playerView: PlayerView) => {
+      playerView.updateStates()
+    })
+  }
+
+  public updatePlayersScore(): void {
+    this._playerViews.forEach((playerView) => {
+      playerView.updateScore()
+    })
+  }
+
   public revealUserHand(): void {
     this._playerViews.forEach((playerView: PlayerView) => {
       playerView.revealHand()
     })
+  }
+
+  // this._playerModels => [player: Player, player: Player, player: Player]
+
+  public aiPlayerProcess(): void {
+    this._playerModels.forEach((playerModel: Player, index: number) => {
+      if (playerModel.getPlayerType() === PLAYERTYPES.AI) {
+        while (playerModel.getHandTotalScore() < 17) {
+          this.addCard(index)
+          playerModel.incrementCurrentTurn()
+
+          if (playerModel.getHandTotalScore() > 21) {
+            playerModel.setToBust()
+            break
+          } else if (playerModel.getHandTotalScore() >= 17) {
+            playerModel.setToStand()
+            break
+          }
+        }
+      }
+    })
+  }
+
+  public startGame(): void {
+    this.dealCardAnimation()
+    this.aiPlayerProcess()
+    this.updateBlackjackPlayerStates()
+    this.updatePlayersScore()
+    this.revealUserHand()
+    // this.aiPlayerProcess()
   }
 
   // public assignDealerBtn(): void {

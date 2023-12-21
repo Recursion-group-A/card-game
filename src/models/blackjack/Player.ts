@@ -250,6 +250,7 @@ export default class Player {
     const betAmount: number = Math.floor(Math.random() * (max - min) + min)
 
     this.bet = betAmount
+    this.chips -= this.bet
   }
 
   public drawUntilSeventeen(deck: Deck): void {
