@@ -12,6 +12,8 @@ export default class PlayerView extends Phaser.GameObjects.Container {
 
   private readonly _statesText: Phaser.GameObjects.Text
 
+  private readonly _scoreText: Phaser.GameObjects.Text
+
   private readonly _chipsText: Phaser.GameObjects.Text
 
   private readonly _betText: Phaser.GameObjects.Text
@@ -36,6 +38,11 @@ export default class PlayerView extends Phaser.GameObjects.Container {
       64 + 40,
       `STATES: ${this._playerModel.getStates()}`
     )
+    this._scoreText = this.scene.add.text(
+      5,
+      64 + 100,
+      `SCORE: ${this._playerModel.getHandTotalScore()}`
+    )
     this._chipsText = this.scene.add.text(
       5,
       64 + 60, // カードの高さ → 64
@@ -48,8 +55,9 @@ export default class PlayerView extends Phaser.GameObjects.Container {
     )
 
     this.add([
-      this._statesText,
       this._playerNameText,
+      this._statesText,
+      this._scoreText,
       this._chipsText,
       this._betText
     ])
@@ -66,10 +74,30 @@ export default class PlayerView extends Phaser.GameObjects.Container {
     return this._handCardViews
   }
 
+  public changeBlackjackColor(): void {
+    this._playerNameText.setColor('#e6b422')
+  }
+
   public update(): void {
     this._statesText.setText(`STATES: ${this._playerModel.getStates()}`)
     this._chipsText.setText(`CHIPS: ${this._playerModel.getChips()}`)
     this.updateHand()
+  }
+
+  public updateStates(): void {
+    this._statesText.setText(`STATES: ${this._playerModel.getStates()}`)
+  }
+
+  public updateChips(): void {
+    this._chipsText.setText(`CHIPS: ${this._playerModel.getChips()}`)
+  }
+
+  public updateBet(): void {
+    this._betText.setText(`BET: ${this._playerModel.getBet()}`)
+  }
+
+  public updateScore(): void {
+    this._scoreText.setText(`SCORE: ${this._playerModel.getHandTotalScore()}`)
   }
 
   private updateHand(): void {
@@ -108,6 +136,8 @@ export default class PlayerView extends Phaser.GameObjects.Container {
     )
     this.scene.add.existing(cardView)
     this._handCardViews.push(cardView)
+    this.updateScore()
+    this.updateStates()
 
     setTimeout(() => {
       cardView.animateCardMove(this.x + (i + 1) * 25 + 20, this.y + 60)

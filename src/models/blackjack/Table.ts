@@ -25,6 +25,7 @@ export default class Table {
 
   private resultLog: string[]
 
+  // blackjack, 6
   constructor(gameType: GAMETYPE, playerNumber: number) {
     this.gameType = gameType
     this.playerNumber = playerNumber
@@ -42,9 +43,11 @@ export default class Table {
   }
 
   public initializePlayers(): void {
-    this.addPlayer('Player', PLAYERTYPE.PLAYER)
-
+    if (this.playerNumber < 3) this.addPlayer('Player', PLAYERTYPE.PLAYER)
     for (let i = 1; i < this.playerNumber; i += 1) {
+      if (i === 3) {
+        this.addPlayer('Player', PLAYERTYPE.PLAYER)
+      }
       const computerName = `Bot_${i}`
       this.addPlayer(computerName, PLAYERTYPE.AI)
     }

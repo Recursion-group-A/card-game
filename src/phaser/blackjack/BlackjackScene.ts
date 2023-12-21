@@ -12,7 +12,7 @@ export default class PokerScene extends Phaser.Scene {
 
   constructor() {
     super('PokerScene')
-    // 仮の人数 => 3
+    // 仮の人数 => 6
     this._tableModel = new Table(GAMETYPE.Blackjack, 6)
   }
 
@@ -22,8 +22,7 @@ export default class PokerScene extends Phaser.Scene {
     // this._tableView.animateCollectBlinds()
 
     this.time.delayedCall(2500, () => {
-      this._tableView?.dealCardAnimation()
-      this._tableView?.revealUserHand()
+      this._tableView?.startGame()
     })
   }
 }

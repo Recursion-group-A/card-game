@@ -1,5 +1,5 @@
 import Phaser from 'phaser'
-import Deck from '@/models/common/Deck'
+import Deck from '@/models/blackjack/Deck'
 
 export default class DeckView extends Phaser.GameObjects.Container {
   private readonly numOfCards: number = 8
