@@ -1,4 +1,5 @@
-import Table from '@/models/common/Table'
+import Phaser from 'phaser'
+import Table from '@/models/blackjack/Table'
 import TableView from '@/phaser/blackjack/TableView'
 import { GAMETYPE } from '@/types/gameTypes'
 import BaseScene from '@/phaser/common/BaseScene'
@@ -12,7 +13,7 @@ export default class BlackjackScene extends BaseScene {
 
   constructor() {
     super('BlackjackScene')
-    // 仮の人数 => 3
+    
     this._tableModel = new Table(GAMETYPE.Blackjack, 6)
   }
 
@@ -22,8 +23,7 @@ export default class BlackjackScene extends BaseScene {
     // this._tableView.animateCollectBlinds()
 
     this.time.delayedCall(2500, () => {
-      this._tableView?.dealCardAnimation()
-      this._tableView?.revealUserHand()
+      this._tableView?.startGame()
     })
   }
 }

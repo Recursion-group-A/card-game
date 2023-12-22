@@ -1,5 +1,5 @@
 import Phaser from 'phaser'
-import Card from '@/models/common/Card'
+import Card from '@/models/blackjack/Card'
 
 export default class CardView extends Phaser.GameObjects.Image {
   private readonly _cardModel: Card
