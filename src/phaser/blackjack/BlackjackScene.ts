@@ -2,17 +2,18 @@ import Phaser from 'phaser'
 import Table from '@/models/blackjack/Table'
 import TableView from '@/phaser/blackjack/TableView'
 import { GAMETYPE } from '@/types/gameTypes'
+import BaseScene from '@/phaser/common/BaseScene'
 
 // PreloadSceneのコードを書き換えることでブラックジャックにできる
 
-export default class PokerScene extends Phaser.Scene {
+export default class BlackjackScene extends BaseScene {
   private _tableView: TableView | undefined
 
   private readonly _tableModel: Table
 
   constructor() {
-    super('PokerScene')
-    // 仮の人数 => 6
+    super('BlackjackScene')
+    
     this._tableModel = new Table(GAMETYPE.Blackjack, 6)
   }
 

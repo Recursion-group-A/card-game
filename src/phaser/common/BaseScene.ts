@@ -36,7 +36,9 @@ export default class BaseScene extends Phaser.Scene {
   }
 
   private createHomeButton(): void {
-    this._homeButton = this.add.image(50, 40, 'home').setScale(0.75, 0.85)
+    this._homeButton = this.add
+      .image(50, 40, 'home-button')
+      .setScale(0.75, 0.85)
     this._homeButton.setInteractive({ useHandCursor: true })
     this._homeButton.on('pointerover', () => {
       this.scaleButton(this._homeButton!, 0.8, 0.9)
@@ -45,7 +47,7 @@ export default class BaseScene extends Phaser.Scene {
       this.scaleButton(this._homeButton!, 0.75, 0.85)
     })
     this._homeButton.on('pointerdown', () => {
-      this.scene.start('HomeScene')
+      window.location.href = '/'
     })
   }
 

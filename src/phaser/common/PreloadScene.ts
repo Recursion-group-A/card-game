@@ -2,11 +2,17 @@ import Phaser from 'phaser'
 import { SUITSFORIMAGE, RANKSFORIMAGE } from '@/constants/cards'
 
 export default class PreloadScene extends Phaser.Scene {
+  private _nextScene: string | undefined
+
   constructor() {
     super('PreloadScene')
   }
 
-  public preload(): void {
+  init(data: { nextScene: string }): void {
+    this._nextScene = data.nextScene
+  }
+
+  preload(): void {
     const { width, height } = this.cameras.main
 
     this.load.setBaseURL('../../assets/')
@@ -26,7 +32,7 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image('dealer-btn', 'dealerBtn.png')
     this.load.image('chip', 'coin-1-32.png')
     this.load.image('btn-dark', 'Rect-Dark-Default.png')
-    this.load.image('home', 'Home.png')
+    this.load.image('home-button', 'home_button.png')
     this.load.image('sound-on', 'sound_on.png')
     this.load.image('sound-off', 'sound_off.png')
 
@@ -54,9 +60,9 @@ export default class PreloadScene extends Phaser.Scene {
       progressBar.fillRect(width / 2 - 150, height / 2 - 30, 300 * value, 30)
       percentText.setText(`${parseInt(String(value * 100), 10)}%`)
     })
+  }
 
-    this.load.on('complete', () => {
-      this.scene.start('PokerScene')
-    })
+  create(): void {
+    this.scene.start(this._nextScene)
   }
 }
