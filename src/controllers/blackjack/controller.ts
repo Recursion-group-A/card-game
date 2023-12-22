@@ -1,16 +1,11 @@
-import { RankStrategy } from '@/models/common/RankStrategy'
 import Table from '@/models/common/Table'
 import { GAMETYPE } from '@/types/gameTypes'
 
 export default class Controller {
   private table: Table
 
-  constructor(
-    gameType: GAMETYPE,
-    playerNumber: number,
-    rankStrategy: RankStrategy
-  ) {
-    this.table = new Table(gameType, playerNumber, rankStrategy)
+  constructor(gameType: GAMETYPE, playerNumber: number) {
+    this.table = new Table(gameType, playerNumber)
   }
 
   // スタートボタンを押したときのメソッド

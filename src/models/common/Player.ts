@@ -97,7 +97,7 @@ export default class Player {
   }
 
   public getHand(): Card[] {
-    return this.hand.getHand()
+    return this.hand.cards
   }
 
   public getStates(): string {
