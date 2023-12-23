@@ -1,11 +1,12 @@
 import Phaser from 'phaser'
-import Table from '@/models/blackjack/Table'
-import Player from '@/models/blackjack/Player'
+import Table from '@/models/blackjack/BlackjackTable'
+import Player from '@/models/blackjack/BlackjackPlayer'
 import PlayerView from '@/phaser/blackjack/PlayerView'
 import DeckView from '@/phaser/common/DeckView'
-import Deck from '@/models/blackjack/Deck'
-import Card from '@/models/blackjack/Card'
-import PLAYERTYPES from '@/types/playerTypes'
+import Deck from '@/models/common/Deck'
+import Card from '@/models/common/Card'
+import PLAYERTYPES from '@/types/common/playerTypes'
+import { PlayerStatus } from '@/types/blackjack/playerStates'
 
 export default class TableView extends Phaser.GameObjects.Container {
   private readonly _tableModel: Table
@@ -29,12 +30,11 @@ export default class TableView extends Phaser.GameObjects.Container {
     this._tableModel = tableModel
     this._playerModels = []
     this._playerViews = []
-    this._deckModel = this._tableModel.getDeck()
+    this._deckModel = this._tableModel.deck
     this._deckView = new DeckView(
       this.scene,
       this._sceneWidth / 2,
-      this._sceneHeight / 2,
-      new Deck(this._tableModel.getGameType())
+      this._sceneHeight / 2
     )
     this._background = this.scene.add.image(
       this._sceneWidth / 2,
@@ -54,10 +54,10 @@ export default class TableView extends Phaser.GameObjects.Container {
     ]
 
     // 下のメソッドたちをきれいにする
-    this._tableModel.initializePlayers()
-    this._playerModels = this._tableModel.getPlayers()
+    // this._tableModel.initializePlayers()
+    this._playerModels = this._tableModel.players
     this._playerModels.forEach((player: Player, index: number) => {
-      if (player.getPlayerType() === PLAYERTYPES.AI) {
+      if (player.playerType === PLAYERTYPES.AI) {
         player.decideAiPlayerBetAmount()
       }
       const playerView = new PlayerView(this.scene, player, playersPos[index])
@@ -74,8 +74,8 @@ export default class TableView extends Phaser.GameObjects.Container {
 
     for (let i: number = 0; i < 2; i += 1) {
       this._playerModels.forEach((player: Player, index: number) => {
-        const card: Card = this._tableModel.drawValidCardFromDeck()
-        player.addCard(card)
+        const card: Card = this._tableModel.drawCard()
+        player.addHand(card)
 
         const deckPosition: { x: number; y: number } = {
           x: this._deckView.x,
@@ -92,14 +92,14 @@ export default class TableView extends Phaser.GameObjects.Container {
   public addCard(index: number): void {
     const delayPerCard: number = 150
 
-    const card: Card = this._tableModel.drawValidCardFromDeck()
-    const handLength: number = this._playerModels[index].getHand().length
+    const card: Card = this._tableModel.drawCard()
+    const handLength: number = this._playerModels[index].hand.getCardCount()
 
     if (!card) {
       throw new Error('Deck is empty.')
     }
 
-    this._playerModels[index].addCard(card)
+    this._playerModels[index].addHand(card)
 
     const deckPosition: { x: number; y: number } = {
       x: this._deckView.x,
@@ -120,7 +120,7 @@ export default class TableView extends Phaser.GameObjects.Container {
   public updateBlackjackPlayerStates(): void {
     this._playerModels.forEach((playerModel: Player, index: number) => {
       if (playerModel.isBlackjack()) {
-        playerModel.setToBlackjack()
+        playerModel.status = PlayerStatus.Blackjack //eslint-disable-line
         this._playerViews[index].updateStates()
         this._playerViews[index].changeBlackjackColor()
       }
@@ -149,16 +149,16 @@ export default class TableView extends Phaser.GameObjects.Container {
 
   public aiPlayerProcess(): void {
     this._playerModels.forEach((playerModel: Player, index: number) => {
-      if (playerModel.getPlayerType() === PLAYERTYPES.AI) {
+      if (playerModel.playerType === PLAYERTYPES.AI) {
         while (playerModel.getHandTotalScore() < 17) {
           this.addCard(index)
           playerModel.incrementCurrentTurn()
 
           if (playerModel.getHandTotalScore() > 21) {
-            playerModel.setToBust()
+            playerModel.status = PlayerStatus.Bust // eslint-disable-line
             break
           } else if (playerModel.getHandTotalScore() >= 17) {
-            playerModel.setToStand()
+            playerModel.status = PlayerStatus.Stand // eslint-disable-line
             break
           }
         }
