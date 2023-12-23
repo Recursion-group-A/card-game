@@ -1,7 +1,7 @@
 import Card from '@/models/common/Card'
 import Deck from '@/models/common/Deck'
 import { RANKS, SUITS } from '@/constants/cards'
-import { GAMESWITHJOKER, GAMETYPE } from '@/types/gameTypes'
+import { GAMESWITHJOKER, GAMETYPE } from '@/types/common/gameTypes'
 import { getRankStrategy } from '@/utils/utils'
 
 describe('Deck constructor', () => {
@@ -9,31 +9,25 @@ describe('Deck constructor', () => {
     const deck: Deck = new Deck(GAMETYPE.Poker)
 
     expect(deck).toBeInstanceOf(Deck)
-    expect(deck.getGameType()).toBe(GAMETYPE.Poker)
-    expect(deck.getRankStrategy()).toStrictEqual(
-      getRankStrategy(GAMETYPE.Poker)
-    )
-    expect(GAMESWITHJOKER.includes(deck.getGameType())).toBeFalsy()
+    expect(deck.gameType).toBe(GAMETYPE.Poker)
+    expect(deck.rankStrategy).toStrictEqual(getRankStrategy(GAMETYPE.Poker))
+    expect(GAMESWITHJOKER.includes(deck.gameType)).toBeFalsy()
   })
   it('should create a Blackjack-Deck instance with correct properties', () => {
     const deck: Deck = new Deck(GAMETYPE.Blackjack)
 
     expect(deck).toBeInstanceOf(Deck)
-    expect(deck.getGameType()).toBe(GAMETYPE.Blackjack)
-    expect(deck.getRankStrategy()).toStrictEqual(
-      getRankStrategy(GAMETYPE.Blackjack)
-    )
-    expect(GAMESWITHJOKER.includes(deck.getGameType())).toBeFalsy()
+    expect(deck.gameType).toBe(GAMETYPE.Blackjack)
+    expect(deck.rankStrategy).toStrictEqual(getRankStrategy(GAMETYPE.Blackjack))
+    expect(GAMESWITHJOKER.includes(deck.gameType)).toBeFalsy()
   })
   it('should create a Speed-Deck instance with correct properties', () => {
     const deck: Deck = new Deck(GAMETYPE.Speed)
 
     expect(deck).toBeInstanceOf(Deck)
-    expect(deck.getGameType()).toBe(GAMETYPE.Speed)
-    expect(deck.getRankStrategy()).toStrictEqual(
-      getRankStrategy(GAMETYPE.Speed)
-    )
-    expect(GAMESWITHJOKER.includes(deck.getGameType())).toBeTruthy()
+    expect(deck.gameType).toBe(GAMETYPE.Speed)
+    expect(deck.rankStrategy).toStrictEqual(getRankStrategy(GAMETYPE.Speed))
+    expect(GAMESWITHJOKER.includes(deck.gameType)).toBeTruthy()
   })
 })
 

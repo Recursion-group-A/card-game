@@ -1,5 +1,5 @@
-import { Suit } from '@/types/suits'
-import { Rank } from '@/types/ranks'
+import { Suit } from '@/types/common/suits'
+import { Rank } from '@/types/common/ranks'
 
 export const SUITS: Suit[] = ['H', 'D', 'C', 'S']
 export const SUITSFORIMAGE: string[] = ['hearts', 'diamonds', 'clubs', 'spades']
