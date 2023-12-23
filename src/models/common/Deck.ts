@@ -1,51 +1,36 @@
 import Card from '@/models/common/Card'
+import { Suit } from '@/types/common/suits'
+import { Rank } from '@/types/common/ranks'
 import { SUITS, RANKS } from '@/constants/cards'
-import { GAMETYPE, GAMESWITHJOKER } from '@/types/gameTypes'
+import { GAMETYPE, GAMESWITHJOKER } from '@/types/common/gameTypes'
 import { RankStrategy } from '@/models/common/RankStrategy'
 import { getRankStrategy } from '@/utils/utils'
 
 export default class Deck {
-  private readonly gameType: GAMETYPE
+  private readonly _gameType: GAMETYPE
 
-  private readonly rankStrategy: RankStrategy
+  private readonly _rankStrategy: RankStrategy
 
-  private deck: Card[]
+  private _deck: Card[]
 
   constructor(gameType: GAMETYPE) {
-    this.gameType = gameType
-    this.rankStrategy = getRankStrategy(gameType)
-    this.deck = this.generateDeck(GAMESWITHJOKER.includes(this.gameType))
+    this._gameType = gameType
+    this._rankStrategy = getRankStrategy(gameType)
+    this._deck = this.generateDeck(GAMESWITHJOKER.includes(gameType))
   }
 
-  public getGameType(): GAMETYPE {
-    return this.gameType
-  }
-
-  public getRankStrategy(): RankStrategy {
-    return this.rankStrategy
-  }
-
-  public getDeckSize(): number {
-    return this.deck.length
-  }
-
-  public getCardAt(index: number): Card {
-    return this.deck[index]
-  }
-
-  // デッキ作成 ジョーカー追加
   public generateDeck(addJoker: boolean = false): Card[] {
     const newDeck: Card[] = []
 
-    SUITS.forEach((suit) => {
-      RANKS.forEach((rank) => {
-        newDeck.push(new Card(suit, rank, this.rankStrategy))
+    SUITS.forEach((suit: Suit) => {
+      RANKS.forEach((rank: Rank) => {
+        newDeck.push(new Card(suit, rank, this._rankStrategy))
       })
     })
 
     if (addJoker) {
-      newDeck.push(Card.createJoker(this.rankStrategy))
-      newDeck.push(Card.createJoker(this.rankStrategy))
+      newDeck.push(Card.createJoker(this._rankStrategy))
+      newDeck.push(Card.createJoker(this._rankStrategy))
     }
     return newDeck
   }
@@ -54,19 +39,35 @@ export default class Deck {
     this.performShuffle()
   }
 
-  private performShuffle(): void {
-    for (let i = this.deck.length - 1; i >= 0; i -= 1) {
-      const j: number = Math.floor(Math.random() * (i + 1))
-      ;[this.deck[i], this.deck[j]] = [this.deck[j], this.deck[i]]
-    }
-  }
-
   public resetDeck(): void {
-    this.deck = this.generateDeck(GAMESWITHJOKER.includes(this.gameType))
+    this._deck = this.generateDeck(GAMESWITHJOKER.includes(this._gameType))
     this.shuffle()
   }
 
   public drawOne(): Card | undefined {
-    return this.deck.shift()
+    return this._deck.shift()
+  }
+
+  public getDeckSize(): number {
+    return this._deck.length
+  }
+
+  public getCardAt(index: number): Card {
+    return this._deck[index]
+  }
+
+  private performShuffle(): void {
+    for (let i: number = this._deck.length - 1; i >= 0; i -= 1) {
+      const j: number = Math.floor(Math.random() * (i + 1))
+      ;[this._deck[i], this._deck[j]] = [this._deck[j], this._deck[i]]
+    }
+  }
+
+  get gameType(): GAMETYPE {
+    return this._gameType
+  }
+
+  get rankStrategy(): RankStrategy {
+    return this._rankStrategy
   }
 }
