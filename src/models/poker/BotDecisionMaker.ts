@@ -1,10 +1,10 @@
 import Card from '@/models/common/Card'
 import Hand from '@/models/common/Hand'
-import Player from '@/models/poker/Player'
-import Table from '@/models/poker/Table'
-import PokerRound from '@/models/poker/rounds'
-import PokerHand from '@/models/poker/PokerHand'
-import PokerAction from '@/models/poker/PokerAction'
+import PokerPlayer from '@/models/poker/PokerPlayer'
+import PokerTable from '@/models/poker/PokerTable'
+import PokerRound from '@/types/poker/PokerRound'
+import PokerHand from '@/types/poker/PokerHand'
+import PokerAction from '@/types/poker/PokerAction'
 import PokerHandEvaluator from '@/models/poker/PokerHandEvaluator'
 
 export default class BotDecisionMaker {
@@ -12,23 +12,23 @@ export default class BotDecisionMaker {
 
   private readonly GOOD_CARD_RANK = 7
 
-  private readonly _table: Table
+  private readonly _table: PokerTable
 
-  constructor(table: Table) {
+  constructor(table: PokerTable) {
     this._table = table
   }
 
-  public determineAIAction(player: Player): PokerAction {
-    if (player.isLastActionRaise()) {
+  public determineAIAction(player: PokerPlayer): PokerAction {
+    if (player.lastAction === PokerAction.RAISE) {
       return PokerAction.CALL
     }
 
     const handRank: PokerHand = PokerHandEvaluator.evaluateHand(
       player.hand.cards,
-      this._table.communityCards.cards
+      this.table.communityCards.cards
     )
 
-    switch (this._table.round) {
+    switch (this.table.round) {
       case PokerRound.PreFlop:
         return this.decidePreFlopAction(player, handRank)
       case PokerRound.Flop:
@@ -42,7 +42,10 @@ export default class BotDecisionMaker {
     }
   }
 
-  private decidePreFlopAction(player: Player, rank: PokerHand): PokerAction {
+  private decidePreFlopAction(
+    player: PokerPlayer,
+    rank: PokerHand
+  ): PokerAction {
     if (rank >= PokerHand.OnePair) {
       return this.decideActionForOnePair(player.hand)
     }
@@ -50,7 +53,7 @@ export default class BotDecisionMaker {
   }
 
   private decideFlopAction(rank: PokerHand): PokerAction {
-    const someoneRaised: boolean = this._table.anyoneRaisedThisRound()
+    const someoneRaised: boolean = this.table.anyoneRaisedThisRound()
 
     if (rank >= PokerHand.ThreeOfAKind && !someoneRaised) {
       return PokerAction.RAISE
@@ -62,7 +65,7 @@ export default class BotDecisionMaker {
   }
 
   private decideTurnAction(rank: PokerHand): PokerAction {
-    const someoneRaised: boolean = this._table.anyoneRaisedThisRound()
+    const someoneRaised: boolean = this.table.anyoneRaisedThisRound()
 
     if (rank >= PokerHand.Straight && !someoneRaised) {
       return PokerAction.RAISE
@@ -74,7 +77,7 @@ export default class BotDecisionMaker {
   }
 
   private decideRiverAction(rank: PokerHand): PokerAction {
-    const someoneRaised: boolean = this._table.anyoneRaisedThisRound()
+    const someoneRaised: boolean = this.table.anyoneRaisedThisRound()
 
     if (rank >= PokerHand.Flush && !someoneRaised) {
       return PokerAction.RAISE
@@ -86,10 +89,7 @@ export default class BotDecisionMaker {
   }
 
   private decideActionForOnePair(hand: Hand): PokerAction {
-    if (
-      this.allCardsAboveEleven(hand) &&
-      !this._table.anyoneRaisedThisRound()
-    ) {
+    if (this.allCardsAboveEleven(hand) && !this.table.anyoneRaisedThisRound()) {
       return PokerAction.RAISE
     }
     return PokerAction.CALL
@@ -106,5 +106,9 @@ export default class BotDecisionMaker {
     return hand.cards.every(
       (card: Card) => card.getRankNumber() >= this.HIGH_CARD_RANK
     )
+  }
+
+  get table(): PokerTable {
+    return this._table as PokerTable
   }
 }

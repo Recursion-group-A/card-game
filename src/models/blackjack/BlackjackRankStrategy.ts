@@ -1,4 +1,4 @@
-import { Rank } from '@/types/ranks'
+import { Rank } from '@/types/common/ranks'
 import { RankStrategy } from '@/models/common/RankStrategy'
 import rankValues from '@/models/blackjack/rankValues'
 
@@ -9,7 +9,6 @@ export default class BlackjackRankStrategy implements RankStrategy {
     if (value === undefined) {
       throw new Error(`Invalid rank: ${rank}`)
     }
-
     return value
   }
 }

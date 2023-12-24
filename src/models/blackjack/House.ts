@@ -1,24 +1,16 @@
-import Card from '@/models/blackjack/Card'
-import Hand from '@/models/blackjack/Hand'
-import Deck from '@/models/blackjack/Deck'
-import HOUSE_STATES from '@/constants/houseStates'
+import Card from '@/models/common/Card'
+import Deck from '@/models/common/Deck'
+import Hand from '@/models/blackjack/BlackjackHand'
+import HOUSE_STATUS from '@/types/blackjack/houseStatus'
 
 export default class House {
-  private hand: Hand
+  private _hand: Hand
 
-  private states: string
+  private _status: string
 
   constructor() {
-    this.hand = new Hand()
-    this.states = HOUSE_STATES.WAIT
-  }
-
-  public initializeHand(): void {
-    this.hand.cleanHand()
-  }
-
-  public initializeStates(): void {
-    this.states = HOUSE_STATES.WAIT
+    this._hand = new Hand()
+    this._status = HOUSE_STATUS.Wait
   }
 
   public prepareForNextRound(): void {
@@ -26,43 +18,28 @@ export default class House {
     this.initializeStates()
   }
 
+  private initializeHand(): void {
+    this._hand.resetHand()
+  }
+
+  private initializeStates(): void {
+    this._status = HOUSE_STATUS.Wait
+  }
+
   public getHandTotalScore(): number {
-    return this.hand.getHandTotalScore()
+    return this._hand.calculateBlackjackTotal()
   }
 
   // TODO: START Playerクラスと共通する処理 → 後で抽象クラス Participant クラスを作る
   public addCard(card: Card): void {
-    this.hand.addOne(card)
-  }
-
-  public changeStates(states: string): void {
-    this.states = states
-  }
-  // TODO: END Playerクラスと共通する処理
-
-  // House 特有のアクション
-  // public revealHand(): void {
-  //     TODO: 伏せたカードを表向きにするアクション
-  // }
-
-  public setToStand(): void {
-    this.changeStates(HOUSE_STATES.STAND)
-  }
-
-  public setToBust(): void {
-    this.changeStates(HOUSE_STATES.BUST)
-  }
-
-  public setToBlackjack(): void {
-    this.changeStates(HOUSE_STATES.BLACKJACK)
-  }
-
-  public isBlackjack(): boolean {
-    return this.hand.isBlackjack()
+    this._hand.addOne(card)
   }
 
   public drawUntilSeventeen(deck: Deck): void {
-    if (this.getHandTotalScore() === 21) this.setToBlackjack()
+    if (this.getHandTotalScore() === 21) {
+      this._status = HOUSE_STATUS.Blackjack
+      return
+    }
 
     while (this.getHandTotalScore() < 17) {
       const card: Card | undefined = deck.drawOne()
@@ -72,12 +49,13 @@ export default class House {
       }
 
       this.addCard(card)
+      const totalScore: number = this.getHandTotalScore()
 
-      if (this.getHandTotalScore() > 21) {
-        this.setToBust()
+      if (totalScore > 21) {
+        this._status = HOUSE_STATUS.Bust
         break
-      } else if (this.getHandTotalScore() >= 17) {
-        this.setToStand()
+      } else if (totalScore >= 17) {
+        this._status = HOUSE_STATUS.Stand
         break
       }
     }

@@ -1,5 +1,5 @@
-import { Suit } from '@/types/suits'
-import { Rank } from '@/types/ranks'
+import { Suit } from '@/types/common/suits'
+import { Rank } from '@/types/common/ranks'
 import { RankStrategy } from '@/models/common/RankStrategy'
 
 export default class Card {
@@ -9,13 +9,10 @@ export default class Card {
 
   private readonly _rankStrategy: RankStrategy
 
-  private _isFaceDown: boolean
-
   constructor(suit: Suit | undefined, rank: Rank, rankStrategy: RankStrategy) {
     this._suit = suit
     this._rank = rank
     this._rankStrategy = rankStrategy
-    this._isFaceDown = true
   }
 
   /**
@@ -27,22 +24,6 @@ export default class Card {
    */
   public static createJoker(rankStrategy: RankStrategy): Card {
     return new Card(undefined, 'Joker', rankStrategy)
-  }
-
-  get suit(): Suit | undefined {
-    return this._suit
-  }
-
-  get rank(): Rank {
-    return this._rank
-  }
-
-  get isFaceDown(): boolean {
-    return this._isFaceDown
-  }
-
-  set isFaceDown(bool: boolean) {
-    this._isFaceDown = bool
   }
 
   /**
@@ -74,5 +55,13 @@ export default class Card {
       : `0${this.rank.toString()}`
 
     return `${suitName}_${rankName}`
+  }
+
+  get suit(): Suit | undefined {
+    return this._suit
+  }
+
+  get rank(): Rank {
+    return this._rank
   }
 }

@@ -1,8 +1,8 @@
 import Phaser from 'phaser'
 import HomeScene from '@/phaser/common/HomeScene'
 import PreloadScene from '@/phaser/common/PreloadScene'
-import PokerScene from '@/phaser/poker/PokerScene'
 import BlackjackScene from '@/phaser/blackjack/BlackjackScene'
+import PokerScene from '@/phaser/poker/PokerScene'
 
 const gameConfig: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -26,7 +26,7 @@ const gameConfig: Phaser.Types.Core.GameConfig = {
       debug: true
     }
   },
-  scene: [HomeScene, PreloadScene, PokerScene, BlackjackScene]
+  scene: [HomeScene, PreloadScene, BlackjackScene, PokerScene]
 }
 
 export default gameConfig
