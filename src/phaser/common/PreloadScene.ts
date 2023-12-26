@@ -1,4 +1,4 @@
-import Phaser from 'phaser'
+import * as Phaser from 'phaser'
 import { SUITS_FOR_IMAGE } from '@/constants/cards/suits.constants'
 import { RANKS_FOR_IMAGE } from '@/constants/cards/ranks.constants'
 
