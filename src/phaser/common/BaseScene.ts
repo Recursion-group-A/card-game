@@ -1,4 +1,4 @@
-import Phaser from 'phaser'
+import * as Phaser from 'phaser'
 
 export default class BaseScene extends Phaser.Scene {
   protected _sceneWidth: number | undefined

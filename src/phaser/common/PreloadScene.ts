@@ -1,4 +1,4 @@
-import Phaser from 'phaser'
+import * as Phaser from 'phaser'
 import { SUITSFORIMAGE, RANKSFORIMAGE } from '@/constants/cards'
 
 export default class PreloadScene extends Phaser.Scene {

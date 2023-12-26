@@ -1,4 +1,4 @@
-import Phaser from 'phaser'
+import * as Phaser from 'phaser'
 import HomeScene from '@/phaser/common/HomeScene'
 import PreloadScene from '@/phaser/common/PreloadScene'
 import BlackjackScene from '@/phaser/blackjack/BlackjackScene'

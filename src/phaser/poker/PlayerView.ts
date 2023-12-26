@@ -1,4 +1,4 @@
-import Phaser from 'phaser'
+import * as Phaser from 'phaser'
 import Card from '@/models/common/Card'
 import CardView from '@/phaser/common/CardView'
 import PokerPlayer from '@/models/poker/PokerPlayer'
