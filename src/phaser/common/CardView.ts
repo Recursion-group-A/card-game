@@ -1,4 +1,4 @@
-import Phaser from 'phaser'
+import * as Phaser from 'phaser'
 import Card from '@/models/common/Card'
 
 export default class CardView extends Phaser.GameObjects.Image {

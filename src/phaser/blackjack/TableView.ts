@@ -1,4 +1,4 @@
-import Phaser from 'phaser'
+import * as Phaser from 'phaser'
 import Table from '@/models/blackjack/BlackjackTable'
 import Player from '@/models/blackjack/BlackjackPlayer'
 import PlayerView from '@/phaser/blackjack/PlayerView'

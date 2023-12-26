@@ -1,4 +1,4 @@
-import Phaser from 'phaser'
+import * as Phaser from 'phaser'
 
 export default class DeckView extends Phaser.GameObjects.Container {
   private readonly numOfCards: number = 8

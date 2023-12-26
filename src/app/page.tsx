@@ -1,19 +1,11 @@
-'use client'
+import dynamic from 'next/dynamic'
+import React from 'react'
 
-import Phaser from 'phaser'
-import React, { useEffect } from 'react'
-import gameConfig from '@/phaser/common/config'
+const PhaserComponentWithNoSSR = dynamic(
+  () => import('@/components/PhaserComponent'),
+  { ssr: false }
+)
 
-export default function PhaserComponent() {
-  useEffect(() => {
-    ;(async () => {
-      const game: Phaser.Game = new Phaser.Game(gameConfig)
-
-      return (): void => {
-        game.destroy(true)
-      }
-    })()
-  }, [])
-
-  return <div id="phaser-game" />
+export default function Page() {
+  return <PhaserComponentWithNoSSR />
 }
