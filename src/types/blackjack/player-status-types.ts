@@ -1,11 +1,11 @@
 export enum PlayerStatus {
-  Broken = 'Broken',
-  Wait = 'Wait',
-  Stand = 'Stand',
-  DoubleDown = 'Double',
-  Surrender = 'Surrender',
-  Bust = 'Bust',
-  Blackjack = 'Blackjack'
+  Broken = 'broken',
+  Wait = 'wait',
+  Stand = 'stand',
+  DoubleDown = 'double',
+  Surrender = 'surrender',
+  Bust = 'bust',
+  Blackjack = 'blackjack'
 }
 
 // 完了したアクションの状態を配列で定義

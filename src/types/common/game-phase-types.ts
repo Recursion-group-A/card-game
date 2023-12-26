@@ -1,4 +1,4 @@
-export enum GAMEPHASE {
+export enum GamePhases {
   Betting = 'betting',
   Acting = 'acting',
   Evaluating = 'evaluating',
@@ -6,4 +6,4 @@ export enum GAMEPHASE {
   Preparation = 'preparation'
 }
 
-export default GAMEPHASE
+export default GamePhases

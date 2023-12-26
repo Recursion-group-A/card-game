@@ -1,10 +1,10 @@
-import { GAMETYPE } from '@/types/common/gameTypes'
+import { GameTypes } from '@/types/common/game-types'
 import { RankStrategy } from '@/models/common/RankStrategy'
 import BlackjackRankStrategy from '@/models/blackjack/BlackjackRankStrategy'
 import PokerRankStrategy from '@/models/poker/PokerRankStrategy'
 
-export function getRankStrategy(gameType: GAMETYPE): RankStrategy {
-  return gameType === GAMETYPE.Blackjack
+export function getRankStrategy(gameType: GameTypes): RankStrategy {
+  return gameType === GameTypes.Blackjack
     ? new BlackjackRankStrategy()
     : new PokerRankStrategy()
 }

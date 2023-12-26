@@ -1,7 +1,8 @@
 import BaseScene from '@/phaser/common/BaseScene'
 import BlackjackTable from '@/models/blackjack/BlackjackTable'
 import TableView from '@/phaser/blackjack/TableView'
-import { GAMETYPE } from '@/types/common/gameTypes'
+import { GameTypes } from '@/types/common/game-types'
+import BaseScene from '@/phaser/common/BaseScene'
 
 // PreloadSceneのコードを書き換えることでブラックジャックにできる
 
@@ -13,7 +14,7 @@ export default class BlackjackScene extends BaseScene {
   constructor() {
     super('BlackjackScene')
 
-    this._tableModel = new BlackjackTable(GAMETYPE.Blackjack)
+    this._tableModel = new BlackjackTable(GameTypes.Blackjack)
   }
 
   public create(): void {

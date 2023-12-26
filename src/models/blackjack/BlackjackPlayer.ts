@@ -2,15 +2,15 @@ import Card from '@/models/common/Card'
 import Deck from '@/models/common/Deck'
 import Player from '@/models/common/Player'
 import BlackjackHand from '@/models/blackjack/BlackjackHand'
-import PLAYERTYPE from '@/types/common/playerTypes'
-import { PlayerStatus } from '@/types/blackjack/playerStates'
+import PlayerTypes from '@/types/common/player-types'
+import { PlayerStatus } from '@/types/blackjack/player-status-types'
 
 export default class BlackjackPlayer extends Player<BlackjackHand> {
   private _currentTurn: number
 
   private _status: PlayerStatus
 
-  constructor(playerType: PLAYERTYPE, playerName: string) {
+  constructor(playerType: PlayerTypes, playerName: string) {
     super(playerType, playerName)
 
     this._hand = this.generateHand()

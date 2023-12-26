@@ -5,11 +5,11 @@ import PokerTable from '@/models/poker/PokerTable'
 import TableView from '@/phaser/poker/TableView'
 import BotDecisionMaker from '@/models/poker/BotDecisionMaker'
 import PokerHandEvaluator from '@/models/poker/PokerHandEvaluator'
-import PokerHand from '@/types/poker/PokerHand'
-import PokerRound from '@/types/poker/PokerRound'
-import PokerAction from '@/types/poker/PokerAction'
-import PLAYERTYPES from '@/types/common/playerTypes'
-import { GAMETYPE } from '@/types/common/gameTypes'
+import PokerHand from '@/types/poker/hand-types'
+import PokerRound from '@/types/poker/round-types'
+import PokerActions from '@/types/poker/action-types'
+import PlayerTypes from '@/types/common/player-types'
+import { GameTypes } from '@/types/common/game-types'
 import { delay } from '@/utils/utils'
 
 export default class PokerScene extends BaseScene {
@@ -30,7 +30,7 @@ export default class PokerScene extends BaseScene {
   constructor() {
     super('PokerScene')
 
-    this._tableModel = new PokerTable(GAMETYPE.Poker)
+    this._tableModel = new PokerTable(GameTypes.Poker)
     this._decisionMaker = new BotDecisionMaker(this._tableModel)
     this._isGameActive = true
     this._isWalk = false
@@ -162,7 +162,7 @@ export default class PokerScene extends BaseScene {
           break
         }
 
-        if (currentPlayer.playerModel.lastAction === PokerAction.RAISE) {
+        if (currentPlayer.playerModel.lastAction === PokerActions.Raise) {
           actionCompleted = 0
         }
       }
@@ -184,30 +184,30 @@ export default class PokerScene extends BaseScene {
   private async processPlayerAction(playerView: PlayerView): Promise<void> {
     await delay(PokerScene.DELAY_TIME / 2)
 
-    if (playerView.playerModel.playerType === PLAYERTYPES.PLAYER) {
+    if (playerView.playerModel.playerType === PlayerTypes.Player) {
       const tableView = this._tableView
       if (tableView) {
         tableView.displayActionButtons(playerView)
-        const action: PokerAction | undefined = await tableView.getUserAction()
+        const action: PokerActions | undefined = await tableView.getUserAction()
         if (action) {
           this.handleAction(playerView, action)
         }
       }
     } else {
-      let action: PokerAction = this._decisionMaker.determineAIAction(
+      let action: PokerActions = this._decisionMaker.determineAIAction(
         playerView.playerModel
       )
       if (
-        action === PokerAction.CALL &&
+        action === PokerActions.Call &&
         this._tableModel.currentMaxBet === playerView.playerModel.bet
       ) {
-        action = PokerAction.CHECK
+        action = PokerActions.Check
       }
       this.handleAction(playerView, action)
     }
   }
 
-  private handleAction(player: PlayerView, action: PokerAction): void {
+  private handleAction(player: PlayerView, action: PokerActions): void {
     this._tableModel.handleAction(player.playerModel, action)
     this._tableView?.executeActionEffect(player, action)
     this._tableView?.setVisibleActionButtons(false)

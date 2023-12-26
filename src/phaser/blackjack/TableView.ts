@@ -5,8 +5,8 @@ import PlayerView from '@/phaser/blackjack/PlayerView'
 import DeckView from '@/phaser/common/DeckView'
 import Deck from '@/models/common/Deck'
 import Card from '@/models/common/Card'
-import PLAYERTYPES from '@/types/common/playerTypes'
-import { PlayerStatus } from '@/types/blackjack/playerStates'
+import PlayerTypes from '@/types/common/player-types'
+import { PlayerStatus } from '@/types/blackjack/player-status-types'
 
 export default class TableView extends Phaser.GameObjects.Container {
   private readonly _tableModel: Table
@@ -57,7 +57,7 @@ export default class TableView extends Phaser.GameObjects.Container {
     // this._tableModel.initializePlayers()
     this._playerModels = this._tableModel.players
     this._playerModels.forEach((player: Player, index: number) => {
-      if (player.playerType === PLAYERTYPES.AI) {
+      if (player.playerType === PlayerTypes.Ai) {
         player.decideAiPlayerBetAmount()
       }
       const playerView = new PlayerView(this.scene, player, playersPos[index])
@@ -149,7 +149,7 @@ export default class TableView extends Phaser.GameObjects.Container {
 
   public aiPlayerProcess(): void {
     this._playerModels.forEach((playerModel: Player, index: number) => {
-      if (playerModel.playerType === PLAYERTYPES.AI) {
+      if (playerModel.playerType === PlayerTypes.Ai) {
         while (playerModel.getHandTotalScore() < 17) {
           this.addCard(index)
           playerModel.incrementCurrentTurn()

@@ -1,22 +1,22 @@
 import Hand from '@/models/common/Hand'
 import Player from '@/models/common/Player'
-import PokerHand from '@/types/poker/PokerHand'
-import PLAYERTYPES from '@/types/common/playerTypes'
-import PokerAction from '@/types/poker/PokerAction'
+import PokerHand from '@/types/poker/hand-types'
+import PlayerTypes from '@/types/common/player-types'
+import PokerActions from '@/types/poker/action-types'
 
 export default class PokerPlayer extends Player<Hand> {
   private _isActive: boolean
 
-  private _lastAction: PokerAction
+  private _lastAction: PokerActions
 
   private _bestHand: PokerHand | undefined
 
-  constructor(playerType: PLAYERTYPES, playerName: string) {
+  constructor(playerType: PlayerTypes, playerName: string) {
     super(playerType, playerName)
 
     this.generateHand()
     this._isActive = true
-    this._lastAction = PokerAction.NO_ACTION
+    this._lastAction = PokerActions.NoAction
   }
 
   // eslint-disable-next-line
@@ -32,11 +32,11 @@ export default class PokerPlayer extends Player<Hand> {
     this._isActive = bool
   }
 
-  get lastAction(): PokerAction {
+  get lastAction(): PokerActions {
     return this._lastAction
   }
 
-  set lastAction(action: PokerAction) {
+  set lastAction(action: PokerActions) {
     this._lastAction = action
   }
 

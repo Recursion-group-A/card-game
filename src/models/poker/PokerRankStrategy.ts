@@ -1,4 +1,4 @@
-import { Rank } from '@/types/common/ranks'
+import { Rank } from '@/types/common/rank-types'
 import { RankStrategy } from '@/models/common/RankStrategy'
 import rankValues from '@/models/poker/rankValues'
 

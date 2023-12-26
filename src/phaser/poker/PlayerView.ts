@@ -2,9 +2,9 @@ import * as Phaser from 'phaser'
 import Card from '@/models/common/Card'
 import CardView from '@/phaser/common/CardView'
 import PokerPlayer from '@/models/poker/PokerPlayer'
-import PokerHand from '@/types/poker/PokerHand'
-import PokerAction from '@/types/poker/PokerAction'
-import PLAYERTYPES from '@/types/common/playerTypes'
+import PokerHand from '@/types/poker/hand-types'
+import PokerActions from '@/types/poker/action-types'
+import PlayerTypes from '@/types/common/player-types'
 
 export default class PlayerView extends Phaser.GameObjects.Container {
   private readonly _playerModel: PokerPlayer
@@ -82,7 +82,7 @@ export default class PlayerView extends Phaser.GameObjects.Container {
     this._handCardViews.removeAll(true)
   }
 
-  public displayActionText(action: PokerAction): void {
+  public displayActionText(action: PokerActions): void {
     this.destroyActionText()
 
     const [x, y] = this.getActionTextPosition(action)
@@ -93,7 +93,7 @@ export default class PlayerView extends Phaser.GameObjects.Container {
     this.setActionTextColor(action)
     this.add(this._actionText)
 
-    if (action !== PokerAction.FOLD) {
+    if (action !== PokerActions.Fold) {
       this.scene.time.delayedCall(1000, () => {
         this.destroyActionText()
       })
@@ -138,7 +138,7 @@ export default class PlayerView extends Phaser.GameObjects.Container {
 
   private createPlayerNameText(): Phaser.GameObjects.Text {
     this._playerNameText = this.scene.add.text(
-      this._playerModel.playerType === PLAYERTYPES.PLAYER ? 44 : 40,
+      this._playerModel.playerType === PlayerTypes.Player ? 44 : 40,
       0,
       `${this._playerModel.playerName.toUpperCase()}`
     )
@@ -208,20 +208,20 @@ export default class PlayerView extends Phaser.GameObjects.Container {
   }
 
   // eslint-disable-next-line
-  private getActionTextPosition(action: PokerAction): [number, number] {
+  private getActionTextPosition(action: PokerActions): [number, number] {
     const x: number =
-      action === PokerAction.CHECK || action === PokerAction.RAISE ? 28 : 35
-    const y: number = action === PokerAction.FOLD ? 45 : -35
+      action === PokerActions.Check || action === PokerActions.Raise ? 28 : 35
+    const y: number = action === PokerActions.Fold ? 45 : -35
     return [x, y]
   }
 
-  private setActionTextColor(action: PokerAction): void {
+  private setActionTextColor(action: PokerActions): void {
     const colorMap = {
-      [PokerAction.FOLD]: '#ff8c00',
-      [PokerAction.CALL]: '#ffd700',
-      [PokerAction.RAISE]: '#ee82ee',
-      [PokerAction.CHECK]: '#aaf0d1',
-      [PokerAction.NO_ACTION]: '#ffffff'
+      [PokerActions.Fold]: '#ff8c00',
+      [PokerActions.Call]: '#ffd700',
+      [PokerActions.Raise]: '#ee82ee',
+      [PokerActions.Check]: '#aaf0d1',
+      [PokerActions.NoAction]: '#ffffff'
     }
     this._actionText?.setColor(colorMap[action])
   }

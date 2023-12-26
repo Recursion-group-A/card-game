@@ -2,10 +2,10 @@ import Pot from '@/models/poker/Pot'
 import Hand from '@/models/common/Hand'
 import PokerPlayer from '@/models/poker/PokerPlayer'
 import Table from '@/models/common/Table'
-import PokerRound from '@/types/poker/PokerRound'
-import PokerAction from '@/types/poker/PokerAction'
-import PLAYERTYPES from '@/types/common/playerTypes'
-import { GAMETYPE } from '@/types/common/gameTypes'
+import PokerRound from '@/types/poker/round-types'
+import PokerActions from '@/types/poker/action-types'
+import PlayerTypes from '@/types/common/player-types'
+import { GameTypes } from '@/types/common/game-types'
 
 export default class PokerTable extends Table<PokerPlayer, Hand> {
   private readonly _pot: Pot
@@ -32,7 +32,7 @@ export default class PokerTable extends Table<PokerPlayer, Hand> {
 
   private _isFirstGame: boolean
 
-  constructor(gameType: GAMETYPE) {
+  constructor(gameType: GameTypes) {
     super(gameType, 6)
 
     this._players = this.generatePlayers(6)
@@ -66,21 +66,21 @@ export default class PokerTable extends Table<PokerPlayer, Hand> {
     this._pot.addPot(amount)
   }
 
-  public handleAction(player: PokerPlayer, action: PokerAction): void {
+  public handleAction(player: PokerPlayer, action: PokerActions): void {
     player.lastAction = action // eslint-disable-line
 
     switch (action) {
-      case PokerAction.FOLD:
+      case PokerActions.Fold:
         player.isActive = false // eslint-disable-line
         break
-      case PokerAction.CALL:
+      case PokerActions.Call:
         {
           const amountToCall: number = this.currentMaxBet - player.bet
           player.placeBet(amountToCall)
           this.pot.addPot(amountToCall)
         }
         break
-      case PokerAction.RAISE:
+      case PokerActions.Raise:
         {
           const amountToRaise: number = this.getRaiseAmount()
           const totalBet: number = amountToRaise + player.bet
@@ -89,7 +89,7 @@ export default class PokerTable extends Table<PokerPlayer, Hand> {
           this.currentMaxBet = totalBet
         }
         break
-      case PokerAction.CHECK:
+      case PokerActions.Check:
         break
       default:
         throw new Error(`Unknown action: ${action}`)
@@ -99,7 +99,7 @@ export default class PokerTable extends Table<PokerPlayer, Hand> {
   public anyoneRaisedThisRound(): boolean {
     return this.players.some(
       (player: PokerPlayer) =>
-        player.isActive && player.lastAction === PokerAction.RAISE
+        player.isActive && player.lastAction === PokerActions.Raise
     )
   }
 
@@ -128,9 +128,9 @@ export default class PokerTable extends Table<PokerPlayer, Hand> {
     for (let i: number = 0; i < numOfPlayers; i += 1) {
       const index: number = i > 2 ? i : i + 1
       if (i === 2) {
-        players.push(new PokerPlayer(PLAYERTYPES.PLAYER, 'you'))
+        players.push(new PokerPlayer(PlayerTypes.Player, 'you'))
       } else {
-        players.push(new PokerPlayer(PLAYERTYPES.AI, `bot${index}`))
+        players.push(new PokerPlayer(PlayerTypes.Ai, `bot${index}`))
       }
     }
     return players
@@ -161,7 +161,7 @@ export default class PokerTable extends Table<PokerPlayer, Hand> {
 
   private resetPlayersLastAction(): void {
     this.players.forEach((player: PokerPlayer) => {
-      player.lastAction = PokerAction.NO_ACTION // eslint-disable-line
+      player.lastAction = PokerActions.NoAction // eslint-disable-line
     })
   }
 

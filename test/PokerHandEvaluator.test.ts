@@ -1,7 +1,7 @@
-import PokerHandEvaluator from '@/models/poker/PokerHandEvaluator'
-import PokerRankStrategy from '@/models/poker/PokerRankStrategy'
-import { RankStrategy } from '@/models/common/RankStrategy'
 import Card from '@/models/common/Card'
+import PokerRankStrategy from '@/models/poker/PokerRankStrategy'
+import PokerHandEvaluator from '@/models/poker/PokerHandEvaluator'
+import { RankStrategy } from '@/models/common/RankStrategy'
 
 const mockRankStrategy: RankStrategy = new PokerRankStrategy()
 
