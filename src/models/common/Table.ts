@@ -2,14 +2,14 @@ import Card from '@/models/common/Card'
 import Deck from '@/models/common/Deck'
 import Hand from '@/models/common/Hand'
 import Player from '@/models/common/Player'
-import { GAMETYPE } from '@/types/common/gameTypes'
+import { GameTypes } from '@/types/common/game-types'
 
 export default abstract class Table<T extends Player<H>, H extends Hand> {
   protected readonly _deck: Deck
 
   protected _players: T[]
 
-  protected constructor(gameType: GAMETYPE, numOfPlayers: number) {
+  protected constructor(gameType: GameTypes, numOfPlayers: number) {
     this._deck = new Deck(gameType)
     this._players = this.generatePlayers(numOfPlayers)
 

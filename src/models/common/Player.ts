@@ -1,9 +1,9 @@
 import Card from '@/models/common/Card'
 import Hand from '@/models/common/Hand'
-import PLAYERTYPE from '@/types/common/playerTypes'
+import PlayerTypes from '@/types/common/player-types'
 
 export default abstract class Player<H extends Hand> {
-  protected readonly _playerType: PLAYERTYPE
+  protected readonly _playerType: PlayerTypes
 
   protected readonly _playerName: string
 
@@ -13,7 +13,7 @@ export default abstract class Player<H extends Hand> {
 
   protected _bet: number
 
-  protected constructor(playerType: PLAYERTYPE, playerName: string) {
+  protected constructor(playerType: PlayerTypes, playerName: string) {
     this._playerType = playerType
     this._playerName = playerName
     this._hand = this.generateHand()
@@ -68,7 +68,7 @@ export default abstract class Player<H extends Hand> {
 
   protected abstract generateHand(): H
 
-  get playerType(): PLAYERTYPE {
+  get playerType(): PlayerTypes {
     return this._playerType
   }
 

@@ -3,9 +3,9 @@ import House from '@/models/blackjack/House'
 import BlackjackPlayer from '@/models/blackjack/BlackjackPlayer'
 import Table from '@/models/common/Table'
 import BlackjackHand from '@/models/blackjack/BlackjackHand'
-import PLAYERTYPE from '@/types/common/playerTypes'
-import { GAMEPHASE } from '@/types/common/gamePhases'
-import { GAMETYPE } from '@/types/common/gameTypes'
+import PLAYERTYPE from '@/types/common/player-types'
+import { GamePhases } from '@/types/common/game-phase-types'
+import { GameTypes } from '@/types/common/game-types'
 
 export default class BlackjackTable extends Table<
   BlackjackPlayer,
@@ -15,17 +15,17 @@ export default class BlackjackTable extends Table<
 
   private readonly _betDenominations: number[]
 
-  private _gamePhase: GAMEPHASE
+  private _gamePhase: GamePhases
 
   private _round: number
 
-  constructor(gameType: GAMETYPE) {
+  constructor(gameType: GameTypes) {
     super(gameType, 6)
 
     this._players = this.generatePlayers(6)
     this._house = new House()
     this._betDenominations = [5, 20, 50, 100]
-    this._gamePhase = GAMEPHASE.Betting
+    this._gamePhase = GamePhases.Betting
     this._round = 1
   }
 
@@ -55,14 +55,14 @@ export default class BlackjackTable extends Table<
   }
 
   public prepareForNextRound(): void {
-    this.gamePhase = GAMEPHASE.Preparation
+    this.gamePhase = GamePhases.Preparation
     this.initializeDeck()
     this.incrementRound()
     // this.preparePlayersForNextRound()
     this.prepareHouseForNextRound()
     this.initializeParticipantsHand()
     this.decideAiPlayersBetAmount()
-    this.gamePhase = GAMEPHASE.Betting
+    this.gamePhase = GamePhases.Betting
   }
 
   public incrementRound(): void {
@@ -117,7 +117,7 @@ export default class BlackjackTable extends Table<
   }
 
   public startGame(): void {
-    this.gamePhase = GAMEPHASE.Acting
+    this.gamePhase = GamePhases.Acting
     // this.initializePlayers()
     this.initializeParticipantsHand()
     this.decideAiPlayersBetAmount()
@@ -167,19 +167,19 @@ export default class BlackjackTable extends Table<
     for (let i: number = 0; i < numOfPlayers; i += 1) {
       const index: number = i > 2 ? i : i + 1
       if (i === 2) {
-        players.push(new BlackjackPlayer(PLAYERTYPE.PLAYER, 'you'))
+        players.push(new BlackjackPlayer(PLAYERTYPE.Player, 'you'))
       } else {
-        players.push(new BlackjackPlayer(PLAYERTYPE.AI, `bot${index}`))
+        players.push(new BlackjackPlayer(PLAYERTYPE.Ai, `bot${index}`))
       }
     }
     return players
   }
 
-  get gamePhase(): GAMEPHASE {
+  get gamePhase(): GamePhases {
     return this._gamePhase
   }
 
-  set gamePhase(gamePhase: GAMEPHASE) {
+  set gamePhase(gamePhase: GamePhases) {
     this._gamePhase = gamePhase
   }
 

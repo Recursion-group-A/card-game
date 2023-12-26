@@ -1,19 +1,20 @@
 import Card from '@/models/common/Card'
-import { Suit } from '@/types/common/suits'
-import { Rank } from '@/types/common/ranks'
-import { SUITS, RANKS } from '@/constants/cards'
-import { GAMETYPE, GAMESWITHJOKER } from '@/types/common/gameTypes'
+import { Suit } from '@/types/common/suit-types'
+import { Rank } from '@/types/common/rank-types'
+import { SUITS } from '@/constants/cards/suits.constants'
+import { RANKS } from '@/constants/cards/ranks.constants'
+import { GameTypes, GAMESWITHJOKER } from '@/types/common/game-types'
 import { RankStrategy } from '@/models/common/RankStrategy'
 import { getRankStrategy } from '@/utils/utils'
 
 export default class Deck {
-  private readonly _gameType: GAMETYPE
+  private readonly _gameType: GameTypes
 
   private readonly _rankStrategy: RankStrategy
 
   private _deck: Card[]
 
-  constructor(gameType: GAMETYPE) {
+  constructor(gameType: GameTypes) {
     this._gameType = gameType
     this._rankStrategy = getRankStrategy(gameType)
     this._deck = this.generateDeck(GAMESWITHJOKER.includes(gameType))
@@ -63,7 +64,7 @@ export default class Deck {
     }
   }
 
-  get gameType(): GAMETYPE {
+  get gameType(): GameTypes {
     return this._gameType
   }
 

@@ -1,7 +1,7 @@
 import Card from '@/models/common/Card'
 import Deck from '@/models/common/Deck'
 import Hand from '@/models/blackjack/BlackjackHand'
-import HOUSE_STATUS from '@/types/blackjack/houseStatus'
+import HOUSE_STATUS from '@/types/blackjack/house-status-types'
 
 export default class House {
   private _hand: Hand

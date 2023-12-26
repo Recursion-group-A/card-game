@@ -5,8 +5,8 @@ import DeckView from '@/phaser/common/DeckView'
 import PokerPlayer from '@/models/poker/PokerPlayer'
 import PlayerView from '@/phaser/poker/PlayerView'
 import PokerTable from '@/models/poker/PokerTable'
-import PokerAction from '@/types/poker/PokerAction'
-import PLAYERTYPES from '@/types/common/playerTypes'
+import PokerActions from '@/types/poker/action-types'
+import PlayerTypes from '@/types/common/player-types'
 import { delay } from '@/utils/utils'
 
 export default class TableView extends Phaser.GameObjects.Container {
@@ -64,7 +64,7 @@ export default class TableView extends Phaser.GameObjects.Container {
   public revealUserHand(): void {
     const user: PlayerView = this._playerViews.filter(
       (player: PlayerView) =>
-        player.playerModel.playerType === PLAYERTYPES.PLAYER
+        player.playerModel.playerType === PlayerTypes.Player
     )[0]
     user.revealHand()
   }
@@ -76,10 +76,10 @@ export default class TableView extends Phaser.GameObjects.Container {
 
     const callOrCheck: string =
       this._tableModel.currentMaxBet - player.playerModel.bet > 0
-        ? PokerAction.CALL
-        : PokerAction.CHECK
+        ? PokerActions.Call
+        : PokerActions.Check
 
-    this.createButton(player.x - offset, player.y + hspace, PokerAction.FOLD)
+    this.createButton(player.x - offset, player.y + hspace, PokerActions.Fold)
     this.createButton(
       player.x + wspace - offset,
       player.y + hspace,
@@ -89,7 +89,7 @@ export default class TableView extends Phaser.GameObjects.Container {
       this.createButton(
         player.x + wspace * 2 - offset,
         player.y + hspace,
-        PokerAction.RAISE
+        PokerActions.Raise
       )
     }
     this.setVisibleActionButtons(true)
@@ -99,31 +99,31 @@ export default class TableView extends Phaser.GameObjects.Container {
     this._actionButtons.setVisible(bool)
   }
 
-  public async getUserAction(): Promise<PokerAction> {
+  public async getUserAction(): Promise<PokerActions> {
     return new Promise((resolve) => {
       this._actionButtons.each((child: Phaser.GameObjects.Container) => {
         child.list[0].on('pointerdown', () => {
-          resolve(child.list[1].name as PokerAction)
+          resolve(child.list[1].name as PokerActions)
         })
       })
     })
   }
 
   // eslint-disable-next-line
-  public executeActionEffect(player: PlayerView, action: PokerAction): void {
+  public executeActionEffect(player: PlayerView, action: PokerActions): void {
     player.displayActionText(action)
 
     switch (action) {
-      case PokerAction.FOLD:
+      case PokerActions.Fold:
         player.removeAllHand()
         break
-      case PokerAction.CALL:
+      case PokerActions.Call:
         player.animatePlaceBet()
         break
-      case PokerAction.RAISE:
+      case PokerActions.Raise:
         player.animatePlaceBet()
         break
-      case PokerAction.CHECK:
+      case PokerActions.Check:
         break
       default:
         throw new Error(`Unknown action: ${action}`)

@@ -1,5 +1,5 @@
-import { Suit } from '@/types/common/suits'
-import { Rank } from '@/types/common/ranks'
+import { Suit } from '@/types/common/suit-types'
+import { Rank } from '@/types/common/rank-types'
 import { RankStrategy } from '@/models/common/RankStrategy'
 
 export default class Card {

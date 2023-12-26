@@ -1,6 +1,6 @@
 import Card from '@/models/common/Card'
-import { Suit } from '@/types/common/suits'
-import { Rank } from '@/types/common/ranks'
+import { Suit } from '@/types/common/suit-types'
+import { Rank } from '@/types/common/rank-types'
 import { RankStrategy } from '@/models/common/RankStrategy'
 import PokerRankStrategy from '@/models/poker/PokerRankStrategy'
 import BlackjackRankStrategy from '@/models/blackjack/BlackjackRankStrategy'

@@ -1,6 +1,6 @@
 import Card from '@/models/common/Card'
-import { Suit } from '@/types/common/suits'
-import PokerHand from '@/types/poker/PokerHand'
+import { Suit } from '@/types/common/suit-types'
+import PokerHand from '@/types/poker/hand-types'
 
 export default class PokerHandEvaluator {
   public static evaluateHand(hand: Card[], communityCards: Card[]): PokerHand {

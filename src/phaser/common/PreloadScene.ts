@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
-import { SUITSFORIMAGE, RANKSFORIMAGE } from '@/constants/cards'
+import { SUITS_FOR_IMAGE } from '@/constants/cards/suits.constants'
+import { RANKS_FOR_IMAGE } from '@/constants/cards/ranks.constants'
 
 export default class PreloadScene extends Phaser.Scene {
   private _nextScene: string | undefined
@@ -19,8 +20,8 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image('table', 'table.jpeg')
 
     // 全種類のカードを読み込む
-    SUITSFORIMAGE.forEach((suit: string) => {
-      RANKSFORIMAGE.forEach((rank: string) => {
+    SUITS_FOR_IMAGE.forEach((suit: string) => {
+      RANKS_FOR_IMAGE.forEach((rank: string) => {
         const key: string = `card_${suit}_${rank}`
         this.load.image(key, `cards/${key}.png`)
       })

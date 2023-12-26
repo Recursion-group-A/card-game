@@ -1,4 +1,4 @@
-import { Rank } from '@/types/common/ranks'
+import { Rank } from '@/types/common/rank-types'
 
 const rankValues: { [key in Rank]: number } = {
   '2': 2,
