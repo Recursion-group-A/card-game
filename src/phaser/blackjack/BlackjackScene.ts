@@ -2,7 +2,6 @@ import BaseScene from '@/phaser/common/BaseScene'
 import BlackjackTable from '@/models/blackjack/BlackjackTable'
 import TableView from '@/phaser/blackjack/TableView'
 import { GameTypes } from '@/types/common/game-types'
-import BaseScene from '@/phaser/common/BaseScene'
 
 // PreloadSceneのコードを書き換えることでブラックジャックにできる
 
