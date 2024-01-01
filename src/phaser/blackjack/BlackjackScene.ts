@@ -3,8 +3,6 @@ import BlackjackTable from '@/models/blackjack/BlackjackTable'
 import TableView from '@/phaser/blackjack/TableView'
 import { GameTypes } from '@/types/common/game-types'
 
-// PreloadSceneのコードを書き換えることでブラックジャックにできる
-
 export default class BlackjackScene extends BaseScene {
   private _tableView: TableView | undefined
 
@@ -16,15 +14,23 @@ export default class BlackjackScene extends BaseScene {
     this._tableModel = new BlackjackTable(GameTypes.Blackjack)
   }
 
-  public create(): void {
+  create(): void {
     super.create()
 
     this._tableView = new TableView(this, this._tableModel)
-    // this._tableView.assignDealerBtn()
-    // this._tableView.animateCollectBlinds()
 
-    this.time.delayedCall(2500, () => {
+    this.time.delayedCall(BlackjackScene.DELAY_TIME, () => {
       this._tableView?.startGame()
     })
+  }
+
+  // eslint-disable-next-line
+  protected startGame(): Promise<void> {
+    return Promise.resolve(undefined)
+  }
+
+  // eslint-disable-next-line
+  protected prepareNextGame(): Promise<void> {
+    return Promise.resolve(undefined)
   }
 }
