@@ -1,22 +1,19 @@
 import * as Phaser from 'phaser'
-import Table from '@/models/blackjack/BlackjackTable'
-import Player from '@/models/blackjack/BlackjackPlayer'
-import PlayerView from '@/phaser/blackjack/PlayerView'
-import DeckView from '@/phaser/common/DeckView'
-import Deck from '@/models/common/Deck'
 import Card from '@/models/common/Card'
+import DeckView from '@/phaser/common/DeckView'
+import BlackjackPlayer from '@/models/blackjack/BlackjackPlayer'
+import PlayerView from '@/phaser/blackjack/PlayerView'
+import BlackjackTable from '@/models/blackjack/BlackjackTable'
 import PlayerTypes from '@/types/common/player-types'
 import BlackjackActions from '@/types/blackjack/action-types'
 import { PlayerStatus } from '@/types/blackjack/player-status-types'
 
 export default class TableView extends Phaser.GameObjects.Container {
-  private readonly _tableModel: Table
+  private readonly _tableModel: BlackjackTable
 
-  private readonly _playerModels: Player[]
+  private readonly _playerModels: BlackjackPlayer[] = []
 
-  private readonly _playerViews: PlayerView[]
-
-  private readonly _deckModel: Deck
+  private readonly _playerViews: PlayerView[] = []
 
   private readonly _deckView: DeckView
 
@@ -26,9 +23,11 @@ export default class TableView extends Phaser.GameObjects.Container {
 
   private _sceneHeight: number = this.scene.cameras.main.height
 
-  constructor(scene: Phaser.Scene, tableModel: Table) {
+  constructor(scene: Phaser.Scene, tableModel: BlackjackTable) {
     super(scene)
+
     this._tableModel = tableModel
+
     this._playerModels = []
     this._playerViews = []
     this._deckModel = this._tableModel.deck
@@ -55,11 +54,15 @@ export default class TableView extends Phaser.GameObjects.Container {
       { x: 450, y: 100 }
     ]
 
-    this._playerModels.forEach((player: Player, index: number) => {
+    this._playerModels.forEach((player: BlackjackPlayer, index: number) => {
       if (player.playerType === PlayerTypes.Ai) {
         player.decideAiPlayerBetAmount()
       }
-      const playerView = new PlayerView(this.scene, player, playersPos[index])
+      const playerView: PlayerView = new PlayerView(
+        this.scene,
+        player,
+        playersPos[index]
+      )
       this._playerViews.push(playerView)
       this.add(playerView)
     })
@@ -73,7 +76,7 @@ export default class TableView extends Phaser.GameObjects.Container {
     const delayPerCard: number = 150
 
     for (let i: number = 0; i < 2; i += 1) {
-      this._playerModels.forEach((player: Player, index: number) => {
+      this._playerModels.forEach((player: BlackjackPlayer, index: number) => {
         const card: Card = this._tableModel.drawCard()
         player.addHand(card)
 
@@ -118,13 +121,15 @@ export default class TableView extends Phaser.GameObjects.Container {
   }
 
   public updateBlackjackPlayerStates(): void {
-    this._playerModels.forEach((playerModel: Player, index: number) => {
-      if (playerModel.isBlackjack()) {
-        playerModel.status = PlayerStatus.Blackjack //eslint-disable-line
-        this._playerViews[index].updateStates()
-        this._playerViews[index].changeBlackjackColor()
+    this._playerModels.forEach(
+      (playerModel: BlackjackPlayer, index: number) => {
+        if (playerModel.isBlackjack()) {
+          playerModel.status = PlayerStatus.Blackjack //eslint-disable-line
+          this._playerViews[index].updateStates()
+          this._playerViews[index].changeBlackjackColor()
+        }
       }
-    })
+    )
   }
 
   public updatePlayersStates(): void {
@@ -146,22 +151,24 @@ export default class TableView extends Phaser.GameObjects.Container {
   }
 
   public aiPlayerProcess(): void {
-    this._playerModels.forEach((playerModel: Player, index: number) => {
-      if (playerModel.playerType === PlayerTypes.Ai) {
-        while (playerModel.getHandTotalScore() < 17) {
-          this.addCard(index)
-          playerModel.incrementCurrentTurn()
+    this._playerModels.forEach(
+      (playerModel: BlackjackPlayer, index: number) => {
+        if (playerModel.playerType === PlayerTypes.Ai) {
+          while (playerModel.getHandTotalScore() < 17) {
+            this.addCard(index)
+            playerModel.incrementCurrentTurn()
 
-          if (playerModel.getHandTotalScore() > 21) {
-            playerModel.status = PlayerStatus.Bust // eslint-disable-line
-            break
-          } else if (playerModel.getHandTotalScore() >= 17) {
-            playerModel.status = PlayerStatus.Stand // eslint-disable-line
-            break
+            if (playerModel.getHandTotalScore() > 21) {
+              playerModel.status = PlayerStatus.Bust // eslint-disable-line
+              break
+            } else if (playerModel.getHandTotalScore() >= 17) {
+              playerModel.status = PlayerStatus.Stand // eslint-disable-line
+              break
+            }
           }
         }
       }
-    })
+    )
   }
 
   public async startGame(): Promise<void> {

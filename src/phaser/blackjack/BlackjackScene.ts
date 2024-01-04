@@ -20,14 +20,24 @@ export default class BlackjackScene extends BaseScene {
     this._isGameActive = true
   }
 
-  public create(): void {
+  create(): void {
     super.create()
 
     this._tableView = new TableView(this, this._tableModel)
     this._playerViews = this._tableView.playerViews
 
-    this.time.delayedCall(2500, () => {
+    this.time.delayedCall(BlackjackScene.DELAY_TIME, () => {
       this._tableView?.startGame()
     })
+  }
+
+  // eslint-disable-next-line
+  protected startGame(): Promise<void> {
+    return Promise.resolve(undefined)
+  }
+
+  // eslint-disable-next-line
+  protected prepareNextGame(): Promise<void> {
+    return Promise.resolve(undefined)
   }
 }
