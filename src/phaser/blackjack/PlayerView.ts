@@ -33,6 +33,16 @@ export default class PlayerView extends Phaser.GameObjects.Container {
       0,
       `${this._playerModel.playerName.toUpperCase()}`
     )
+    this._betText = this.scene.add.text(
+      -40,
+      -32,
+      `BET: ${this._playerModel.bet}`
+    )
+    this._chipsText = this.scene.add.text(
+      70,
+      -32, // カードの高さ → 64
+      `CHIPS: ${this._playerModel.chips}`
+    )
     this._statesText = this.scene.add.text(
       5,
       64 + 40,
@@ -40,26 +50,20 @@ export default class PlayerView extends Phaser.GameObjects.Container {
     )
     this._scoreText = this.scene.add.text(
       5,
-      64 + 100,
-      `SCORE: ${this._playerModel.getHandTotalScore()}`
-    )
-    this._chipsText = this.scene.add.text(
-      5,
-      64 + 60, // カードの高さ → 64
-      `CHIPS: ${this._playerModel.chips}`
-    )
-    this._betText = this.scene.add.text(
-      5,
-      64 + 80,
-      `BET: ${this._playerModel.bet}`
+      64 + 60,
+      `SCORE: ${this._playerModel.getHandTotalScore()}`,
+      {
+        font: '24px',
+        backgroundColor: 'blue'
+      }
     )
 
     this.add([
       this._playerNameText,
-      this._statesText,
-      this._scoreText,
+      this._betText,
       this._chipsText,
-      this._betText
+      this._statesText,
+      this._scoreText
     ])
     this.updateHand()
 
