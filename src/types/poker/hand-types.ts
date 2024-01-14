@@ -1,4 +1,4 @@
-enum PokerHand {
+enum PokerHands {
   HighCard,
   OnePair,
   TwoPair,
@@ -11,4 +11,4 @@ enum PokerHand {
   RoyalStraightFlush
 }
 
-export default PokerHand
+export default PokerHands
