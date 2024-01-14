@@ -2,7 +2,7 @@ import Pot from '@/models/poker/Pot'
 import Hand from '@/models/common/Hand'
 import PokerPlayer from '@/models/poker/PokerPlayer'
 import Table from '@/models/common/Table'
-import PokerRound from '@/types/poker/round-types'
+import PokerRounds from '@/types/poker/round-types'
 import PokerActions from '@/types/poker/action-types'
 import PlayerTypes from '@/types/common/player-types'
 import { GameTypes } from '@/types/common/game-types'
@@ -28,7 +28,7 @@ export default class PokerTable extends Table<PokerPlayer, Hand> {
 
   private _currentMaxBet: number
 
-  private _round: PokerRound
+  private _round: PokerRounds
 
   private _isFirstGame: boolean
 
@@ -43,7 +43,7 @@ export default class PokerTable extends Table<PokerPlayer, Hand> {
     this._bbIndex = 0
     this._utgIndex = 0
     this._currentMaxBet = this._bigBlind
-    this._round = PokerRound.PreFlop
+    this._round = PokerRounds.PreFlop
     this._isFirstGame = true
   }
 
@@ -118,7 +118,7 @@ export default class PokerTable extends Table<PokerPlayer, Hand> {
     this.dealerIndex = (this.dealerIndex + 1) % this.players.length
     this.assignOtherPlayersPosition()
     this.currentMaxBet = this.bigBlind
-    this.round = PokerRound.PreFlop
+    this.round = PokerRounds.PreFlop
   }
 
   // eslint-disable-next-line
@@ -138,11 +138,11 @@ export default class PokerTable extends Table<PokerPlayer, Hand> {
 
   private getRaiseAmount(): number {
     switch (this.round) {
-      case PokerRound.PreFlop:
-      case PokerRound.Flop:
+      case PokerRounds.PreFlop:
+      case PokerRounds.Flop:
         return this.limit * 2
-      case PokerRound.Turn:
-      case PokerRound.River:
+      case PokerRounds.Turn:
+      case PokerRounds.River:
         return this.limit * 4
       default:
         throw new Error(`Invalid round: ${this.round}`)
@@ -231,11 +231,11 @@ export default class PokerTable extends Table<PokerPlayer, Hand> {
     this._currentMaxBet = maxBet
   }
 
-  get round(): PokerRound {
+  get round(): PokerRounds {
     return this._round
   }
 
-  set round(round: PokerRound) {
+  set round(round: PokerRounds) {
     this._round = round
   }
 

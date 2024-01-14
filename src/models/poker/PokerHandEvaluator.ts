@@ -1,39 +1,39 @@
 import Card from '@/models/common/Card'
 import { Suit } from '@/types/common/suit-types'
-import PokerHand from '@/types/poker/hand-types'
+import PokerHands from '@/types/poker/hand-types'
 
 export default class PokerHandEvaluator {
-  public static evaluateHand(hand: Card[], communityCards: Card[]): PokerHand {
+  public static evaluateHand(hand: Card[], communityCards: Card[]): PokerHands {
     const combinedCards: Card[] = [...hand, ...communityCards]
 
     if (PokerHandEvaluator.isRoyalStraightFlush(combinedCards)) {
-      return PokerHand.RoyalStraightFlush
+      return PokerHands.RoyalStraightFlush
     }
     if (PokerHandEvaluator.isStraightFlush(combinedCards)) {
-      return PokerHand.StraightFlush
+      return PokerHands.StraightFlush
     }
     if (PokerHandEvaluator.isFourOfAKind(combinedCards)) {
-      return PokerHand.FourOfAKind
+      return PokerHands.FourOfAKind
     }
     if (PokerHandEvaluator.isFullHouse(combinedCards)) {
-      return PokerHand.FullHouse
+      return PokerHands.FullHouse
     }
     if (PokerHandEvaluator.isFlush(combinedCards)) {
-      return PokerHand.Flush
+      return PokerHands.Flush
     }
     if (PokerHandEvaluator.isStraight(combinedCards)) {
-      return PokerHand.Straight
+      return PokerHands.Straight
     }
     if (PokerHandEvaluator.isThreeOfAKind(combinedCards)) {
-      return PokerHand.ThreeOfAKind
+      return PokerHands.ThreeOfAKind
     }
     if (PokerHandEvaluator.isTwoPair(combinedCards)) {
-      return PokerHand.TwoPair
+      return PokerHands.TwoPair
     }
     if (PokerHandEvaluator.isOnePair(combinedCards)) {
-      return PokerHand.OnePair
+      return PokerHands.OnePair
     }
-    return PokerHand.HighCard
+    return PokerHands.HighCard
   }
 
   private static isRoyalStraightFlush(cards: Card[]): boolean {

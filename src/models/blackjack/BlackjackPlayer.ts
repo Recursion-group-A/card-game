@@ -3,19 +3,19 @@ import Deck from '@/models/common/Deck'
 import Player from '@/models/common/Player'
 import BlackjackHand from '@/models/blackjack/BlackjackHand'
 import PlayerTypes from '@/types/common/player-types'
-import { PlayerStatus } from '@/types/blackjack/player-status-types'
+import { ParticipantStatuses } from '@/types/blackjack/participant-status-types'
 
 export default class BlackjackPlayer extends Player<BlackjackHand> {
   private _currentTurn: number
 
-  private _status: PlayerStatus
+  private _status: ParticipantStatuses
 
   constructor(playerType: PlayerTypes, playerName: string) {
     super(playerType, playerName)
 
     this._hand = this.generateHand()
     this._currentTurn = 1
-    this._status = PlayerStatus.Wait
+    this._status = ParticipantStatuses.Wait
   }
 
   public getHandTotalScore(): number {
@@ -64,16 +64,16 @@ export default class BlackjackPlayer extends Player<BlackjackHand> {
   }
 
   public bust(): void {
-    this._status = PlayerStatus.Bust
+    this._status = ParticipantStatuses.Bust
   }
 
   public stand(): void {
-    this._status = PlayerStatus.Stand
+    this._status = ParticipantStatuses.Stand
   }
 
   public double(): void {
     this.placeBet(this.bet)
-    this._status = PlayerStatus.DoubleDown
+    this._status = ParticipantStatuses.DoubleDown
   }
 
   public surrender(): void {
@@ -81,7 +81,7 @@ export default class BlackjackPlayer extends Player<BlackjackHand> {
 
     this.subtractBet(Math.floor(currentBet / 2))
     this.addChips(Math.floor(currentBet / 2))
-    this._status = PlayerStatus.Surrender
+    this._status = ParticipantStatuses.Surrender
   }
 
   public settlement(houseScore: number) {
@@ -114,10 +114,10 @@ export default class BlackjackPlayer extends Player<BlackjackHand> {
       this.incrementCurrentTurn()
 
       if (this.getHandTotalScore() > 21) {
-        this._status = PlayerStatus.Bust
+        this._status = ParticipantStatuses.Bust
         break
       } else if (this.getHandTotalScore() >= 17) {
-        this._status = PlayerStatus.Stand
+        this._status = ParticipantStatuses.Stand
         break
       }
     }
@@ -136,11 +136,11 @@ export default class BlackjackPlayer extends Player<BlackjackHand> {
     this._currentTurn = numOfTurns
   }
 
-  get status(): PlayerStatus {
+  get status(): ParticipantStatuses {
     return this._status
   }
 
-  set status(playerStatus: PlayerStatus) {
+  set status(playerStatus: ParticipantStatuses) {
     this._status = playerStatus
   }
 }

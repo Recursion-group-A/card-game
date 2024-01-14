@@ -1,16 +1,16 @@
 import Card from '@/models/common/Card'
 import Deck from '@/models/common/Deck'
-import Hand from '@/models/blackjack/BlackjackHand'
-import HOUSE_STATUS from '@/types/blackjack/house-status-types'
+import BlackjackHand from '@/models/blackjack/BlackjackHand'
+import { ParticipantStatuses } from '@/types/blackjack/participant-status-types'
 
 export default class House {
-  private _hand: Hand
+  private _hand: BlackjackHand
 
-  private _status: string
+  private _status: ParticipantStatuses
 
   constructor() {
-    this._hand = new Hand()
-    this._status = HOUSE_STATUS.Wait
+    this._hand = new BlackjackHand()
+    this._status = ParticipantStatuses.Wait
   }
 
   public prepareForNextRound(): void {
@@ -23,21 +23,20 @@ export default class House {
   }
 
   private initializeStates(): void {
-    this._status = HOUSE_STATUS.Wait
+    this._status = ParticipantStatuses.Wait
   }
 
   public getHandTotalScore(): number {
     return this._hand.calculateBlackjackTotal()
   }
 
-  // TODO: START Playerクラスと共通する処理 → 後で抽象クラス Participant クラスを作る
   public addCard(card: Card): void {
     this._hand.addOne(card)
   }
 
   public drawUntilSeventeen(deck: Deck): void {
     if (this.getHandTotalScore() === 21) {
-      this._status = HOUSE_STATUS.Blackjack
+      this._status = ParticipantStatuses.Blackjack
       return
     }
 
@@ -52,10 +51,10 @@ export default class House {
       const totalScore: number = this.getHandTotalScore()
 
       if (totalScore > 21) {
-        this._status = HOUSE_STATUS.Bust
+        this._status = ParticipantStatuses.Bust
         break
       } else if (totalScore >= 17) {
-        this._status = HOUSE_STATUS.Stand
+        this._status = ParticipantStatuses.Stand
         break
       }
     }

@@ -3,7 +3,7 @@ import House from '@/models/blackjack/House'
 import BlackjackPlayer from '@/models/blackjack/BlackjackPlayer'
 import Table from '@/models/common/Table'
 import BlackjackHand from '@/models/blackjack/BlackjackHand'
-import PLAYERTYPE from '@/types/common/player-types'
+import PlayerTypes from '@/types/common/player-types'
 import { GamePhases } from '@/types/common/game-phase-types'
 import { GameTypes } from '@/types/common/game-types'
 
@@ -12,8 +12,6 @@ export default class BlackjackTable extends Table<
   BlackjackHand
 > {
   private readonly _house: House
-
-  private readonly _betDenominations: number[]
 
   private _gamePhase: GamePhases
 
@@ -24,39 +22,13 @@ export default class BlackjackTable extends Table<
 
     this._players = this.generatePlayers(6)
     this._house = new House()
-    this._betDenominations = [5, 20, 50, 100]
     this._gamePhase = GamePhases.Betting
     this._round = 1
   }
 
-  public initializeDeck(): void {
-    this.deck.resetDeck()
-  }
-
-  public initializeParticipantsHand(): void {
-    // 各々（house含む）に一枚ずつ配る行為を2巡する
-    for (let i = 0; i < 2; i += 1) {
-      this.players.forEach((player: BlackjackPlayer) => {
-        this.addParticipantHand(player)
-      })
-
-      // this.addParticipantHand(this._house)
-    }
-  }
-
-  // public preparePlayersForNextRound(): void {
-  //   this.players.forEach((player: BlackjackPlayer) => {
-  //     // player.prepareForNextRound()
-  //   })
-  // }
-
-  public prepareHouseForNextRound(): void {
-    this._house.prepareForNextRound()
-  }
-
   public prepareForNextRound(): void {
     this.gamePhase = GamePhases.Preparation
-    this.initializeDeck()
+    this.deck.resetDeck()
     this.incrementRound()
     // this.preparePlayersForNextRound()
     this.prepareHouseForNextRound()
@@ -81,7 +53,7 @@ export default class BlackjackTable extends Table<
     })
   }
 
-  public addPlayer(playerName: string, playerType: PLAYERTYPE): void {
+  public addPlayer(playerName: string, playerType: PlayerTypes): void {
     this.players.push(new BlackjackPlayer(playerType, playerName))
   }
 
@@ -167,12 +139,25 @@ export default class BlackjackTable extends Table<
     for (let i: number = 0; i < numOfPlayers; i += 1) {
       const index: number = i > 2 ? i : i + 1
       if (i === 2) {
-        players.push(new BlackjackPlayer(PLAYERTYPE.Player, 'you'))
+        players.push(new BlackjackPlayer(PlayerTypes.Player, 'you'))
       } else {
-        players.push(new BlackjackPlayer(PLAYERTYPE.Ai, `bot${index}`))
+        players.push(new BlackjackPlayer(PlayerTypes.Ai, `bot${index}`))
       }
     }
     return players
+  }
+
+  private initializeParticipantsHand(): void {
+    for (let i = 0; i < 2; i += 1) {
+      this.players.forEach((player: BlackjackPlayer) => {
+        this.addParticipantHand(player)
+      })
+      // this.addParticipantHand(this._house)
+    }
+  }
+
+  private prepareHouseForNextRound(): void {
+    this._house.prepareForNextRound()
   }
 
   get gamePhase(): GamePhases {

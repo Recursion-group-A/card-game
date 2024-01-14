@@ -7,7 +7,7 @@ import Deck from '@/models/common/Deck'
 import Card from '@/models/common/Card'
 import PlayerTypes from '@/types/common/player-types'
 import BlackjackActions from '@/types/blackjack/action-types'
-import { PlayerStatus } from '@/types/blackjack/player-status-types'
+import { ParticipantStatuses } from '@/types/blackjack/participant-status-types'
 
 export default class TableView extends Phaser.GameObjects.Container {
   private readonly _tableModel: Table
@@ -120,7 +120,7 @@ export default class TableView extends Phaser.GameObjects.Container {
   public updateBlackjackPlayerStates(): void {
     this._playerModels.forEach((playerModel: Player, index: number) => {
       if (playerModel.isBlackjack()) {
-        playerModel.status = PlayerStatus.Blackjack //eslint-disable-line
+        playerModel.status = ParticipantStatuses.Blackjack //eslint-disable-line
         this._playerViews[index].updateStates()
         this._playerViews[index].changeBlackjackColor()
       }
@@ -153,10 +153,10 @@ export default class TableView extends Phaser.GameObjects.Container {
           playerModel.incrementCurrentTurn()
 
           if (playerModel.getHandTotalScore() > 21) {
-            playerModel.status = PlayerStatus.Bust // eslint-disable-line
+            playerModel.status = ParticipantStatuses.Bust // eslint-disable-line
             break
           } else if (playerModel.getHandTotalScore() >= 17) {
-            playerModel.status = PlayerStatus.Stand // eslint-disable-line
+            playerModel.status = ParticipantStatuses.Stand // eslint-disable-line
             break
           }
         }
