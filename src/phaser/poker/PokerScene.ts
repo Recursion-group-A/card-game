@@ -13,8 +13,6 @@ import { GameTypes } from '@/types/common/game-types'
 import { delay } from '@/utils/utils'
 
 export default class PokerScene extends BaseScene {
-  private static readonly DELAY_TIME: number = 1500
-
   private readonly _tableModel: PokerTable
 
   private _tableView: TableView | undefined
@@ -23,8 +21,6 @@ export default class PokerScene extends BaseScene {
 
   private readonly _decisionMaker: BotDecisionMaker
 
-  private readonly _isGameActive: boolean
-
   private _isWalk: boolean
 
   constructor() {
@@ -32,7 +28,6 @@ export default class PokerScene extends BaseScene {
 
     this._tableModel = new PokerTable(GameTypes.Poker)
     this._decisionMaker = new BotDecisionMaker(this._tableModel)
-    this._isGameActive = true
     this._isWalk = false
   }
 
@@ -49,16 +44,24 @@ export default class PokerScene extends BaseScene {
   }
 
   private async startGameLoop(): Promise<void> {
-    while (this._isGameActive) {
+    while (this.isGameActive) {
       await this.startGame() // eslint-disable-line
     }
   }
 
-  private async startGame(): Promise<void> {
+  protected async startGame(): Promise<void> {
     await this.processBeforePreFlop()
     await this.processAllRounds()
     await this.showDown()
     await this.prepareNextGame()
+  }
+
+  protected async prepareNextGame(): Promise<void> {
+    this._tableModel.resetGame()
+    this._tableView?.displayPromptText()
+    await this.waitForUserClick()
+    this._tableView?.resetTableAndView()
+    this._isWalk = false
   }
 
   private async processBeforePreFlop(): Promise<void> {
@@ -283,13 +286,5 @@ export default class PokerScene extends BaseScene {
     const winner: PlayerView[] = this.getActivePlayers()
     const winAmount: number = this._tableModel.pot.getTotalPot()
     this._tableView?.distributeWinnings(winner, winAmount)
-  }
-
-  private async prepareNextGame(): Promise<void> {
-    this._tableModel.resetGame()
-    this._tableView?.displayPromptText()
-    await this._tableView?.waitForUserClick()
-    this._tableView?.resetTableAndView()
-    this._isWalk = false
   }
 }

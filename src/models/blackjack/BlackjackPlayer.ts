@@ -1,21 +1,32 @@
-import Card from '@/models/common/Card'
-import Deck from '@/models/common/Deck'
 import Player from '@/models/common/Player'
 import BlackjackHand from '@/models/blackjack/BlackjackHand'
 import PlayerTypes from '@/types/common/player-types'
 import { ParticipantStatuses } from '@/types/blackjack/participant-status-types'
+import { PlayerStatus } from '@/types/blackjack/player-status-types'
+import GameResult from '@/types/blackjack/game-result-types'
+import HouseStatus from '@/types/blackjack/house-status-types'
 
 export default class BlackjackPlayer extends Player<BlackjackHand> {
   private _currentTurn: number
 
   private _status: ParticipantStatuses
 
+  private _actionCompleted: boolean
+
+  private _gameResult: GameResult
+
   constructor(playerType: PlayerTypes, playerName: string) {
     super(playerType, playerName)
 
     this._hand = this.generateHand()
     this._currentTurn = 1
+
     this._status = ParticipantStatuses.Wait
+
+    this._actionCompleted = false
+    this._gameResult = GameResult.Draw
+
+    this.decideAiPlayerBetAmount()
   }
 
   public getHandTotalScore(): number {
@@ -49,10 +60,7 @@ export default class BlackjackPlayer extends Player<BlackjackHand> {
   public canDouble(): boolean {
     if (this.isBlackjack()) return false
 
-    const doubleBet: number = this.bet * 2
-    const currentChips: number = this.chips
-
-    return this.isFirstTurn() && doubleBet <= currentChips
+    return this.isFirstTurn() && this.chips - this._bet >= 0
   }
 
   public canSurrender(): boolean {
@@ -69,11 +77,14 @@ export default class BlackjackPlayer extends Player<BlackjackHand> {
 
   public stand(): void {
     this._status = ParticipantStatuses.Stand
+    this._actionCompleted = true
   }
 
   public double(): void {
     this.placeBet(this.bet)
+
     this._status = ParticipantStatuses.DoubleDown
+    this._actionCompleted = true
   }
 
   public surrender(): void {
@@ -82,44 +93,34 @@ export default class BlackjackPlayer extends Player<BlackjackHand> {
     this.subtractBet(Math.floor(currentBet / 2))
     this.addChips(Math.floor(currentBet / 2))
     this._status = ParticipantStatuses.Surrender
+    this._actionCompleted = true
+
   }
 
-  public settlement(houseScore: number) {
-    const playerScore: number = this.getHandTotalScore()
+  public blackjack(): void {
+    this._status = PlayerStatus.Blackjack
+    this.actionCompleted = true
+  }
 
-    if (houseScore === playerScore) {
-      this.addChips(this.bet)
-    } else if (houseScore > playerScore) {
-      this.addChips(this.bet * 2)
+  public evaluating(houseScore: number, houseStatus: HouseStatus) {
+    if (
+      this._status === PlayerStatus.Bust ||
+      (houseStatus !== HouseStatus.Bust &&
+        this.getHandTotalScore() < houseScore)
+    ) {
+      this._gameResult = GameResult.Lose
+    } else if (this.getHandTotalScore() !== houseScore) {
+      this._gameResult = GameResult.Win
     }
   }
 
   public decideAiPlayerBetAmount(): void {
-    const max: number = Math.floor(this.chips * 0.2)
-    const min: number = Math.floor(this.chips * 0.1)
-    this.bet = Math.floor(Math.random() * (max - min) + min)
+    if (this.playerType === PlayerTypes.Ai) {
+      const max: number = Math.floor(this.chips * 0.2)
+      const min: number = Math.floor(this.chips * 0.1)
+      this.bet = Math.floor(Math.random() * (max - min) + min)
 
-    this.subtractChips(this.bet)
-  }
-
-  public drawUntilSeventeen(deck: Deck): void {
-    while (this.getHandTotalScore() < 17) {
-      const card: Card | undefined = deck.drawOne()
-
-      if (!card) {
-        throw new Error('Deck is empty.')
-      }
-
-      this.addHand(card)
-      this.incrementCurrentTurn()
-
-      if (this.getHandTotalScore() > 21) {
-        this._status = ParticipantStatuses.Bust
-        break
-      } else if (this.getHandTotalScore() >= 17) {
-        this._status = ParticipantStatuses.Stand
-        break
-      }
+      this.subtractChips(this.bet)
     }
   }
 
@@ -142,5 +143,17 @@ export default class BlackjackPlayer extends Player<BlackjackHand> {
 
   set status(playerStatus: ParticipantStatuses) {
     this._status = playerStatus
+  }
+
+  get actionCompleted(): boolean {
+    return this._actionCompleted
+  }
+
+  set actionCompleted(bool: boolean) {
+    this._actionCompleted = bool
+  }
+
+  get gameResult(): GameResult {
+    return this._gameResult
   }
 }

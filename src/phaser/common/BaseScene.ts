@@ -1,74 +1,87 @@
 import * as Phaser from 'phaser'
 
-export default class BaseScene extends Phaser.Scene {
-  protected _sceneWidth: number | undefined
+export default abstract class BaseScene extends Phaser.Scene {
+  protected static readonly DELAY_TIME: number = 1500
 
-  protected _sceneHeight: number | undefined
+  protected sceneWidth: number | undefined
 
-  protected _background: Phaser.GameObjects.Image | undefined
+  protected sceneHeight: number | undefined
 
-  protected _homeButton: Phaser.GameObjects.Image | undefined
+  protected background: Phaser.GameObjects.Image | undefined
 
-  protected _soundButton: Phaser.GameObjects.Image | undefined
+  protected homeButton: Phaser.GameObjects.Image | undefined
+
+  protected soundButton: Phaser.GameObjects.Image | undefined
+
+  protected readonly isGameActive: boolean
 
   protected _isSoundOn: boolean
 
-  constructor(key: string) {
+  protected constructor(key: string) {
     super(key)
-
     this._isSoundOn = true
   }
 
   create(): void {
-    this._sceneWidth = this.cameras.main.width
-    this._sceneHeight = this.cameras.main.height
+    this.sceneWidth = this.cameras.main.width
+    this.sceneHeight = this.cameras.main.height
 
     this.createBackground()
     this.createHomeButton()
     this.createSoundButton()
   }
 
+  public async waitForUserClick(): Promise<void> {
+    return new Promise<void>((resolve) => {
+      this.input.once('pointerdown', () => {
+        resolve()
+      })
+    })
+  }
+
+  protected abstract startGame(): Promise<void>
+
+  protected abstract prepareNextGame(): Promise<void>
+
   private createBackground(): void {
-    this._background = this.add.image(
-      this._sceneWidth! / 2,
-      this._sceneHeight! / 2,
+    this.background = this.add.image(
+      this.sceneWidth! / 2,
+      this.sceneHeight! / 2,
       'table'
     )
   }
 
   private createHomeButton(): void {
-    this._homeButton = this.add
-      .image(50, 40, 'home-button')
-      .setScale(0.75, 0.85)
-    this._homeButton.setInteractive({ useHandCursor: true })
-    this._homeButton.on('pointerover', () => {
-      this.scaleButton(this._homeButton!, 0.8, 0.9)
+    this.homeButton = this.add.image(50, 40, 'home-button').setScale(0.75, 0.85)
+    this.homeButton.setInteractive({ useHandCursor: true })
+    this.homeButton.on('pointerover', () => {
+      this.scaleButton(this.homeButton!, 0.8, 0.9)
     })
-    this._homeButton.on('pointerout', () => {
-      this.scaleButton(this._homeButton!, 0.75, 0.85)
+    this.homeButton.on('pointerout', () => {
+      this.scaleButton(this.homeButton!, 0.75, 0.85)
     })
-    this._homeButton.on('pointerdown', () => {
+    this.homeButton.on('pointerdown', () => {
       window.location.href = '/'
     })
   }
 
   private createSoundButton() {
-    this._soundButton = this.add
-      .image(this._sceneWidth! - 50, 40, 'sound-on')
+    this.soundButton = this.add
+      .image(this.sceneWidth! - 50, 40, 'sound-on')
       .setScale(0.8, 0.9)
-    this._soundButton.setInteractive({ useHandCursor: true })
-    this._soundButton.on('pointerover', () =>
-      this.scaleButton(this._soundButton!, 0.85, 0.95)
+    this.soundButton.setInteractive({ useHandCursor: true })
+    this.soundButton.on('pointerover', () =>
+      this.scaleButton(this.soundButton!, 0.85, 0.95)
     )
-    this._soundButton.on('pointerout', () =>
-      this.scaleButton(this._soundButton!, 0.8, 0.9)
+    this.soundButton.on('pointerout', () =>
+      this.scaleButton(this.soundButton!, 0.8, 0.9)
     )
-    this._soundButton.on('pointerdown', () => this.toggleSound())
+    this.soundButton.on('pointerdown', () => this.toggleSound())
   }
 
   private toggleSound() {
     const texture: string = this._isSoundOn ? 'sound-off' : 'sound-on'
-    this._soundButton?.setTexture(texture)
+    this.soundButton?.setTexture(texture)
     this._isSoundOn = !this._isSoundOn
   }
 

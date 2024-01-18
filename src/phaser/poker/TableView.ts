@@ -201,14 +201,6 @@ export default class TableView extends Phaser.GameObjects.Container {
     })
   }
 
-  public async waitForUserClick(): Promise<void> {
-    return new Promise<void>((resolve) => {
-      this.scene.input.once('pointerdown', () => {
-        resolve()
-      })
-    })
-  }
-
   public resetTableAndView(): void {
     this._promptText.setVisible(false)
     this._communityCards.removeAll(true)

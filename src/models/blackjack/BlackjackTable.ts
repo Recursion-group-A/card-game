@@ -1,4 +1,3 @@
-import Card from '@/models/common/Card'
 import House from '@/models/blackjack/House'
 import BlackjackPlayer from '@/models/blackjack/BlackjackPlayer'
 import Table from '@/models/common/Table'
@@ -6,6 +5,7 @@ import BlackjackHand from '@/models/blackjack/BlackjackHand'
 import PlayerTypes from '@/types/common/player-types'
 import { GamePhases } from '@/types/common/game-phase-types'
 import { GameTypes } from '@/types/common/game-types'
+import HouseStatus from '@/types/blackjack/house-status-types'
 
 export default class BlackjackTable extends Table<
   BlackjackPlayer,
@@ -13,123 +13,76 @@ export default class BlackjackTable extends Table<
 > {
   private readonly _house: House
 
+  private readonly _betDenominations: number[]
+
+  private _userBetCompleted: boolean
+
   private _gamePhase: GamePhases
 
-  private _round: number
-
   constructor(gameType: GameTypes) {
-    super(gameType, 6)
+    super(gameType, 5)
 
-    this._players = this.generatePlayers(6)
+    this._players = this.generatePlayers(5)
     this._house = new House()
     this._gamePhase = GamePhases.Betting
-    this._round = 1
+    this._userBetCompleted = false
+  }
+
+  public setPlayersStatus(): void {
+    this.players.forEach((player) => {
+      if (player.isBlackjack()) {
+        player.blackjack()
+      } else if (
+        player.playerType === PLAYERTYPE.Ai &&
+        player.getHandTotalScore() >= 17
+      ) {
+        player.stand()
+      }
+    })
+  }
+
+  public setHouseStatus(): void {
+    if (this._house.isBlackjack()) {
+      this._house.blackjack()
+    } else if (this._house.getHandTotalScore() >= 17) {
+      this._house.stand()
+    }
+  }
+
+  public initializeDeck(): void {
+    this.deck.resetDeck()
+  }
+
+  public isHouseTurn(): boolean {
+    const allPlayerActionCompleted: boolean = this.players.every(
+      (player) => player.actionCompleted === true
+    )
+
+    return allPlayerActionCompleted
+  }
+
+  public houseActionCompleted(): boolean {
+    return this._house.actionCompleted
+  }
+
+  public prepareHouseForNextRound(): void {
+    this._house.prepareForNextRound()
   }
 
   public prepareForNextRound(): void {
     this.gamePhase = GamePhases.Preparation
-    this.deck.resetDeck()
-    this.incrementRound()
-    // this.preparePlayersForNextRound()
+    this.initializeDeck()
     this.prepareHouseForNextRound()
-    this.initializeParticipantsHand()
-    this.decideAiPlayersBetAmount()
     this.gamePhase = GamePhases.Betting
   }
 
-  public incrementRound(): void {
-    this._round += 1
-  }
-
-  public changeHouseTurn(): void {
-    this._house.drawUntilSeventeen(this.deck)
-  }
-
-  public changeAiPlayerTurn(): void {
-    const aiPlayers: BlackjackPlayer[] = this.players.slice(1)
-
-    aiPlayers.forEach((aiPlayer) => {
-      aiPlayer.drawUntilSeventeen(this.deck)
-    })
-  }
-
-  public addPlayer(playerName: string, playerType: PlayerTypes): void {
-    this.players.push(new BlackjackPlayer(playerType, playerName))
-  }
-
-  public addParticipantHand(participant: BlackjackPlayer): void {
-    const card: Card | undefined = this.deck.drawOne()
-
-    if (card) {
-      // addCardはPlayerとHouseの共通のメソッド
-      participant.addHand(card)
-    }
-  }
-
-  public addPlayerBet(amount: number) {
-    const player: BlackjackPlayer = this.players[0]
-    if (player.canBet(amount)) {
-      player.addBet(amount)
-    }
-  }
-
-  public decideAiPlayersBetAmount(): void {
-    const aiPlayers: BlackjackPlayer[] = this.players.slice(1)
-
-    aiPlayers.forEach((aiPlayer) => {
-      aiPlayer.decideAiPlayerBetAmount()
-    })
-  }
-
-  public settlementPlayers(): void {
+  public evaluatingPlayers(): void {
     const houseScore: number = this._house.getHandTotalScore()
+    const houseStatus: HouseStatus = this._house.status
+
     this.players.forEach((player) => {
-      player.settlement(houseScore)
+      player.evaluating(houseScore, houseStatus)
     })
-  }
-
-  public startGame(): void {
-    this.gamePhase = GamePhases.Acting
-    // this.initializePlayers()
-    this.initializeParticipantsHand()
-    this.decideAiPlayersBetAmount()
-  }
-
-  public commonProcess(player: BlackjackPlayer): void {
-    this.addParticipantHand(player)
-    player.incrementCurrentTurn()
-    if (player.isBust()) player.bust()
-  }
-
-  public standProcess(): void {
-    const player: BlackjackPlayer = this.players[0]
-    player.stand()
-  }
-
-  public hitProcess(): void {
-    const player: BlackjackPlayer = this.players[0]
-
-    if (player.canHit()) {
-      this.commonProcess(player)
-    }
-  }
-
-  public doubleProcess(): void {
-    const player: BlackjackPlayer = this.players[0]
-
-    if (player.canDouble()) {
-      player.double()
-      this.commonProcess(player)
-    }
-  }
-
-  public surrenderProcess(): void {
-    const player: BlackjackPlayer = this.players[0]
-
-    if (player.canSurrender()) {
-      player.surrender()
-      this.commonProcess(player)
-    }
   }
 
   // eslint-disable-next-line
@@ -147,17 +100,12 @@ export default class BlackjackTable extends Table<
     return players
   }
 
-  private initializeParticipantsHand(): void {
-    for (let i = 0; i < 2; i += 1) {
-      this.players.forEach((player: BlackjackPlayer) => {
-        this.addParticipantHand(player)
-      })
-      // this.addParticipantHand(this._house)
-    }
+  get betDenominations(): number[] {
+    return this._betDenominations
   }
 
-  private prepareHouseForNextRound(): void {
-    this._house.prepareForNextRound()
+  get house(): House {
+    return this._house
   }
 
   get gamePhase(): GamePhases {
@@ -168,11 +116,11 @@ export default class BlackjackTable extends Table<
     this._gamePhase = gamePhase
   }
 
-  get round(): number {
-    return this._round
+  get userBetCompleted(): boolean {
+    return this._userBetCompleted
   }
 
-  set round(round: number) {
-    this._round = round
+  set userBetCompleted(bool: boolean) {
+    this._userBetCompleted = bool
   }
 }
