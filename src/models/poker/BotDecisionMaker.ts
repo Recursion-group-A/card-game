@@ -2,8 +2,8 @@ import Card from '@/models/common/Card'
 import Hand from '@/models/common/Hand'
 import PokerPlayer from '@/models/poker/PokerPlayer'
 import PokerTable from '@/models/poker/PokerTable'
-import PokerRound from '@/types/poker/round-types'
-import PokerHand from '@/types/poker/hand-types'
+import PokerRounds from '@/types/poker/round-types'
+import PokerHands from '@/types/poker/hand-types'
 import PokerActions from '@/types/poker/action-types'
 import PokerHandEvaluator from '@/models/poker/PokerHandEvaluator'
 
@@ -23,19 +23,19 @@ export default class BotDecisionMaker {
       return PokerActions.Call
     }
 
-    const handRank: PokerHand = PokerHandEvaluator.evaluateHand(
+    const handRank: PokerHands = PokerHandEvaluator.evaluateHand(
       player.hand.cards,
       this.table.communityCards.cards
     )
 
     switch (this.table.round) {
-      case PokerRound.PreFlop:
+      case PokerRounds.PreFlop:
         return this.decidePreFlopAction(player, handRank)
-      case PokerRound.Flop:
+      case PokerRounds.Flop:
         return this.decideFlopAction(handRank)
-      case PokerRound.Turn:
+      case PokerRounds.Turn:
         return this.decideTurnAction(handRank)
-      case PokerRound.River:
+      case PokerRounds.River:
         return this.decideRiverAction(handRank)
       default:
         throw new Error('Unknown PokerRound')
@@ -44,45 +44,45 @@ export default class BotDecisionMaker {
 
   private decidePreFlopAction(
     player: PokerPlayer,
-    rank: PokerHand
+    rank: PokerHands
   ): PokerActions {
-    if (rank >= PokerHand.OnePair) {
+    if (rank >= PokerHands.OnePair) {
       return this.decideActionForOnePair(player.hand)
     }
     return this.decideActionForNoPair(player.hand)
   }
 
-  private decideFlopAction(rank: PokerHand): PokerActions {
+  private decideFlopAction(rank: PokerHands): PokerActions {
     const someoneRaised: boolean = this.table.anyoneRaisedThisRound()
 
-    if (rank >= PokerHand.ThreeOfAKind && !someoneRaised) {
+    if (rank >= PokerHands.ThreeOfAKind && !someoneRaised) {
       return PokerActions.Raise
     }
-    if (someoneRaised && rank <= PokerHand.HighCard) {
+    if (someoneRaised && rank <= PokerHands.HighCard) {
       return PokerActions.Fold
     }
     return PokerActions.Call
   }
 
-  private decideTurnAction(rank: PokerHand): PokerActions {
+  private decideTurnAction(rank: PokerHands): PokerActions {
     const someoneRaised: boolean = this.table.anyoneRaisedThisRound()
 
-    if (rank >= PokerHand.Straight && !someoneRaised) {
+    if (rank >= PokerHands.Straight && !someoneRaised) {
       return PokerActions.Raise
     }
-    if (someoneRaised && rank <= PokerHand.HighCard) {
+    if (someoneRaised && rank <= PokerHands.HighCard) {
       return PokerActions.Fold
     }
     return PokerActions.Call
   }
 
-  private decideRiverAction(rank: PokerHand): PokerActions {
+  private decideRiverAction(rank: PokerHands): PokerActions {
     const someoneRaised: boolean = this.table.anyoneRaisedThisRound()
 
-    if (rank >= PokerHand.Flush && !someoneRaised) {
+    if (rank >= PokerHands.Flush && !someoneRaised) {
       return PokerActions.Raise
     }
-    if (someoneRaised && rank <= PokerHand.OnePair) {
+    if (someoneRaised && rank <= PokerHands.OnePair) {
       return PokerActions.Fold
     }
     return PokerActions.Call

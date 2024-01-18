@@ -1,6 +1,7 @@
 import Player from '@/models/common/Player'
 import BlackjackHand from '@/models/blackjack/BlackjackHand'
 import PlayerTypes from '@/types/common/player-types'
+import { ParticipantStatuses } from '@/types/blackjack/participant-status-types'
 import { PlayerStatus } from '@/types/blackjack/player-status-types'
 import GameResult from '@/types/blackjack/game-result-types'
 import HouseStatus from '@/types/blackjack/house-status-types'
@@ -8,7 +9,7 @@ import HouseStatus from '@/types/blackjack/house-status-types'
 export default class BlackjackPlayer extends Player<BlackjackHand> {
   private _currentTurn: number
 
-  private _status: PlayerStatus
+  private _status: ParticipantStatuses
 
   private _actionCompleted: boolean
 
@@ -19,7 +20,9 @@ export default class BlackjackPlayer extends Player<BlackjackHand> {
 
     this._hand = this.generateHand()
     this._currentTurn = 1
-    this._status = PlayerStatus.Wait
+
+    this._status = ParticipantStatuses.Wait
+
     this._actionCompleted = false
     this._gameResult = GameResult.Draw
 
@@ -69,18 +72,18 @@ export default class BlackjackPlayer extends Player<BlackjackHand> {
   }
 
   public bust(): void {
-    this._status = PlayerStatus.Bust
-    this._actionCompleted = true
+    this._status = ParticipantStatuses.Bust
   }
 
   public stand(): void {
-    this._status = PlayerStatus.Stand
+    this._status = ParticipantStatuses.Stand
     this._actionCompleted = true
   }
 
   public double(): void {
     this.placeBet(this.bet)
-    this._status = PlayerStatus.DoubleDown
+
+    this._status = ParticipantStatuses.DoubleDown
     this._actionCompleted = true
   }
 
@@ -89,8 +92,9 @@ export default class BlackjackPlayer extends Player<BlackjackHand> {
 
     this.subtractBet(Math.floor(currentBet / 2))
     this.addChips(Math.floor(currentBet / 2))
-    this._status = PlayerStatus.Surrender
+    this._status = ParticipantStatuses.Surrender
     this._actionCompleted = true
+
   }
 
   public blackjack(): void {
@@ -133,11 +137,11 @@ export default class BlackjackPlayer extends Player<BlackjackHand> {
     this._currentTurn = numOfTurns
   }
 
-  get status(): PlayerStatus {
+  get status(): ParticipantStatuses {
     return this._status
   }
 
-  set status(playerStatus: PlayerStatus) {
+  set status(playerStatus: ParticipantStatuses) {
     this._status = playerStatus
   }
 

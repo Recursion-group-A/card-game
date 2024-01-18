@@ -7,6 +7,7 @@ import HouseView from '@/phaser/blackjack/HouseView'
 import BlackjackTable from '@/models/blackjack/BlackjackTable'
 import PlayerTypes from '@/types/common/player-types'
 import BlackjackActions from '@/types/blackjack/action-types'
+import { ParticipantStatuses } from '@/types/blackjack/participant-status-types'
 
 export default class TableView extends Phaser.GameObjects.Container {
   private readonly _tableModel: BlackjackTable

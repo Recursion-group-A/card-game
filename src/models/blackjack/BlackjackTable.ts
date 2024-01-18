@@ -2,7 +2,7 @@ import House from '@/models/blackjack/House'
 import BlackjackPlayer from '@/models/blackjack/BlackjackPlayer'
 import Table from '@/models/common/Table'
 import BlackjackHand from '@/models/blackjack/BlackjackHand'
-import PLAYERTYPE from '@/types/common/player-types'
+import PlayerTypes from '@/types/common/player-types'
 import { GamePhases } from '@/types/common/game-phase-types'
 import { GameTypes } from '@/types/common/game-types'
 import HouseStatus from '@/types/blackjack/house-status-types'
@@ -24,7 +24,6 @@ export default class BlackjackTable extends Table<
 
     this._players = this.generatePlayers(5)
     this._house = new House()
-    this._betDenominations = [5, 20, 50, 100]
     this._gamePhase = GamePhases.Betting
     this._userBetCompleted = false
   }
@@ -93,9 +92,9 @@ export default class BlackjackTable extends Table<
     for (let i: number = 0; i < numOfPlayers; i += 1) {
       const index: number = i > 2 ? i : i + 1
       if (i === 2) {
-        players.push(new BlackjackPlayer(PLAYERTYPE.Player, 'you'))
+        players.push(new BlackjackPlayer(PlayerTypes.Player, 'you'))
       } else {
-        players.push(new BlackjackPlayer(PLAYERTYPE.Ai, `bot${index}`))
+        players.push(new BlackjackPlayer(PlayerTypes.Ai, `bot${index}`))
       }
     }
     return players

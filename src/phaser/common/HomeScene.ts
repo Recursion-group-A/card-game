@@ -7,13 +7,14 @@ export default class HomeScene extends Phaser.Scene {
 
   preload(): void {
     this.load.setBaseURL('../../assets/')
-    this.load.image('home-table', 'home.png')
-    this.load.image('button', 'Rect-Dark-Default.png')
+    this.load.image('home', 'ui/home.png')
+    this.load.image('button', 'ui/button.png')
+    this.load.audio('retro', 'sounds/retro-sound.wav')
   }
 
   create(): void {
     const { width, height } = this.cameras.main
-    this.add.image(width / 2, height / 2, 'home-table')
+    this.add.image(width / 2, height / 2, 'home')
     this.add
       .text(width / 2, height / 4, 'CARD GAME', { font: '75px' })
       .setOrigin(0.5)
@@ -30,7 +31,10 @@ export default class HomeScene extends Phaser.Scene {
       .setInteractive({ useHandCursor: true })
     button.on('pointerover', () => button.setScale(1.5, 1.2))
     button.on('pointerout', () => button.setScale(1.4, 1.1))
-    button.on('pointerdown', () => this.startPreload(`${game}Scene`))
+    button.on('pointerdown', () => {
+      this.sound.add('retro').setVolume(0.1).play()
+      this.startPreload(`${game}Scene`)
+    })
 
     const text: Phaser.GameObjects.Text = this.add
       .text(x, y, game.toUpperCase())

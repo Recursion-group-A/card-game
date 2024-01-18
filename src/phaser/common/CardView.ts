@@ -38,22 +38,4 @@ export default class CardView extends Phaser.GameObjects.Image {
       }
     })
   }
-
-  public close(): void {
-    this.scene.tweens.add({
-      targets: this,
-      scaleX: 0,
-      duration: 150,
-      ease: 'Linear',
-      onComplete: (): void => {
-        this.setTexture('card-back')
-        this.scene.tweens.add({
-          targets: this,
-          scaleX: 1,
-          duration: 150,
-          ease: 'Linear'
-        })
-      }
-    })
-  }
 }

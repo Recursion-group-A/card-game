@@ -1,6 +1,6 @@
 import Hand from '@/models/common/Hand'
 import Player from '@/models/common/Player'
-import PokerHand from '@/types/poker/hand-types'
+import PokerHands from '@/types/poker/hand-types'
 import PlayerTypes from '@/types/common/player-types'
 import PokerActions from '@/types/poker/action-types'
 
@@ -9,7 +9,7 @@ export default class PokerPlayer extends Player<Hand> {
 
   private _lastAction: PokerActions
 
-  private _bestHand: PokerHand | undefined
+  private _bestHand: PokerHands | undefined
 
   constructor(playerType: PlayerTypes, playerName: string) {
     super(playerType, playerName)
@@ -40,11 +40,11 @@ export default class PokerPlayer extends Player<Hand> {
     this._lastAction = action
   }
 
-  get bestHand(): PokerHand | undefined {
+  get bestHand(): PokerHands | undefined {
     return this._bestHand
   }
 
-  set bestHand(bestHand: PokerHand | undefined) {
+  set bestHand(bestHand: PokerHands | undefined) {
     this._bestHand = bestHand
   }
 }

@@ -15,12 +15,10 @@ export default abstract class BaseScene extends Phaser.Scene {
 
   protected readonly isGameActive: boolean
 
-  private _isSoundOn: boolean
+  protected _isSoundOn: boolean
 
   protected constructor(key: string) {
     super(key)
-
-    this.isGameActive = true
     this._isSoundOn = true
   }
 

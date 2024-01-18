@@ -1,4 +1,4 @@
-enum PokerRound {
+enum PokerRounds {
   PreFlop = 'pre-flop',
   Flop = 'flop',
   Turn = 'turn',
@@ -6,4 +6,4 @@ enum PokerRound {
   Showdown = 'showdown'
 }
 
-export default PokerRound
+export default PokerRounds

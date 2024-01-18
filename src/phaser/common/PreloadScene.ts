@@ -17,7 +17,7 @@ export default class PreloadScene extends Phaser.Scene {
     const { width, height } = this.cameras.main
 
     this.load.setBaseURL('../../assets/')
-    this.load.image('table', 'table.jpeg')
+    this.load.image('table', 'ui/table.jpeg')
 
     // 全種類のカードを読み込む
     SUITS_FOR_IMAGE.forEach((suit: string) => {
@@ -30,12 +30,25 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image('card-back', 'cards/card_back.png')
     this.load.image('joker-black', 'cards/card_joker_black.png')
     this.load.image('joker-red', 'cards/card_joker_red.png')
-    this.load.image('dealer-btn', 'dealerBtn.png')
-    this.load.image('chip', 'coin-1-32.png')
-    this.load.image('btn-dark', 'Rect-Dark-Default.png')
-    this.load.image('home-button', 'home_button.png')
-    this.load.image('sound-on', 'sound_on.png')
-    this.load.image('sound-off', 'sound_off.png')
+    this.load.image('chip', 'ui/coin.png')
+    this.load.image('dealer-btn', 'ui/dealer_button.png')
+    this.load.image('btn-dark', 'ui/button.png')
+    this.load.image('home-button', 'ui/home_button.png')
+    this.load.image('sound-on', 'ui/sound_on.png')
+    this.load.image('sound-off', 'ui/sound_off.png')
+
+    this.load.audio('click', 'sounds/click2.mp3')
+    this.load.audio('click3', 'sounds/click3.wav')
+    this.load.audio('card-sound', 'sounds/card-sound.mp3')
+    this.load.audio('card-flip1', 'sounds/card-flip1.mp3')
+    this.load.audio('card-flip2', 'sounds/card-flip2.mp3')
+    this.load.audio('card-flip3', 'sounds/card-flip3.mp3')
+    this.load.audio('bet', 'sounds/bet.mp3')
+    this.load.audio('retro', 'sounds/retro-sound.wav')
+    this.load.audio('hit', 'sounds/hit.wav')
+    this.load.audio('fold', 'sounds/fold.wav')
+    this.load.audio('negative', 'sounds/negative-sound.wav')
+    this.load.audio('money', 'sounds/money.wav')
 
     const progressBar: Phaser.GameObjects.Graphics = this.add.graphics()
     const progressBox: Phaser.GameObjects.Graphics = this.add.graphics()
