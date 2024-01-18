@@ -11,10 +11,11 @@ export default class BaseScene extends Phaser.Scene {
 
   protected _soundButton: Phaser.GameObjects.Image | undefined
 
-  private _isSoundOn: boolean
+  protected _isSoundOn: boolean
 
   constructor(key: string) {
     super(key)
+
     this._isSoundOn = true
   }
 

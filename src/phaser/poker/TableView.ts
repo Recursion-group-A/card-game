@@ -61,7 +61,11 @@ export default class TableView extends Phaser.GameObjects.Container {
     this._playerViews[this._tableModel.dealerIndex].addDealerBtn()
   }
 
-  public revealUserHand(): void {
+  public revealUserHand(isSoundOn: boolean): void {
+    if (isSoundOn) {
+      this.scene.sound.add('card-flip2').setVolume(0.5).play()
+    }
+
     const user: PlayerView = this._playerViews.filter(
       (player: PlayerView) =>
         player.playerModel.playerType === PlayerTypes.Player
@@ -110,23 +114,36 @@ export default class TableView extends Phaser.GameObjects.Container {
   }
 
   // eslint-disable-next-line
-  public executeActionEffect(player: PlayerView, action: PokerActions): void {
+  public executeActionEffect(
+    player: PlayerView,
+    action: PokerActions,
+    isSoundOn: boolean
+  ): void {
     player.displayActionText(action)
 
+    let sound: string = ''
     switch (action) {
       case PokerActions.Fold:
+        sound = 'negative'
         player.removeAllHand()
         break
       case PokerActions.Call:
         player.animatePlaceBet()
+        sound = 'bet'
         break
       case PokerActions.Raise:
         player.animatePlaceBet()
+        sound = 'bet'
         break
       case PokerActions.Check:
+        sound = 'click3'
         break
       default:
         throw new Error(`Unknown action: ${action}`)
+    }
+
+    if (isSoundOn) {
+      this.scene.sound.add(sound).setVolume(0.2).play()
     }
   }
 
