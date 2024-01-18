@@ -3,19 +3,21 @@ import Card from '@/models/common/Card'
 import DeckView from '@/phaser/common/DeckView'
 import BlackjackPlayer from '@/models/blackjack/BlackjackPlayer'
 import PlayerView from '@/phaser/blackjack/PlayerView'
+import HouseView from '@/phaser/blackjack/HouseView'
 import BlackjackTable from '@/models/blackjack/BlackjackTable'
 import PlayerTypes from '@/types/common/player-types'
 import BlackjackActions from '@/types/blackjack/action-types'
-import { PlayerStatus } from '@/types/blackjack/player-status-types'
 
 export default class TableView extends Phaser.GameObjects.Container {
   private readonly _tableModel: BlackjackTable
 
-  private readonly _playerModels: BlackjackPlayer[] = []
-
   private readonly _playerViews: PlayerView[] = []
 
+  private readonly _houseView: HouseView[] = []
+
   private readonly _deckView: DeckView
+
+  private readonly _betButtons: Phaser.GameObjects.Container
 
   private readonly _actionButtons: Phaser.GameObjects.Container
 
@@ -27,213 +29,79 @@ export default class TableView extends Phaser.GameObjects.Container {
     super(scene)
 
     this._tableModel = tableModel
-
-    this._playerModels = []
     this._playerViews = []
-    this._deckModel = this._tableModel.deck
     this._deckView = this.createDeckView()
+    this._betButtons = this.scene.add.container()
     this._actionButtons = this.scene.add.container()
-
-    this.add([this._deckView])
-
-    this._playerModels = this._tableModel.players
-
     this.createPlayerViews()
+    this.createHouseView()
 
-    this._deckModel.shuffle()
+    this.add([this._deckView, this._betButtons, this._actionButtons])
     scene.add.existing(this)
-  }
-
-  private createPlayerViews(): void {
-    const playersPos: { x: number; y: number }[] = [
-      { x: 750, y: 100 }, // プレイヤー
-      { x: 750, y: 350 },
-      { x: 450, y: 550 },
-      { x: 150, y: 350 },
-      { x: 150, y: 100 },
-      { x: 450, y: 100 }
-    ]
-
-    this._playerModels.forEach((player: BlackjackPlayer, index: number) => {
-      if (player.playerType === PlayerTypes.Ai) {
-        player.decideAiPlayerBetAmount()
-      }
-      const playerView: PlayerView = new PlayerView(
-        this.scene,
-        player,
-        playersPos[index]
-      )
-      this._playerViews.push(playerView)
-      this.add(playerView)
-    })
   }
 
   private createDeckView(): DeckView {
     return new DeckView(this.scene, this._sceneWidth / 2, this._sceneHeight / 2)
   }
 
-  public dealCardAnimation(): void {
-    const delayPerCard: number = 150
+  private createPlayerViews(): void {
+    const playersPos: { x: number; y: number }[] = [
+      { x: 750, y: 100 },
+      { x: 750, y: 350 },
+      { x: 450, y: 550 },
+      { x: 150, y: 350 },
+      { x: 150, y: 100 }
+    ]
 
-    for (let i: number = 0; i < 2; i += 1) {
-      this._playerModels.forEach((player: BlackjackPlayer, index: number) => {
-        const card: Card = this._tableModel.drawCard()
-        player.addHand(card)
-
-        const deckPosition: { x: number; y: number } = {
-          x: this._deckView.x,
-          y: this._deckView.y - 2 * 8
-        }
-        const delay: number =
-          i * delayPerCard * this._playerModels.length + index * delayPerCard
-
-        this._playerViews[index].addCardToHand(deckPosition, card, i, delay)
-      })
-    }
-  }
-
-  public addCard(index: number): void {
-    const delayPerCard: number = 150
-
-    const card: Card = this._tableModel.drawCard()
-    const handLength: number = this._playerModels[index].hand.getCardCount()
-
-    if (!card) {
-      throw new Error('Deck is empty.')
-    }
-
-    this._playerModels[index].addHand(card)
-
-    const deckPosition: { x: number; y: number } = {
-      x: this._deckView.x,
-      y: this._deckView.y - 2 * 8
-    }
-    const delay: number =
-      handLength * delayPerCard * this._playerModels.length +
-      index * delayPerCard
-
-    this._playerViews[index].addCardToHand(
-      deckPosition,
-      card,
-      handLength,
-      delay
-    )
-  }
-
-  public updateBlackjackPlayerStates(): void {
-    this._playerModels.forEach(
-      (playerModel: BlackjackPlayer, index: number) => {
-        if (playerModel.isBlackjack()) {
-          playerModel.status = PlayerStatus.Blackjack //eslint-disable-line
-          this._playerViews[index].updateStates()
-          this._playerViews[index].changeBlackjackColor()
-        }
+    this._tableModel.players.forEach(
+      (player: BlackjackPlayer, index: number) => {
+        const playerView: PlayerView = new PlayerView(
+          this.scene,
+          player,
+          playersPos[index]
+        )
+        this._playerViews.push(playerView)
+        this.add(playerView)
       }
     )
   }
 
-  public updatePlayersStates(): void {
-    this._playerViews.forEach((playerView: PlayerView) => {
-      playerView.updateStates()
-    })
-  }
+  private createHouseView(): void {
+    const housePos: { x: number; y: number } = { x: 450, y: 100 }
 
-  public updatePlayersScore(): void {
-    this._playerViews.forEach((playerView) => {
-      playerView.updateScore()
-    })
-  }
-
-  public revealUserHand(): void {
-    this._playerViews.forEach((playerView: PlayerView) => {
-      playerView.revealHand()
-    })
-  }
-
-  public aiPlayerProcess(): void {
-    this._playerModels.forEach(
-      (playerModel: BlackjackPlayer, index: number) => {
-        if (playerModel.playerType === PlayerTypes.Ai) {
-          while (playerModel.getHandTotalScore() < 17) {
-            this.addCard(index)
-            playerModel.incrementCurrentTurn()
-
-            if (playerModel.getHandTotalScore() > 21) {
-              playerModel.status = PlayerStatus.Bust // eslint-disable-line
-              break
-            } else if (playerModel.getHandTotalScore() >= 17) {
-              playerModel.status = PlayerStatus.Stand // eslint-disable-line
-              break
-            }
-          }
-        }
-      }
+    const houseView: HouseView = new HouseView(
+      this.scene,
+      this._tableModel.house,
+      housePos
     )
+    this._houseView.push(houseView)
+    this.add(houseView)
   }
 
-  public async startGame(): Promise<void> {
-    this.dealCardAnimation()
-    this.aiPlayerProcess()
-    this.updateBlackjackPlayerStates()
-    this.updatePlayersScore()
-    this.revealUserHand()
-
-    const player: PlayerView = this._playerViews.filter(
-      (playerView) => playerView.playerModel.playerType === PlayerTypes.Player
-    )[0]
-
-    this.displayActionButtons(player)
-
-    const action: BlackjackActions | undefined = await this.getUserAction()
-    console.log(action)
-  }
-
-  public async getUserAction(): Promise<BlackjackActions> {
-    return new Promise((resolve) => {
-      this._actionButtons.each((child: Phaser.GameObjects.Container) => {
-        child.list[0].on('pointerdown', () => {
-          resolve(child.list[1].name as BlackjackActions)
-        })
-      })
-    })
-  }
-
-  public displayActionButtons(player: PlayerView): void {
+  public displayButtons(
+    userView: PlayerView,
+    content: string | BlackjackActions,
+    n: number,
+    type: string
+  ) {
     const offset: number = 120
     const wspace: number = 120
     const hspace: number = 180
 
-    // ボタン表示の条件分岐
-
     this.createButton(
-      player.x - offset,
-      player.y + hspace,
-      BlackjackActions.Hit
+      userView.x + wspace * n - offset,
+      userView.y + hspace,
+      content,
+      type
     )
-    this.createButton(
-      player.x + wspace - offset,
-      player.y + hspace,
-      BlackjackActions.Stand
-    )
-    this.createButton(
-      player.x + wspace * 2 - offset,
-      player.y + hspace,
-      BlackjackActions.Double
-    )
-    this.createButton(
-      player.x + wspace * 3 - offset,
-      player.y + hspace,
-      BlackjackActions.Surrender
-    )
-
-    this.setVisibleActionButtons(true)
   }
 
-  public setVisibleActionButtons(bool: boolean) {
-    this._actionButtons.setVisible(bool)
-  }
-
-  private createButton(x: number, y: number, textContent: string): void {
+  private createButton(
+    x: number,
+    y: number,
+    textContent: string,
+    type: string
+  ): void {
     const container: Phaser.GameObjects.Container = this.scene.add.container()
     const button: Phaser.GameObjects.Image = this.scene.add
       .image(x, y, 'btn-dark')
@@ -249,7 +117,9 @@ export default class TableView extends Phaser.GameObjects.Container {
     text.setName(textContent)
 
     container.add([button, text])
-    this._actionButtons.add(container)
+
+    if (type === 'bet') this._betButtons.add(container)
+    else if (type === 'action') this._actionButtons.add(container)
 
     button.on('pointerover', () => {
       button.setScale(1.4, 0.9)
@@ -259,7 +129,237 @@ export default class TableView extends Phaser.GameObjects.Container {
     })
   }
 
+  public getUserBetInfo(): void {
+    this._betButtons.each((child: Phaser.GameObjects.Container) => {
+      child.list[0].on('pointerdown', () => {
+        const betInfo: string = child.list[1].name
+
+        if (betInfo === 'OK') {
+          this.decideBetAmount()
+        } else if (betInfo === 'RESET') {
+          this.resetBetAmount()
+        } else if (betInfo === 'ALL') {
+          this.allIn()
+        } else {
+          this.addBet(Number(betInfo))
+        }
+      })
+    })
+  }
+
+  public async getUserAction(): Promise<void> {
+    this._actionButtons.each((child: Phaser.GameObjects.Container) => {
+      child.list[0].on('pointerdown', () => {
+        const action: string = child.list[1].name
+
+        const userView: PlayerView = this.userView()
+        const userModel: BlackjackPlayer = userView.playerModel
+
+        if (action === 'STAND') {
+          this.standProcess(userView, userModel)
+        } else if (action === 'DOUBLE') {
+          this.doubleProcess(userView, userModel)
+        } else if (action === 'SURRENDER') {
+          this.surrenderProcess(userView, userModel)
+        } else {
+          this.hitProcess(userView, userModel)
+        }
+      })
+    })
+  }
+
+  public standProcess(userView: PlayerView, userModel: BlackjackPlayer): void {
+    // if (confirm('STANDしますか？')) {}
+
+    userModel.stand()
+    userView.updateStatus()
+
+    this.clearActionButtons()
+  }
+
+  public doubleProcess(userView: PlayerView, userModel: BlackjackPlayer): void {
+    // if (!userModel.canDouble()) alert('DOUBLEはできません。')
+    // if (confirm('DOUBLEしますか？)) {}
+
+    if (userModel.canDouble()) {
+      userModel.double()
+
+      const card: Card = this._tableModel.drawCard()
+      userModel.addHand(card)
+      userView.animateAddHand(
+        this._deckView.x,
+        this._deckView.y - 14,
+        card,
+        userModel.hand.cards.length - 1
+      )
+      userView.revealLastHand()
+
+      if (userModel.isBust()) {
+        userModel.bust()
+      }
+      userView.updateAll()
+
+      this.clearActionButtons()
+    }
+  }
+
+  public surrenderProcess(
+    userView: PlayerView,
+    userModel: BlackjackPlayer
+  ): void {
+    // if (!userModel.canSurrender()) alert('SURRENDERはできません。')
+    // if (confirm('SURRENDERしますか？')) {}
+
+    if (userModel.canSurrender()) {
+      userModel.surrender()
+      userView.updateStatus()
+      userView.updateChips()
+      userView.updateBet()
+
+      this.clearActionButtons()
+    }
+  }
+
+  public hitProcess(userView: PlayerView, userModel: BlackjackPlayer): void {
+    // if (!userModel.canHit()) alert('HITはできません。')
+    // if (confirm('HITしますか？')) {}
+
+    if (userModel.canHit()) {
+      const card: Card = this._tableModel.drawCard()
+      userModel.addHand(card)
+      userModel.incrementCurrentTurn()
+      userView.animateAddHand(
+        this._deckView.x,
+        this._deckView.y - 14,
+        card,
+        userModel.hand.cards.length - 1
+      )
+      userView.revealLastHand()
+      userView.updateScore()
+
+      if (userModel.getHandTotalScore() === 21) {
+        userModel.stand()
+        userView.updateStatus()
+
+        this.clearActionButtons()
+      } else if (userModel.isBust()) {
+        userModel.bust()
+        userView.updateStatus()
+
+        this.clearActionButtons()
+      }
+    }
+  }
+
+  public decideBetAmount(): void {
+    const userModel: BlackjackPlayer = this.userModel()
+
+    // if (userModel.bet <= 0) {
+    //   alert('Bet額は0以上にしてください。')
+    // } else if (
+    //   confirm('Bet額: ' + String(userModel.bet) + 'で確定しますか？')
+    // ) {
+    //   this.clearBetButtons()
+    //   this._tableModel.userBetCompleted = true
+    // }
+
+    if (userModel.bet > 0) {
+      this.clearBetButtons()
+      this._tableModel.userBetCompleted = true
+    }
+  }
+
+  public resetBetAmount(): void {
+    const userView: PlayerView = this.userView()
+    const userModel: BlackjackPlayer = userView.playerModel
+
+    userModel.addChips(userModel.bet)
+    userModel.resetBet()
+    userView.updateBet()
+    userView.updateChips()
+  }
+
+  public allIn(): void {
+    const userView: PlayerView = this.userView()
+    const userModel: BlackjackPlayer = userView.playerModel
+
+    userModel.placeBet(userModel.chips)
+    userView.updateBet()
+    userView.updateChips()
+  }
+
+  public addBet(amount: number): void {
+    const userView: PlayerView = this.userView()
+    const userModel: BlackjackPlayer = userView.playerModel
+    const amountAndBet: number = userModel.bet + amount
+
+    if (amountAndBet <= userModel.chips) {
+      userModel.subtractChips(amount)
+      userModel.addBet(amount)
+      userView.updateBet()
+      userView.updateChips()
+    }
+
+    // try {
+    //   userModel.subtractChips(amount)
+    //   userModel.addBet(amount)
+    //   userView.updateBet()
+    //   userView.updateChips()
+    // } catch (error) {
+    //   alert('これ以上Betすることはできません。')
+    // }
+  }
+
+  public clearBetButtons(): void {
+    this._betButtons.each((child: Phaser.GameObjects.Container) => {
+      child.destroy()
+    })
+
+    this._betButtons.removeAll()
+  }
+
+  public clearActionButtons(): void {
+    this._actionButtons.each((child: Phaser.GameObjects.Container) => {
+      child.destroy()
+    })
+
+    this._actionButtons.removeAll()
+  }
+
+  public userModel(): BlackjackPlayer {
+    const userModel: BlackjackPlayer | undefined =
+      this._tableModel.players.find(
+        (player) => player.playerType === PlayerTypes.Player
+      )
+
+    if (!userModel) {
+      throw new Error('Unable to retrieve user model.')
+    }
+
+    return userModel
+  }
+
+  public userView(): PlayerView {
+    const userView: PlayerView | undefined = this._playerViews.find(
+      (playerView) => playerView.playerModel.playerType === PlayerTypes.Player
+    )
+
+    if (!userView) {
+      throw new Error('Unable to retrieve user view.')
+    }
+
+    return userView
+  }
+
   get playerViews(): PlayerView[] {
     return this._playerViews
+  }
+
+  get houseView(): HouseView[] {
+    return this._houseView
+  }
+
+  get deckView(): DeckView {
+    return this._deckView
   }
 }

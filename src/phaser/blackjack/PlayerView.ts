@@ -6,17 +6,19 @@ import BlackjackPlayer from '@/models/blackjack/BlackjackPlayer'
 export default class PlayerView extends Phaser.GameObjects.Container {
   private readonly _playerModel: BlackjackPlayer
 
-  private readonly _handCardViews: CardView[] = []
+  private readonly _handCardViews: Phaser.GameObjects.Container
 
   private readonly _playerNameText: Phaser.GameObjects.Text
 
-  private readonly _statesText: Phaser.GameObjects.Text
-
-  private readonly _scoreText: Phaser.GameObjects.Text
+  private readonly _betText: Phaser.GameObjects.Text
 
   private readonly _chipsText: Phaser.GameObjects.Text
 
-  private readonly _betText: Phaser.GameObjects.Text
+  private readonly _resultText: Phaser.GameObjects.Text
+
+  private readonly _statusText: Phaser.GameObjects.Text
+
+  private readonly _scoreText: Phaser.GameObjects.Text
 
   private _dealerBtn: Phaser.GameObjects.Image | undefined | null
 
@@ -28,6 +30,7 @@ export default class PlayerView extends Phaser.GameObjects.Container {
     super(scene, playerPos.x, playerPos.y)
     this._playerModel = playerModel
 
+    this._resultText = this.scene.add.text(5, -60, `RESULT:`)
     this._playerNameText = this.scene.add.text(
       40,
       0,
@@ -43,7 +46,7 @@ export default class PlayerView extends Phaser.GameObjects.Container {
       -32, // カードの高さ → 64
       `CHIPS: ${this._playerModel.chips}`
     )
-    this._statesText = this.scene.add.text(
+    this._statusText = this.scene.add.text(
       5,
       64 + 40,
       `STATES: ${this._playerModel.status}`
@@ -58,14 +61,18 @@ export default class PlayerView extends Phaser.GameObjects.Container {
       }
     )
 
+    this._handCardViews = this.scene.add.container()
+
     this.add([
+      this._resultText,
       this._playerNameText,
       this._betText,
       this._chipsText,
-      this._statesText,
-      this._scoreText
+      this._statusText,
+      this._scoreText,
+      this._handCardViews
     ])
-    this.updateHand()
+    // this.updateHand()
 
     scene.add.existing(this)
   }
@@ -74,22 +81,23 @@ export default class PlayerView extends Phaser.GameObjects.Container {
     return this._playerModel
   }
 
-  get handCardViews(): CardView[] {
-    return this._handCardViews
-  }
-
   public changeBlackjackColor(): void {
     this._playerNameText.setColor('#e6b422')
   }
 
-  public update(): void {
-    this._statesText.setText(`STATES: ${this._playerModel.status}`)
-    this._chipsText.setText(`CHIPS: ${this._playerModel.chips}`)
-    this.updateHand()
+  public updateGameResult(): void {
+    this._resultText.setText(`RESULT: ${this._playerModel.gameResult}`)
   }
 
-  public updateStates(): void {
-    this._statesText.setText(`STATES: ${this._playerModel.status}`)
+  public updateAll(): void {
+    this.updateStatus()
+    this.updateChips()
+    this.updateBet()
+    this.updateScore()
+  }
+
+  public updateStatus(): void {
+    this._statusText.setText(`STATES: ${this._playerModel.status}`)
   }
 
   public updateChips(): void {
@@ -104,19 +112,6 @@ export default class PlayerView extends Phaser.GameObjects.Container {
     this._scoreText.setText(`SCORE: ${this._playerModel.getHandTotalScore()}`)
   }
 
-  private updateHand(): void {
-    this.removeAllCards()
-
-    const hand = this._playerModel.hand.cards
-    hand.forEach((card: Card, index: number) => {
-      const cardView: CardView = new CardView(this.scene, 0, 0, card)
-      cardView.x = index * 25 + 45
-      cardView.y = this._playerNameText.y + 64
-      this.add(cardView)
-      this._handCardViews.push(cardView)
-    })
-  }
-
   private removeAllCards(): void {
     this.remove(
       this.list.filter(
@@ -126,31 +121,19 @@ export default class PlayerView extends Phaser.GameObjects.Container {
     )
   }
 
-  public addCardToHand(
-    deckPosition: { x: number; y: number },
-    card: Card,
-    i: number,
-    delay: number
-  ): void {
-    const cardView: CardView = new CardView(
-      this.scene,
-      deckPosition.x,
-      deckPosition.y,
-      card
-    )
-    this.scene.add.existing(cardView)
-    this._handCardViews.push(cardView)
-    this.updateScore()
-    this.updateStates()
-
-    setTimeout(() => {
-      cardView.animateCardMove(this.x + (i + 1) * 25 + 20, this.y + 60)
-    }, delay)
+  public revealHand(): void {
+    this._handCardViews.each((child: CardView) => {
+      child.open()
+    })
   }
 
-  public revealHand(): void {
-    this._handCardViews.forEach((cardView: CardView) => {
-      cardView.open()
+  public revealLastHand(): void {
+    let i = 0
+    this._handCardViews.each((child: CardView) => {
+      i += 1
+      if (i >= this._handCardViews.length) {
+        child.open()
+      }
     })
   }
 
@@ -191,8 +174,11 @@ export default class PlayerView extends Phaser.GameObjects.Container {
     })
   }
 
-  // public animatePlaceBet(amount: number): void {
-  //   // this._playerModel.placeBet(amount)
-  //   this._chipsText.setText(`CHIPS: ${this._playerModel.getChips()}`)
-  // }
+  public animateAddHand(x: number, y: number, card: Card, i: number): void {
+    const cardView: CardView = new CardView(this.scene, x, y, card)
+
+    cardView.animateCardMove(this.x + (i + 1) * 25 + 20, this.y + 60)
+    this._handCardViews.add(cardView)
+    this.scene.add.existing(this._handCardViews)
+  }
 }
