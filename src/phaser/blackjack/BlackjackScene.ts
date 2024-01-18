@@ -60,7 +60,6 @@ export default class BlackjackScene extends BaseScene {
         }
       }
 
-      // 最初に一度実行する
       checkCompletion()
     })
   }
@@ -239,35 +238,6 @@ export default class BlackjackScene extends BaseScene {
       const aiPlayerModel: BlackjackPlayer = aiPlayerView.playerModel
       this.drawUntilSeventeen(aiPlayerModel, aiPlayerView)
     })
-
-    // for (const aiPlayerView of aiPlayerViews) {
-    //   const aiPlayerModel: BlackjackPlayer = aiPlayerView.playerModel
-    //   this.drawUntilSeventeen(aiPlayerModel, aiPlayerView)
-
-    //   // while (aiPlayerModel.getHandTotalScore() < 17) {
-    //   //   await delay(BlackjackScene.DELAY_TIME * 2)
-
-    //   //   const card: Card = this._tableModel.drawCard()
-    //   //   aiPlayerModel.addHand(card)
-    //   //   aiPlayerView.animateAddHand(
-    //   //     this._tableView!.deckView.x,
-    //   //     this._tableView!.deckView.y - 14,
-    //   //     card,
-    //   //     aiPlayerModel.hand.cards.length - 1
-    //   //   )
-    //   //   aiPlayerView.revealLastHand()
-
-    //   //   if (aiPlayerModel.getHandTotalScore() > 21) {
-    //   //     aiPlayerModel.bust()
-    //   //     aiPlayerView.updateStatus()
-    //   //   } else if (aiPlayerModel.getHandTotalScore() >= 17) {
-    //   //     aiPlayerModel.stand()
-    //   //     aiPlayerView.updateStatus()
-    //   //   }
-
-    //   //   aiPlayerView.updateScore()
-    //   // }
-    // }
   }
 
   private async houseProcess(): Promise<void> {
@@ -283,29 +253,6 @@ export default class BlackjackScene extends BaseScene {
       this._houseView[0].changeBlackjackColor()
     } else {
       this.drawUntilSeventeen(houseModel, this._houseView[0])
-      // while (houseModel.getHandTotalScore() < 17) {
-      //   await delay(BlackjackScene.DELAY_TIME * 2)
-
-      //   const card: Card = this._tableModel.drawCard()
-      //   houseModel.addHand(card)
-      //   this._houseView[0].animateAddHand(
-      //     this._tableView!.deckView.x,
-      //     this._tableView!.deckView.y - 14,
-      //     card,
-      //     houseModel.hand.cards.length - 1
-      //   )
-      //   this._houseView[0].revealLastHand()
-
-      //   if (houseModel.getHandTotalScore() > 21) {
-      //     houseModel.bust()
-      //     this._houseView[0].updateStatus()
-      //   } else if (houseModel.getHandTotalScore() >= 17) {
-      //     houseModel.stand()
-      //     this._houseView[0].updateStatus()
-      //   }
-
-      //   this._houseView[0].updateScore()
-      // }
     }
   }
 
@@ -347,4 +294,76 @@ export default class BlackjackScene extends BaseScene {
   protected prepareNextGame(): Promise<void> {
     return Promise.resolve(undefined)
   }
+
+  // アニメーションがうまく動くコード
+
+  // private async aiProcess(): Promise<void> {
+  //   const aiPlayerViews: PlayerView[] = this.getAiPlayersView()
+
+  //   for (const aiPlayerView of aiPlayerViews) {
+  //     const aiPlayerModel: BlackjackPlayer = aiPlayerView.playerModel
+
+  //     while (aiPlayerModel.getHandTotalScore() < 17) {
+  //       await delay(BlackjackScene.DELAY_TIME * 2)
+
+  //       const card: Card = this._tableModel.drawCard()
+  //       aiPlayerModel.addHand(card)
+  //       aiPlayerView.animateAddHand(
+  //         this._tableView!.deckView.x,
+  //         this._tableView!.deckView.y - 14,
+  //         card,
+  //         aiPlayerModel.hand.cards.length - 1
+  //       )
+  //       aiPlayerView.revealLastHand()
+
+  //       if (aiPlayerModel.getHandTotalScore() > 21) {
+  //         aiPlayerModel.bust()
+  //         aiPlayerView.updateStatus()
+  //       } else if (aiPlayerModel.getHandTotalScore() >= 17) {
+  //         aiPlayerModel.stand()
+  //         aiPlayerView.updateStatus()
+  //       }
+
+  //       aiPlayerView.updateScore()
+  //     }
+  //   }
+  // }
+
+  // private async houseProcess(): Promise<void> {
+  //   await BlackjackScene.waitForCompletion(() => this._tableModel.isHouseTurn())
+
+  //   await delay(BlackjackScene.DELAY_TIME)
+  //   this._houseView[0].revealLastHand()
+  //   this._houseView[0].updateStatus()
+  //   this._houseView[0].updateScore()
+
+  //   const { houseModel } = this._houseView[0]
+  //   if (houseModel.isBlackjack()) {
+  //     this._houseView[0].changeBlackjackColor()
+  //   } else {
+  //     while (houseModel.getHandTotalScore() < 17) {
+  //       await delay(BlackjackScene.DELAY_TIME * 2)
+
+  //       const card: Card = this._tableModel.drawCard()
+  //       houseModel.addHand(card)
+  //       this._houseView[0].animateAddHand(
+  //         this._tableView!.deckView.x,
+  //         this._tableView!.deckView.y - 14,
+  //         card,
+  //         houseModel.hand.cards.length - 1
+  //       )
+  //       this._houseView[0].revealLastHand()
+
+  //       if (houseModel.getHandTotalScore() > 21) {
+  //         houseModel.bust()
+  //         this._houseView[0].updateStatus()
+  //       } else if (houseModel.getHandTotalScore() >= 17) {
+  //         houseModel.stand()
+  //         this._houseView[0].updateStatus()
+  //       }
+
+  //       this._houseView[0].updateScore()
+  //     }
+  //   }
+  // }
 }
