@@ -41,11 +41,8 @@ export default class BlackjackScene extends BaseScene {
     await this.bettingProcess()
     await this.actingProcess()
     await this.evaluatingProcess()
-  }
-
-  private async bettingProcess(): Promise<void> {
-    this.createBetButtons()
-    this._tableView?.getUserBetInfo()
+    await this.settlementProcess()
+    await this.prepareNextGame()
   }
 
   private static async waitForCompletion(
@@ -64,6 +61,12 @@ export default class BlackjackScene extends BaseScene {
     })
   }
 
+  private async bettingProcess(): Promise<void> {
+    this.decideAiPlayersBetAmount()
+    this.createBetButtons()
+    this._tableView?.getUserBetInfo()
+  }
+
   private async actingProcess(): Promise<void> {
     await BlackjackScene.waitForCompletion(
       () => this._tableModel.userBetCompleted
@@ -77,7 +80,8 @@ export default class BlackjackScene extends BaseScene {
 
     this._tableModel.setPlayersStatus()
     this._tableModel.setHouseStatus()
-    this.updatePlayersDisplay()
+    this.updatePlayersStatus()
+    this.updatePlayersScore()
 
     await delay(BlackjackScene.DELAY_TIME)
     this.createActionButtons()
@@ -93,6 +97,46 @@ export default class BlackjackScene extends BaseScene {
 
     this._tableModel.gamePhase = GamePhases.Evaluating
     this._tableModel.evaluatingPlayers()
+
+    this.updatePlayersGameResult()
+    await delay(BlackjackScene.DELAY_TIME * 3)
+    this.removePlayersGameResult()
+  }
+
+  private async settlementProcess(): Promise<void> {
+    await BlackjackScene.waitForCompletion(
+      () => this._tableModel.evaluateCompleted
+    )
+
+    this._tableModel.gamePhase = GamePhases.Settlement
+    this._tableModel.settlementPlayers()
+
+    this.updatePlayersChips()
+    this.updatePlayersBet()
+  }
+
+  // eslint-disable-next-line
+  protected async prepareNextGame(): Promise<void> {
+    await BlackjackScene.waitForCompletion(
+      () => this._tableModel.settlementCompleted
+    )
+
+    this._tableModel.prepareNextRound()
+    this.updatePlayersStatus()
+    this.updatePlayersScore()
+    this._houseView[0].updateStatus()
+    this._houseView[0].updateScore()
+    this.removePlayersCards()
+    this._houseView[0].removeAllCards()
+
+    await delay(BlackjackScene.DELAY_TIME * 3)
+
+    this.startGame()
+  }
+
+  private decideAiPlayersBetAmount(): void {
+    this._tableModel.decideAiPlayersBetAmount()
+    this.updatePlayersBet()
   }
 
   private async dealCardsToParticipants(): Promise<void> {
@@ -158,13 +202,22 @@ export default class BlackjackScene extends BaseScene {
     this._houseView[0].revealFirstHand()
   }
 
-  private revealHouseHand(): void {
-    this._houseView[0].revealHand()
+  private removePlayersCards(): void {
+    this._playerViews.forEach((playerView: PlayerView) =>
+      playerView.removeAllCards()
+    )
   }
 
-  private updatePlayersDisplay(): void {
-    this.updatePlayersStatus()
-    this.updatePlayersScore()
+  private removePlayersGameResult(): void {
+    this._playerViews.forEach((playerView: PlayerView) => {
+      playerView.removeGameResult()
+    })
+  }
+
+  private updatePlayersGameResult(): void {
+    this._playerViews.forEach((playerView: PlayerView) => {
+      playerView.updateGameResult()
+    })
   }
 
   private updatePlayersStatus(): void {
@@ -178,6 +231,18 @@ export default class BlackjackScene extends BaseScene {
   private updatePlayersScore(): void {
     this._playerViews.forEach((playerView) => {
       playerView.updateScore()
+    })
+  }
+
+  private updatePlayersChips(): void {
+    this._playerViews.forEach((playerView) => {
+      playerView.updateChips()
+    })
+  }
+
+  private updatePlayersBet(): void {
+    this._playerViews.forEach((playerView) => {
+      playerView.updateBet()
     })
   }
 
@@ -288,11 +353,6 @@ export default class BlackjackScene extends BaseScene {
       (playerView: PlayerView) =>
         playerView.playerModel.playerType === PlayerTypes.Ai
     )
-  }
-
-  // eslint-disable-next-line
-  protected prepareNextGame(): Promise<void> {
-    return Promise.resolve(undefined)
   }
 
   // アニメーションがうまく動くコード
