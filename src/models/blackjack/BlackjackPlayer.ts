@@ -2,9 +2,7 @@ import Player from '@/models/common/Player'
 import BlackjackHand from '@/models/blackjack/BlackjackHand'
 import PlayerTypes from '@/types/common/player-types'
 import { ParticipantStatuses } from '@/types/blackjack/participant-status-types'
-import { PlayerStatus } from '@/types/blackjack/player-status-types'
 import GameResult from '@/types/blackjack/game-result-types'
-import HouseStatus from '@/types/blackjack/house-status-types'
 
 export default class BlackjackPlayer extends Player<BlackjackHand> {
   private _currentTurn: number
@@ -20,13 +18,17 @@ export default class BlackjackPlayer extends Player<BlackjackHand> {
 
     this._hand = this.generateHand()
     this._currentTurn = 1
-
     this._status = ParticipantStatuses.Wait
-
     this._actionCompleted = false
     this._gameResult = GameResult.Draw
+  }
 
-    this.decideAiPlayerBetAmount()
+  public prepareNextRound(): void {
+    this._hand = this.generateHand()
+    this._currentTurn = 1
+    this._status = ParticipantStatuses.Wait
+    this._actionCompleted = false
+    this._gameResult = GameResult.Draw
   }
 
   public getHandTotalScore(): number {
@@ -73,6 +75,7 @@ export default class BlackjackPlayer extends Player<BlackjackHand> {
 
   public bust(): void {
     this._status = ParticipantStatuses.Bust
+    this._actionCompleted = true
   }
 
   public stand(): void {
@@ -82,7 +85,6 @@ export default class BlackjackPlayer extends Player<BlackjackHand> {
 
   public double(): void {
     this.placeBet(this.bet)
-
     this._status = ParticipantStatuses.DoubleDown
     this._actionCompleted = true
   }
@@ -94,18 +96,17 @@ export default class BlackjackPlayer extends Player<BlackjackHand> {
     this.addChips(Math.floor(currentBet / 2))
     this._status = ParticipantStatuses.Surrender
     this._actionCompleted = true
-
   }
 
   public blackjack(): void {
-    this._status = PlayerStatus.Blackjack
+    this._status = ParticipantStatuses.Blackjack
     this.actionCompleted = true
   }
 
-  public evaluating(houseScore: number, houseStatus: HouseStatus) {
+  public evaluating(houseScore: number, houseStatus: ParticipantStatuses) {
     if (
-      this._status === PlayerStatus.Bust ||
-      (houseStatus !== HouseStatus.Bust &&
+      this._status === ParticipantStatuses.Bust ||
+      (houseStatus !== ParticipantStatuses.Bust &&
         this.getHandTotalScore() < houseScore)
     ) {
       this._gameResult = GameResult.Lose
@@ -114,7 +115,19 @@ export default class BlackjackPlayer extends Player<BlackjackHand> {
     }
   }
 
+  public settlement(): void {
+    if (this._gameResult === GameResult.Win) {
+      this.addChips(this._bet * 2)
+    } else if (this._gameResult === GameResult.Draw) {
+      this.addChips(this._bet)
+    }
+
+    // prepare内でやってもいいかも
+    this.resetBet()
+  }
+
   public decideAiPlayerBetAmount(): void {
+    // 条件分岐不要
     if (this.playerType === PlayerTypes.Ai) {
       const max: number = Math.floor(this.chips * 0.2)
       const min: number = Math.floor(this.chips * 0.1)

@@ -30,7 +30,7 @@ export default class PlayerView extends Phaser.GameObjects.Container {
     super(scene, playerPos.x, playerPos.y)
     this._playerModel = playerModel
 
-    this._resultText = this.scene.add.text(5, -60, `RESULT:`)
+    this._resultText = this.scene.add.text(40, -60, ``, { fontSize: '20px' })
     this._playerNameText = this.scene.add.text(
       40,
       0,
@@ -86,7 +86,12 @@ export default class PlayerView extends Phaser.GameObjects.Container {
   }
 
   public updateGameResult(): void {
-    this._resultText.setText(`RESULT: ${this._playerModel.gameResult}`)
+    this._resultText.setText(`${this._playerModel.gameResult}`)
+    this._resultText.setColor('#e6b422')
+  }
+
+  public removeGameResult(): void {
+    this._resultText.setText(``)
   }
 
   public updateAll(): void {
@@ -112,13 +117,8 @@ export default class PlayerView extends Phaser.GameObjects.Container {
     this._scoreText.setText(`SCORE: ${this._playerModel.getHandTotalScore()}`)
   }
 
-  private removeAllCards(): void {
-    this.remove(
-      this.list.filter(
-        (child: Phaser.GameObjects.GameObject) => child instanceof CardView
-      ),
-      true
-    )
+  public removeAllCards(): void {
+    this._handCardViews.removeAll(true)
   }
 
   public revealHand(): void {
