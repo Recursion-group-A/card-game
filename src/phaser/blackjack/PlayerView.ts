@@ -28,6 +28,7 @@ export default class PlayerView extends Phaser.GameObjects.Container {
     playerPos: { x: number; y: number }
   ) {
     super(scene, playerPos.x, playerPos.y)
+
     this._playerModel = playerModel
 
     this._resultText = this.scene.add.text(40, -60, ``, { fontSize: '20px' })
@@ -49,7 +50,7 @@ export default class PlayerView extends Phaser.GameObjects.Container {
     this._statusText = this.scene.add.text(
       5,
       64 + 40,
-      `STATES: ${this._playerModel.status}`
+      `STATES: ${this._playerModel.status.toUpperCase()}`
     )
     this._scoreText = this.scene.add.text(
       5,
@@ -72,26 +73,24 @@ export default class PlayerView extends Phaser.GameObjects.Container {
       this._scoreText,
       this._handCardViews
     ])
-    // this.updateHand()
 
     scene.add.existing(this)
   }
 
-  get playerModel(): BlackjackPlayer {
-    return this._playerModel
+  public animateAddHand(x: number, y: number, card: Card, i: number): void {
+    const cardView: CardView = new CardView(this.scene, x, y, card)
+
+    cardView.animateCardMove(this.x + (i + 1) * 25 + 20, this.y + 60)
+    this._handCardViews.add(cardView)
+    this.scene.add.existing(this._handCardViews)
   }
 
-  public changeBlackjackColor(): void {
+  public updateBlackjackColor(): void {
     this._playerNameText.setColor('#e6b422')
   }
 
-  public updateGameResult(): void {
-    this._resultText.setText(`${this._playerModel.gameResult}`)
-    this._resultText.setColor('#e6b422')
-  }
-
-  public removeGameResult(): void {
-    this._resultText.setText(``)
+  public resetBlackjackColor(): void {
+    this._playerNameText.setColor('white')
   }
 
   public updateAll(): void {
@@ -102,7 +101,9 @@ export default class PlayerView extends Phaser.GameObjects.Container {
   }
 
   public updateStatus(): void {
-    this._statusText.setText(`STATES: ${this._playerModel.status}`)
+    this._statusText.setText(
+      `STATES: ${this._playerModel.status.toUpperCase()}`
+    )
   }
 
   public updateChips(): void {
@@ -115,6 +116,15 @@ export default class PlayerView extends Phaser.GameObjects.Container {
 
   public updateScore(): void {
     this._scoreText.setText(`SCORE: ${this._playerModel.getHandTotalScore()}`)
+  }
+
+  public updateGameResult(): void {
+    this._resultText.setText(`${this._playerModel.gameResult.toUpperCase()}`)
+    this._resultText.setColor('#e6b422')
+  }
+
+  public removeGameResult(): void {
+    this._resultText.setText(``)
   }
 
   public removeAllCards(): void {
@@ -137,48 +147,7 @@ export default class PlayerView extends Phaser.GameObjects.Container {
     })
   }
 
-  public addDealerBtn(): void {
-    this._dealerBtn = this.scene.add
-      .image(
-        this._playerNameText.x + 60,
-        this._playerNameText.y + 7,
-        'dealer-btn'
-      )
-      .setScale(0.08)
-    this.add(this._dealerBtn)
-    this.dealerBtnRotateAnimation()
-  }
-
-  public removeDealerBtn(): void {
-    if (this._dealerBtn) {
-      this._dealerBtn.destroy()
-      this._dealerBtn = null
-    }
-  }
-
-  private dealerBtnRotateAnimation(): void {
-    this.scene.tweens.add({
-      targets: this._dealerBtn,
-      scaleX: 0,
-      duration: 400,
-      ease: 'Power2',
-      onComplete: (): void => {
-        this._dealerBtn?.setTexture('dealer-btn')
-        this.scene.tweens.add({
-          targets: this._dealerBtn,
-          scaleX: 0.08,
-          duration: 300,
-          ease: 'Power2'
-        })
-      }
-    })
-  }
-
-  public animateAddHand(x: number, y: number, card: Card, i: number): void {
-    const cardView: CardView = new CardView(this.scene, x, y, card)
-
-    cardView.animateCardMove(this.x + (i + 1) * 25 + 20, this.y + 60)
-    this._handCardViews.add(cardView)
-    this.scene.add.existing(this._handCardViews)
+  get playerModel(): BlackjackPlayer {
+    return this._playerModel
   }
 }

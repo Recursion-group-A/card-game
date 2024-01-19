@@ -35,14 +35,30 @@ export default class BlackjackTable extends Table<
     this._settlementCompleted = false
   }
 
+  private preparePlayersNextRound(): void {
+    this.players.forEach((player: BlackjackPlayer) => player.prepareNextRound())
+  }
+
+  private prepareHouseForNextRound(): void {
+    this._house.prepareNextRound()
+  }
+
+  public prepareNextRound(): void {
+    this.preparePlayersNextRound()
+    this.prepareHouseForNextRound()
+
+    this._deck.resetDeck()
+    this._userBetCompleted = false
+    this._evaluateCompleted = false
+    this._settlementCompleted = false
+    this.gamePhase = GamePhases.Betting
+  }
+
   public setPlayersStatus(): void {
     this.players.forEach((player) => {
       if (player.isBlackjack()) {
         player.blackjack()
-      } else if (
-        player.playerType === PlayerTypes.Ai &&
-        player.getHandTotalScore() >= 17
-      ) {
+      } else if (player.canStandAi()) {
         player.stand()
       }
     })
@@ -51,13 +67,9 @@ export default class BlackjackTable extends Table<
   public setHouseStatus(): void {
     if (this._house.isBlackjack()) {
       this._house.blackjack()
-    } else if (this._house.getHandTotalScore() >= 17) {
+    } else if (this._house.isHandTotalScoreAbove17()) {
       this._house.stand()
     }
-  }
-
-  public initializeDeck(): void {
-    this.deck.resetDeck()
   }
 
   public isHouseTurn(): boolean {
@@ -72,31 +84,12 @@ export default class BlackjackTable extends Table<
     return this._house.actionCompleted
   }
 
-  public preparePlayersNextRound(): void {
-    this.players.forEach((player: BlackjackPlayer) => player.prepareNextRound())
-  }
-
-  public prepareHouseForNextRound(): void {
-    this._house.prepareNextRound()
-  }
-
-  public prepareNextRound(): void {
-    this.initializeDeck()
-    this.preparePlayersNextRound()
-    this.prepareHouseForNextRound()
-
-    this._userBetCompleted = false
-    this._evaluateCompleted = false
-    this._settlementCompleted = false
-    this.gamePhase = GamePhases.Betting
-  }
-
   public evaluatingPlayers(): void {
-    const houseScore: number = this._house.getHandTotalScore()
     const houseStatus: ParticipantStatuses = this._house.status
+    const houseScore: number = this._house.getHandTotalScore()
 
     this.players.forEach((player) => {
-      player.evaluating(houseScore, houseStatus)
+      player.evaluating(houseStatus, houseScore)
     })
 
     this._evaluateCompleted = true

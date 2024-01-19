@@ -60,8 +60,12 @@ export default class PlayerView extends Phaser.GameObjects.Container {
     this.scene.add.existing(this._handCardViews)
   }
 
-  public changeBlackjackColor(): void {
+  public updateBlackjackColor(): void {
     this._playerNameText.setColor('#e6b422')
+  }
+
+  public resetBlackjackColor(): void {
+    this._playerNameText.setColor('white')
   }
 
   public updateAll(): void {

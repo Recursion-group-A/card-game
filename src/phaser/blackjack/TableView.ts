@@ -1,13 +1,11 @@
 import * as Phaser from 'phaser'
 import Card from '@/models/common/Card'
-import DeckView from '@/phaser/common/DeckView'
 import BlackjackPlayer from '@/models/blackjack/BlackjackPlayer'
-import PlayerView from '@/phaser/blackjack/PlayerView'
-import HouseView from '@/phaser/blackjack/HouseView'
 import BlackjackTable from '@/models/blackjack/BlackjackTable'
 import PlayerTypes from '@/types/common/player-types'
-import BlackjackActions from '@/types/blackjack/action-types'
-import { ParticipantStatuses } from '@/types/blackjack/participant-status-types'
+import DeckView from '@/phaser/common/DeckView'
+import PlayerView from '@/phaser/blackjack/PlayerView'
+import HouseView from '@/phaser/blackjack/HouseView'
 
 export default class TableView extends Phaser.GameObjects.Container {
   private readonly _tableModel: BlackjackTable
@@ -81,7 +79,7 @@ export default class TableView extends Phaser.GameObjects.Container {
 
   public displayButtons(
     userView: PlayerView,
-    content: string | BlackjackActions,
+    content: string,
     n: number,
     type: string
   ) {
@@ -170,8 +168,6 @@ export default class TableView extends Phaser.GameObjects.Container {
   }
 
   public standProcess(userView: PlayerView, userModel: BlackjackPlayer): void {
-    // if (confirm('STANDしますか？')) {}
-
     userModel.stand()
     userView.updateStatus()
 
@@ -179,9 +175,6 @@ export default class TableView extends Phaser.GameObjects.Container {
   }
 
   public doubleProcess(userView: PlayerView, userModel: BlackjackPlayer): void {
-    // if (!userModel.canDouble()) alert('DOUBLEはできません。')
-    // if (confirm('DOUBLEしますか？)) {}
-
     if (userModel.canDouble()) {
       userModel.double()
 
@@ -208,9 +201,6 @@ export default class TableView extends Phaser.GameObjects.Container {
     userView: PlayerView,
     userModel: BlackjackPlayer
   ): void {
-    // if (!userModel.canSurrender()) alert('SURRENDERはできません。')
-    // if (confirm('SURRENDERしますか？')) {}
-
     if (userModel.canSurrender()) {
       userModel.surrender()
       userView.updateStatus()
@@ -222,9 +212,6 @@ export default class TableView extends Phaser.GameObjects.Container {
   }
 
   public hitProcess(userView: PlayerView, userModel: BlackjackPlayer): void {
-    // if (!userModel.canHit()) alert('HITはできません。')
-    // if (confirm('HITしますか？')) {}
-
     if (userModel.canHit()) {
       const card: Card = this._tableModel.drawCard()
       userModel.addHand(card)
@@ -255,15 +242,6 @@ export default class TableView extends Phaser.GameObjects.Container {
   public decideBetAmount(): void {
     const userModel: BlackjackPlayer = this.userModel()
 
-    // if (userModel.bet <= 0) {
-    //   alert('Bet額は0以上にしてください。')
-    // } else if (
-    //   confirm('Bet額: ' + String(userModel.bet) + 'で確定しますか？')
-    // ) {
-    //   this.clearBetButtons()
-    //   this._tableModel.userBetCompleted = true
-    // }
-
     if (userModel.bet > 0) {
       this.clearBetButtons()
       this._tableModel.userBetCompleted = true
@@ -292,23 +270,12 @@ export default class TableView extends Phaser.GameObjects.Container {
   public addBet(amount: number): void {
     const userView: PlayerView = this.userView()
     const userModel: BlackjackPlayer = userView.playerModel
-    const amountAndBet: number = userModel.bet + amount
 
-    if (amountAndBet <= userModel.chips) {
-      userModel.subtractChips(amount)
-      userModel.addBet(amount)
+    if (userModel.canBet(amount)) {
+      userModel.placeBet(amount)
       userView.updateBet()
       userView.updateChips()
     }
-
-    // try {
-    //   userModel.subtractChips(amount)
-    //   userModel.addBet(amount)
-    //   userView.updateBet()
-    //   userView.updateChips()
-    // } catch (error) {
-    //   alert('これ以上Betすることはできません。')
-    // }
   }
 
   public clearBetButtons(): void {
