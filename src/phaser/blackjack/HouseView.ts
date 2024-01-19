@@ -77,13 +77,8 @@ export default class PlayerView extends Phaser.GameObjects.Container {
     this._scoreText.setText(`SCORE: ${this._houseModel.getHandTotalScore()}`)
   }
 
-  private removeAllCards(): void {
-    this.remove(
-      this.list.filter(
-        (child: Phaser.GameObjects.GameObject) => child instanceof CardView
-      ),
-      true
-    )
+  public removeAllCards(): void {
+    this._handCardViews.removeAll(true)
   }
 
   public revealFirstHand(): void {

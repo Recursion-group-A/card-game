@@ -1,11 +1,11 @@
 import House from '@/models/blackjack/House'
 import BlackjackPlayer from '@/models/blackjack/BlackjackPlayer'
 import Table from '@/models/common/Table'
+import { ParticipantStatuses } from '@/types/blackjack/participant-status-types'
 import BlackjackHand from '@/models/blackjack/BlackjackHand'
 import PlayerTypes from '@/types/common/player-types'
 import { GamePhases } from '@/types/common/game-phase-types'
 import { GameTypes } from '@/types/common/game-types'
-import HouseStatus from '@/types/blackjack/house-status-types'
 
 export default class BlackjackTable extends Table<
   BlackjackPlayer,
@@ -17,6 +17,10 @@ export default class BlackjackTable extends Table<
 
   private _userBetCompleted: boolean
 
+  private _evaluateCompleted: boolean
+
+  private _settlementCompleted: boolean
+
   private _gamePhase: GamePhases
 
   constructor(gameType: GameTypes) {
@@ -24,8 +28,11 @@ export default class BlackjackTable extends Table<
 
     this._players = this.generatePlayers(5)
     this._house = new House()
+    this._betDenominations = [5, 20, 50, 100]
     this._gamePhase = GamePhases.Betting
     this._userBetCompleted = false
+    this._evaluateCompleted = false
+    this._settlementCompleted = false
   }
 
   public setPlayersStatus(): void {
@@ -33,7 +40,7 @@ export default class BlackjackTable extends Table<
       if (player.isBlackjack()) {
         player.blackjack()
       } else if (
-        player.playerType === PLAYERTYPE.Ai &&
+        player.playerType === PlayerTypes.Ai &&
         player.getHandTotalScore() >= 17
       ) {
         player.stand()
@@ -65,23 +72,47 @@ export default class BlackjackTable extends Table<
     return this._house.actionCompleted
   }
 
-  public prepareHouseForNextRound(): void {
-    this._house.prepareForNextRound()
+  public preparePlayersNextRound(): void {
+    this.players.forEach((player: BlackjackPlayer) => player.prepareNextRound())
   }
 
-  public prepareForNextRound(): void {
-    this.gamePhase = GamePhases.Preparation
+  public prepareHouseForNextRound(): void {
+    this._house.prepareNextRound()
+  }
+
+  public prepareNextRound(): void {
     this.initializeDeck()
+    this.preparePlayersNextRound()
     this.prepareHouseForNextRound()
+
+    this._userBetCompleted = false
+    this._evaluateCompleted = false
+    this._settlementCompleted = false
     this.gamePhase = GamePhases.Betting
   }
 
   public evaluatingPlayers(): void {
     const houseScore: number = this._house.getHandTotalScore()
-    const houseStatus: HouseStatus = this._house.status
+    const houseStatus: ParticipantStatuses = this._house.status
 
     this.players.forEach((player) => {
       player.evaluating(houseScore, houseStatus)
+    })
+
+    this._evaluateCompleted = true
+  }
+
+  public settlementPlayers(): void {
+    this.players.forEach((player) => {
+      player.settlement()
+    })
+
+    this._settlementCompleted = true
+  }
+
+  public decideAiPlayersBetAmount(): void {
+    this.players.forEach((player: BlackjackPlayer) => {
+      if (player.playerType === PlayerTypes.Ai) player.decideAiPlayerBetAmount()
     })
   }
 
@@ -122,5 +153,13 @@ export default class BlackjackTable extends Table<
 
   set userBetCompleted(bool: boolean) {
     this._userBetCompleted = bool
+  }
+
+  get evaluateCompleted(): boolean {
+    return this._evaluateCompleted
+  }
+
+  get settlementCompleted(): boolean {
+    return this._settlementCompleted
   }
 }

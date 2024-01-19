@@ -36,25 +36,22 @@ export default class House {
     return this.hand.isBlackjack()
   }
 
-  public prepareForNextRound(): void {
-    this.initializeHand()
-    this.initializeStates()
-  }
-
-  private initializeHand(): void {
-    this._hand.resetHand()
-  }
-
-  private initializeStates(): void {
+  public prepareNextRound(): void {
+    this._hand = House.generateHand()
     this._status = ParticipantStatuses.Wait
+    this._actionCompleted = false
   }
 
   public getHandTotalScore(): number {
     return this._hand.calculateBlackjackTotal()
   }
-
+  
   public addHand(card: Card): void {
     this._hand.addOne(card)
+  }
+
+  public static generateHand(): BlackjackHand {
+    return new BlackjackHand()
   }
 
   get name(): string {

@@ -18,13 +18,17 @@ export default class BlackjackPlayer extends Player<BlackjackHand> {
 
     this._hand = this.generateHand()
     this._currentTurn = 1
-
     this._status = ParticipantStatuses.Wait
-
     this._actionCompleted = false
     this._gameResult = GameResult.Draw
+  }
 
-    this.decideAiPlayerBetAmount()
+  public prepareNextRound(): void {
+    this._hand = this.generateHand()
+    this._currentTurn = 1
+    this._status = ParticipantStatuses.Wait
+    this._actionCompleted = false
+    this._gameResult = GameResult.Draw
   }
 
   public getHandTotalScore(): number {
@@ -71,6 +75,7 @@ export default class BlackjackPlayer extends Player<BlackjackHand> {
 
   public bust(): void {
     this._status = ParticipantStatuses.Bust
+    this._actionCompleted = true
   }
 
   public stand(): void {
@@ -80,7 +85,6 @@ export default class BlackjackPlayer extends Player<BlackjackHand> {
 
   public double(): void {
     this.placeBet(this.bet)
-
     this._status = ParticipantStatuses.DoubleDown
     this._actionCompleted = true
   }
@@ -111,7 +115,19 @@ export default class BlackjackPlayer extends Player<BlackjackHand> {
     }
   }
 
+  public settlement(): void {
+    if (this._gameResult === GameResult.Win) {
+      this.addChips(this._bet * 2)
+    } else if (this._gameResult === GameResult.Draw) {
+      this.addChips(this._bet)
+    }
+
+    // prepare内でやってもいいかも
+    this.resetBet()
+  }
+
   public decideAiPlayerBetAmount(): void {
+    // 条件分岐不要
     if (this.playerType === PlayerTypes.Ai) {
       const max: number = Math.floor(this.chips * 0.2)
       const min: number = Math.floor(this.chips * 0.1)
