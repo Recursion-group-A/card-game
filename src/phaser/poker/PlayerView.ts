@@ -21,6 +21,8 @@ export default class PlayerView extends Phaser.GameObjects.Container {
 
   private _actionText: Phaser.GameObjects.Text | null = null
 
+  private _blindText: Phaser.GameObjects.Text | null = null
+
   constructor(
     scene: Phaser.Scene,
     player: PokerPlayer,
@@ -98,6 +100,21 @@ export default class PlayerView extends Phaser.GameObjects.Container {
         this.destroyActionText()
       })
     }
+  }
+
+  public displayBlindText(amount: number): void {
+    this._blindText?.destroy()
+
+    const text: string =
+      amount === 1 ? `SMALL BLIND：$${amount}` : ` BIG BLIND：$${amount}`
+
+    this._blindText = this.scene.add.text(-10, 140, text)
+    this._blindText.setColor('#00ff00')
+    this.add(this._blindText)
+
+    this.scene.time.delayedCall(1500, () => {
+      this._blindText?.destroy()
+    })
   }
 
   public displayResultTexts(winAmount: number): void {

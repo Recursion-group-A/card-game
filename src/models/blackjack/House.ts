@@ -5,14 +5,14 @@ import { ParticipantStatuses } from '@/types/blackjack/participant-status-types'
 export default class House {
   private readonly _name: string = 'HOUSE'
 
-  private _hand: BlackjackHand
+  private readonly _hand: BlackjackHand
 
   private _status: ParticipantStatuses
 
   private _actionCompleted: boolean
 
   constructor() {
-    this._hand = House.generateHand()
+    this._hand = new BlackjackHand()
     this._status = ParticipantStatuses.Wait
     this._actionCompleted = false
   }
@@ -51,8 +51,7 @@ export default class House {
   public isBlackjack(): boolean {
     return this._hand.isBlackjack()
   }
-
-  // TODO: START Playerクラスと共通する処理 → 後で抽象クラス Participant クラスを作る
+  
   public addHand(card: Card): void {
     this._hand.addOne(card)
   }

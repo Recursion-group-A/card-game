@@ -46,6 +46,10 @@ export default class BotDecisionMaker {
     player: PokerPlayer,
     rank: PokerHands
   ): PokerActions {
+    if (player.bet === this._table.currentMaxBet) {
+      return PokerActions.Call
+    }
+
     if (rank >= PokerHands.OnePair) {
       return this.decideActionForOnePair(player.hand)
     }
@@ -55,7 +59,7 @@ export default class BotDecisionMaker {
   private decideFlopAction(rank: PokerHands): PokerActions {
     const someoneRaised: boolean = this.table.anyoneRaisedThisRound()
 
-    if (rank >= PokerHands.ThreeOfAKind && !someoneRaised) {
+    if (rank >= PokerHands.TwoPair && !someoneRaised) {
       return PokerActions.Raise
     }
     if (someoneRaised && rank <= PokerHands.HighCard) {
@@ -67,7 +71,7 @@ export default class BotDecisionMaker {
   private decideTurnAction(rank: PokerHands): PokerActions {
     const someoneRaised: boolean = this.table.anyoneRaisedThisRound()
 
-    if (rank >= PokerHands.Straight && !someoneRaised) {
+    if (rank >= PokerHands.TwoPair && !someoneRaised) {
       return PokerActions.Raise
     }
     if (someoneRaised && rank <= PokerHands.HighCard) {
@@ -79,7 +83,7 @@ export default class BotDecisionMaker {
   private decideRiverAction(rank: PokerHands): PokerActions {
     const someoneRaised: boolean = this.table.anyoneRaisedThisRound()
 
-    if (rank >= PokerHands.Flush && !someoneRaised) {
+    if (rank >= PokerHands.TwoPair && !someoneRaised) {
       return PokerActions.Raise
     }
     if (someoneRaised && rank <= PokerHands.OnePair) {
@@ -109,6 +113,6 @@ export default class BotDecisionMaker {
   }
 
   get table(): PokerTable {
-    return this._table as PokerTable
+    return this._table
   }
 }

@@ -15,9 +15,11 @@ npm run dev
 ```
 
 # Documents
+
 - [Wiki](https://github.com/Recursion-group-A/card-game/wiki)
 
 # Contributors
+
 <a href="https://github.com/Recursion-group-A/card-game/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=recursion-group-a/card-game" 
 alt="contributors images" />
