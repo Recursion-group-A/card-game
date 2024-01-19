@@ -15,11 +15,13 @@ export default abstract class BaseScene extends Phaser.Scene {
 
   protected readonly isGameActive: boolean
 
-  protected _isSoundOn: boolean
+  protected isSoundOn: boolean
 
   protected constructor(key: string) {
     super(key)
-    this._isSoundOn = true
+
+    this.isGameActive = true
+    this.isSoundOn = true
   }
 
   create(): void {
@@ -80,9 +82,9 @@ export default abstract class BaseScene extends Phaser.Scene {
   }
 
   private toggleSound() {
-    const texture: string = this._isSoundOn ? 'sound-off' : 'sound-on'
+    const texture: string = this.isSoundOn ? 'sound-off' : 'sound-on'
     this.soundButton?.setTexture(texture)
-    this._isSoundOn = !this._isSoundOn
+    this.isSoundOn = !this.isSoundOn
   }
 
   // eslint-disable-next-line

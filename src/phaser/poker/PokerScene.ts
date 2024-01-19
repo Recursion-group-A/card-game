@@ -71,7 +71,7 @@ export default class PokerScene extends BaseScene {
     await delay(PokerScene.DELAY_TIME)
     await this.dealCardsToPlayers()
     await delay(PokerScene.DELAY_TIME)
-    this._tableView?.revealUserHand(this._isSoundOn)
+    this._tableView?.revealUserHand(this.isSoundOn)
   }
 
   private assignDealerButton(): void {
@@ -100,7 +100,8 @@ export default class PokerScene extends BaseScene {
   private collectIndividualBlind(index: number, amount: number): void {
     this._tableModel.collectBlind(index, amount)
     this._playerViews[index].animatePlaceBet()
-    if (this._isSoundOn) {
+    this._playerViews[index].displayBlindText(amount)
+    if (this.isSoundOn) {
       this.sound.add('bet').setVolume(0.3).play()
     }
   }
@@ -115,7 +116,7 @@ export default class PokerScene extends BaseScene {
         const currentPlayerView: PlayerView = this._playerViews[currentIndex]
         const card: Card = this._tableModel.drawCard()
         currentPlayerView.playerModel.addHand(card)
-        if (this._isSoundOn) {
+        if (this.isSoundOn) {
           this.sound.add('card-flip3').setVolume(0.3).play()
         }
 
@@ -152,7 +153,7 @@ export default class PokerScene extends BaseScene {
     await delay(PokerScene.DELAY_TIME)
     if (cardsToAdd > 0 && !this._isWalk) {
       await this._tableView?.dealCommunityCards(cardsToAdd)
-      if (this._isSoundOn) {
+      if (this.isSoundOn) {
         this.sound.add('card-flip2').setVolume(0.5).play()
       }
     }
@@ -221,7 +222,7 @@ export default class PokerScene extends BaseScene {
 
   private handleAction(player: PlayerView, action: PokerActions): void {
     this._tableModel.handleAction(player.playerModel, action)
-    this._tableView?.executeActionEffect(player, action, this._isSoundOn)
+    this._tableView?.executeActionEffect(player, action, this.isSoundOn)
     this._tableView?.setVisibleActionButtons(false)
   }
 
@@ -229,7 +230,7 @@ export default class PokerScene extends BaseScene {
     this._tableModel.round = PokerRound.Showdown
 
     if (this._isWalk) {
-      this.handleWalk()
+      await this.handleWalk()
       return
     }
 
@@ -244,11 +245,7 @@ export default class PokerScene extends BaseScene {
       this._tableModel.pot.getTotalPot() / winners.length
     )
     this._tableView?.distributeWinnings(winners, winAmountPerPlayer)
-    if (this._isSoundOn) {
-      this.sound.add('money').setVolume(0.2).play()
-      await delay(PokerScene.DELAY_TIME / 10)
-      this.sound.add('money').setVolume(0.2).play()
-    }
+    await this.makeMoneySound()
   }
 
   // eslint-disable-next-line
@@ -282,9 +279,18 @@ export default class PokerScene extends BaseScene {
     return winners
   }
 
-  private handleWalk(): void {
+  private async handleWalk(): Promise<void> {
     const winner: PlayerView[] = this.getActivePlayers()
     const winAmount: number = this._tableModel.pot.getTotalPot()
     this._tableView?.distributeWinnings(winner, winAmount)
+    await this.makeMoneySound()
+  }
+
+  private async makeMoneySound(): Promise<void> {
+    if (this.isSoundOn) {
+      this.sound.add('money').setVolume(0.2).play()
+      await delay(PokerScene.DELAY_TIME / 10)
+      this.sound.add('money').setVolume(0.2).play()
+    }
   }
 }

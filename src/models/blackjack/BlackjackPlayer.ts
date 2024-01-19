@@ -2,9 +2,7 @@ import Player from '@/models/common/Player'
 import BlackjackHand from '@/models/blackjack/BlackjackHand'
 import PlayerTypes from '@/types/common/player-types'
 import { ParticipantStatuses } from '@/types/blackjack/participant-status-types'
-import { PlayerStatus } from '@/types/blackjack/player-status-types'
 import GameResult from '@/types/blackjack/game-result-types'
-import HouseStatus from '@/types/blackjack/house-status-types'
 
 export default class BlackjackPlayer extends Player<BlackjackHand> {
   private _currentTurn: number
@@ -94,18 +92,17 @@ export default class BlackjackPlayer extends Player<BlackjackHand> {
     this.addChips(Math.floor(currentBet / 2))
     this._status = ParticipantStatuses.Surrender
     this._actionCompleted = true
-
   }
 
   public blackjack(): void {
-    this._status = PlayerStatus.Blackjack
+    this._status = ParticipantStatuses.Blackjack
     this.actionCompleted = true
   }
 
-  public evaluating(houseScore: number, houseStatus: HouseStatus) {
+  public evaluating(houseScore: number, houseStatus: ParticipantStatuses) {
     if (
-      this._status === PlayerStatus.Bust ||
-      (houseStatus !== HouseStatus.Bust &&
+      this._status === ParticipantStatuses.Bust ||
+      (houseStatus !== ParticipantStatuses.Bust &&
         this.getHandTotalScore() < houseScore)
     ) {
       this._gameResult = GameResult.Lose
