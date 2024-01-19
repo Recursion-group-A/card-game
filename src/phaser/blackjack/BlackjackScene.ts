@@ -1,5 +1,6 @@
 import BaseScene from '@/phaser/common/BaseScene'
 import Card from '@/models/common/Card'
+// eslint-disable-next-line
 import House from '@/models/blackjack/House'
 import BlackjackTable from '@/models/blackjack/BlackjackTable'
 import TableView from '@/phaser/blackjack/TableView'
@@ -120,14 +121,16 @@ export default class BlackjackScene extends BaseScene {
     await BlackjackScene.waitForCompletion(
       () => this._tableModel.settlementCompleted
     )
+    const houseView: HouseView = this.getHouseView()
 
     this._tableModel.prepareNextRound()
     this.updatePlayersStatus()
     this.updatePlayersScore()
-    this._houseView[0].updateStatus()
-    this._houseView[0].updateScore()
+    this.resetBlackjackPlayerColor()
+    houseView.updateStatus()
+    houseView.updateScore()
     this.removePlayersCards()
-    this._houseView[0].removeAllCards()
+    houseView.removeAllCards()
 
     await delay(BlackjackScene.DELAY_TIME * 3)
 
@@ -136,7 +139,9 @@ export default class BlackjackScene extends BaseScene {
 
   private decideAiPlayersBetAmount(): void {
     this._tableModel.decideAiPlayersBetAmount()
+
     this.updatePlayersBet()
+    this.updatePlayersChips()
   }
 
   private async dealCardsToParticipants(): Promise<void> {
@@ -147,26 +152,30 @@ export default class BlackjackScene extends BaseScene {
 
       for (let i: number = 0; i < totalPlayers; i += 1) {
         const currentPlayerView: PlayerView = this._playerViews[currentIndex]
-        const card: Card = this._tableModel.drawCard()
-        currentPlayerView.playerModel.addHand(card)
 
-        // eslint-disable-next-line
-        await delay(BlackjackScene.DELAY_TIME / 10)
-        currentPlayerView.animateAddHand(
-          this._tableView!.deckView.x,
-          this._tableView!.deckView.y - 14,
-          card,
-          times
-        )
-        currentIndex = (currentIndex + 1) % totalPlayers
+        if (!currentPlayerView.playerModel.isBroken()) {
+          const card: Card = this._tableModel.drawCard()
+          currentPlayerView.playerModel.addHand(card)
 
+          // eslint-disable-next-line
+          await delay(BlackjackScene.DELAY_TIME / 10)
+          currentPlayerView.animateAddHand(
+            this._tableView!.deckView.x,
+            this._tableView!.deckView.y - 14,
+            card,
+            times
+          )
+          currentIndex = (currentIndex + 1) % totalPlayers
+        }
         // houseの手札追加
         if (i >= totalPlayers - 1) {
+          const houseView: HouseView = this.getHouseView()
           const houseCard: Card = this._tableModel.drawCard()
-          this._houseView[0].houseModel.addHand(houseCard)
+          houseView.houseModel.addHand(houseCard)
 
-          // await delay(BlackjackScene.DELAY_TIME / 10)
-          this._houseView[0].animateAddHand(
+          // eslint-disable-next-line
+          await delay(BlackjackScene.DELAY_TIME / 10)
+          houseView.animateAddHand(
             this._tableView!.deckView.x,
             this._tableView!.deckView.y - 14,
             houseCard,
@@ -199,7 +208,8 @@ export default class BlackjackScene extends BaseScene {
   }
 
   private revealHouseFirstHand(): void {
-    this._houseView[0].revealFirstHand()
+    const houseView: HouseView = this.getHouseView()
+    houseView.revealFirstHand()
   }
 
   private removePlayersCards(): void {
@@ -223,7 +233,7 @@ export default class BlackjackScene extends BaseScene {
   private updatePlayersStatus(): void {
     this._playerViews.forEach((playerView: PlayerView) => {
       if (playerView.playerModel.isBlackjack())
-        playerView.changeBlackjackColor()
+        playerView.updateBlackjackColor()
       playerView.updateStatus()
     })
   }
@@ -243,6 +253,12 @@ export default class BlackjackScene extends BaseScene {
   private updatePlayersBet(): void {
     this._playerViews.forEach((playerView) => {
       playerView.updateBet()
+    })
+  }
+
+  private resetBlackjackPlayerColor(): void {
+    this._playerViews.forEach((playerView: PlayerView) => {
+      playerView.resetBlackjackColor()
     })
   }
 
@@ -296,58 +312,6 @@ export default class BlackjackScene extends BaseScene {
     }
   }
 
-  private async aiProcess(): Promise<void> {
-    const aiPlayerViews: PlayerView[] = this.getAiPlayersView()
-
-    aiPlayerViews.forEach((aiPlayerView: PlayerView) => {
-      const aiPlayerModel: BlackjackPlayer = aiPlayerView.playerModel
-      this.drawUntilSeventeen(aiPlayerModel, aiPlayerView)
-    })
-  }
-
-  private async houseProcess(): Promise<void> {
-    await BlackjackScene.waitForCompletion(() => this._tableModel.isHouseTurn())
-
-    await delay(BlackjackScene.DELAY_TIME)
-    this._houseView[0].revealLastHand()
-    this._houseView[0].updateStatus()
-    this._houseView[0].updateScore()
-
-    const { houseModel } = this._houseView[0]
-    if (houseModel.isBlackjack()) {
-      this._houseView[0].changeBlackjackColor()
-    } else {
-      this.drawUntilSeventeen(houseModel, this._houseView[0])
-    }
-  }
-
-  private async drawUntilSeventeen(
-    model: BlackjackPlayer | House,
-    view: PlayerView | HouseView
-  ): Promise<void> {
-    while (model.getHandTotalScore() < 17) {
-      const card: Card = this._tableModel.drawCard()
-      model.addHand(card)
-      view.animateAddHand(
-        this._tableView!.deckView.x,
-        this._tableView!.deckView.y - 14,
-        card,
-        model.hand.cards.length - 1
-      )
-      view.revealLastHand()
-
-      if (model.getHandTotalScore() > 21) {
-        model.bust()
-        view.updateStatus()
-      } else if (model.getHandTotalScore() >= 17) {
-        model.stand()
-        view.updateStatus()
-      }
-
-      view.updateScore()
-    }
-  }
-
   private getAiPlayersView(): PlayerView[] {
     return this._playerViews.filter(
       (playerView: PlayerView) =>
@@ -355,75 +319,83 @@ export default class BlackjackScene extends BaseScene {
     )
   }
 
-  // アニメーションがうまく動くコード
+  private getHouseView(): HouseView {
+    return this._houseView[0]
+  }
 
-  // private async aiProcess(): Promise<void> {
-  //   const aiPlayerViews: PlayerView[] = this.getAiPlayersView()
+  private async aiProcess(): Promise<void> {
+    const aiPlayerViews: PlayerView[] = this.getAiPlayersView()
 
-  //   for (const aiPlayerView of aiPlayerViews) {
-  //     const aiPlayerModel: BlackjackPlayer = aiPlayerView.playerModel
+    // eslint-disable-next-line
+    for (const aiPlayerView of aiPlayerViews) {
+      const aiPlayerModel: BlackjackPlayer = aiPlayerView.playerModel
+      if (!aiPlayerModel.isBroken()) {
+        while (aiPlayerModel.getHandTotalScore() < 17) {
+          // eslint-disable-next-line
+          await delay(BlackjackScene.DELAY_TIME * 2)
 
-  //     while (aiPlayerModel.getHandTotalScore() < 17) {
-  //       await delay(BlackjackScene.DELAY_TIME * 2)
+          const card: Card = this._tableModel.drawCard()
+          aiPlayerModel.addHand(card)
+          aiPlayerView.animateAddHand(
+            this._tableView!.deckView.x,
+            this._tableView!.deckView.y - 14,
+            card,
+            aiPlayerModel.hand.cards.length - 1
+          )
+          aiPlayerView.revealLastHand()
 
-  //       const card: Card = this._tableModel.drawCard()
-  //       aiPlayerModel.addHand(card)
-  //       aiPlayerView.animateAddHand(
-  //         this._tableView!.deckView.x,
-  //         this._tableView!.deckView.y - 14,
-  //         card,
-  //         aiPlayerModel.hand.cards.length - 1
-  //       )
-  //       aiPlayerView.revealLastHand()
+          if (aiPlayerModel.getHandTotalScore() > 21) {
+            aiPlayerModel.bust()
+            aiPlayerView.updateStatus()
+          } else if (aiPlayerModel.getHandTotalScore() >= 17) {
+            aiPlayerModel.stand()
+            aiPlayerView.updateStatus()
+          }
 
-  //       if (aiPlayerModel.getHandTotalScore() > 21) {
-  //         aiPlayerModel.bust()
-  //         aiPlayerView.updateStatus()
-  //       } else if (aiPlayerModel.getHandTotalScore() >= 17) {
-  //         aiPlayerModel.stand()
-  //         aiPlayerView.updateStatus()
-  //       }
+          aiPlayerView.updateScore()
+        }
+      }
+    }
+  }
 
-  //       aiPlayerView.updateScore()
-  //     }
-  //   }
-  // }
+  private async houseProcess(): Promise<void> {
+    await BlackjackScene.waitForCompletion(() => this._tableModel.isHouseTurn())
+    await delay(BlackjackScene.DELAY_TIME)
 
-  // private async houseProcess(): Promise<void> {
-  //   await BlackjackScene.waitForCompletion(() => this._tableModel.isHouseTurn())
+    const houseView: HouseView = this.getHouseView()
 
-  //   await delay(BlackjackScene.DELAY_TIME)
-  //   this._houseView[0].revealLastHand()
-  //   this._houseView[0].updateStatus()
-  //   this._houseView[0].updateScore()
+    houseView.revealLastHand()
+    houseView.updateStatus()
+    houseView.updateScore()
 
-  //   const { houseModel } = this._houseView[0]
-  //   if (houseModel.isBlackjack()) {
-  //     this._houseView[0].changeBlackjackColor()
-  //   } else {
-  //     while (houseModel.getHandTotalScore() < 17) {
-  //       await delay(BlackjackScene.DELAY_TIME * 2)
+    const { houseModel } = houseView
+    if (houseModel.isBlackjack()) {
+      houseView.updateBlackjackColor()
+    } else {
+      while (houseModel.getHandTotalScore() < 17) {
+        // eslint-disable-next-line
+        await delay(BlackjackScene.DELAY_TIME * 2)
 
-  //       const card: Card = this._tableModel.drawCard()
-  //       houseModel.addHand(card)
-  //       this._houseView[0].animateAddHand(
-  //         this._tableView!.deckView.x,
-  //         this._tableView!.deckView.y - 14,
-  //         card,
-  //         houseModel.hand.cards.length - 1
-  //       )
-  //       this._houseView[0].revealLastHand()
+        const card: Card = this._tableModel.drawCard()
+        houseModel.addHand(card)
+        houseView.animateAddHand(
+          this._tableView!.deckView.x,
+          this._tableView!.deckView.y - 14,
+          card,
+          houseModel.hand.cards.length - 1
+        )
+        houseView.revealLastHand()
 
-  //       if (houseModel.getHandTotalScore() > 21) {
-  //         houseModel.bust()
-  //         this._houseView[0].updateStatus()
-  //       } else if (houseModel.getHandTotalScore() >= 17) {
-  //         houseModel.stand()
-  //         this._houseView[0].updateStatus()
-  //       }
+        if (houseModel.getHandTotalScore() > 21) {
+          houseModel.bust()
+          houseView.updateStatus()
+        } else if (houseModel.getHandTotalScore() >= 17) {
+          houseModel.stand()
+          houseView.updateStatus()
+        }
 
-  //       this._houseView[0].updateScore()
-  //     }
-  //   }
-  // }
+        houseView.updateScore()
+      }
+    }
+  }
 }

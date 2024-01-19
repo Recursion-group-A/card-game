@@ -17,25 +17,6 @@ export default class House {
     this._actionCompleted = false
   }
 
-  public bust(): void {
-    this._status = ParticipantStatuses.Bust
-    this._actionCompleted = true
-  }
-
-  public stand(): void {
-    this._status = ParticipantStatuses.Stand
-    this._actionCompleted = true
-  }
-
-  public blackjack(): void {
-    this._status = ParticipantStatuses.Blackjack
-    this._actionCompleted = true
-  }
-
-  public isBlackjack(): boolean {
-    return this.hand.isBlackjack()
-  }
-
   public prepareNextRound(): void {
     this._hand = House.generateHand()
     this._status = ParticipantStatuses.Wait
@@ -44,6 +25,31 @@ export default class House {
 
   public getHandTotalScore(): number {
     return this._hand.calculateBlackjackTotal()
+  }
+
+  public isHandTotalScoreAbove17(): boolean {
+    return this.getHandTotalScore() >= 17
+  }
+
+  private updateStatusAndCompleteAction(status: ParticipantStatuses): void {
+    this._status = status
+    this._actionCompleted = true
+  }
+
+  public bust(): void {
+    this.updateStatusAndCompleteAction(ParticipantStatuses.Bust)
+  }
+
+  public stand(): void {
+    this.updateStatusAndCompleteAction(ParticipantStatuses.Stand)
+  }
+
+  public blackjack(): void {
+    this.updateStatusAndCompleteAction(ParticipantStatuses.Blackjack)
+  }
+
+  public isBlackjack(): boolean {
+    return this._hand.isBlackjack()
   }
 
   // TODO: START Playerクラスと共通する処理 → 後で抽象クラス Participant クラスを作る
@@ -61,10 +67,6 @@ export default class House {
 
   get status(): ParticipantStatuses {
     return this._status
-  }
-
-  set status(status: ParticipantStatuses) {
-    this.status = status
   }
 
   get hand(): BlackjackHand {

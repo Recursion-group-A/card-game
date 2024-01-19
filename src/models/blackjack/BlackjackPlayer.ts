@@ -1,8 +1,8 @@
 import Player from '@/models/common/Player'
-import BlackjackHand from '@/models/blackjack/BlackjackHand'
 import PlayerTypes from '@/types/common/player-types'
-import { ParticipantStatuses } from '@/types/blackjack/participant-status-types'
+import BlackjackHand from '@/models/blackjack/BlackjackHand'
 import GameResult from '@/types/blackjack/game-result-types'
+import { ParticipantStatuses } from '@/types/blackjack/participant-status-types'
 
 export default class BlackjackPlayer extends Player<BlackjackHand> {
   private _currentTurn: number
@@ -25,116 +25,161 @@ export default class BlackjackPlayer extends Player<BlackjackHand> {
 
   public prepareNextRound(): void {
     this._hand = this.generateHand()
-    this._currentTurn = 1
-    this._status = ParticipantStatuses.Wait
-    this._actionCompleted = false
-    this._gameResult = GameResult.Draw
+    if (this.isBroken()) {
+      this._status = ParticipantStatuses.Broken
+      this._actionCompleted = true
+      this._gameResult = GameResult.No
+    } else {
+      this._currentTurn = 1
+      this._status = ParticipantStatuses.Wait
+      this._actionCompleted = false
+      this._gameResult = GameResult.Draw
+    }
+  }
+
+  public decideAiPlayerBetAmount(): void {
+    if (!this.isBroken()) {
+      if (this._chips < 100) {
+        this.addBet(this._chips)
+      } else {
+        this.addBet(100)
+      }
+
+      this.subtractChips(this._bet)
+    }
   }
 
   public getHandTotalScore(): number {
-    return this.hand.calculateBlackjackTotal()
+    return this._hand.calculateBlackjackTotal()
   }
 
   public incrementCurrentTurn(): void {
-    this.currentTurn += 1
+    this._currentTurn += 1
   }
 
   public isFirstTurn(): boolean {
-    return this.currentTurn === 1
+    return this._currentTurn === 1
+  }
+
+  public isBroken(): boolean {
+    return this._bet <= 0 && this._chips <= 0
   }
 
   public isBlackjack(): boolean {
-    return this.hand.isBlackjack()
+    return this._hand.isBlackjack()
   }
 
   public isBust(): boolean {
-    return this.hand.isBust()
+    return this._hand.isBust()
   }
 
-  public canBet(bet: number): boolean {
-    return this.bet + bet <= this.chips
+  private isWinner(): boolean {
+    return this._gameResult === GameResult.Win
+  }
+
+  private isDrawer(): boolean {
+    return this._gameResult === GameResult.Draw
+  }
+
+  public canBet(amount: number): boolean {
+    return this._chips - amount >= 0
+  }
+
+  public canStandAi(): boolean {
+    return (
+      this._playerType === PlayerTypes.Ai &&
+      this._hand.isHandTotalScoreAbove17()
+    )
   }
 
   public canHit(): boolean {
-    return this.hand.canHit()
+    return this._hand.canHit()
   }
 
   public canDouble(): boolean {
     if (this.isBlackjack()) return false
 
-    return this.isFirstTurn() && this.chips - this._bet >= 0
+    return this.isFirstTurn() && this._chips - this._bet >= 0
   }
 
   public canSurrender(): boolean {
     if (this.isBlackjack()) return false
 
-    const halfBet: number = Math.floor(this.bet / 2)
+    const halfBet: number = Math.floor(this._bet / 2)
 
     return this.isFirstTurn() && halfBet > 0
   }
 
-  public bust(): void {
-    this._status = ParticipantStatuses.Bust
+  private updateStatusAndCompleteAction(status: ParticipantStatuses): void {
+    this._status = status
     this._actionCompleted = true
+  }
+
+  public bust(): void {
+    this.updateStatusAndCompleteAction(ParticipantStatuses.Bust)
   }
 
   public stand(): void {
-    this._status = ParticipantStatuses.Stand
-    this._actionCompleted = true
+    this.updateStatusAndCompleteAction(ParticipantStatuses.Stand)
   }
 
   public double(): void {
-    this.placeBet(this.bet)
-    this._status = ParticipantStatuses.DoubleDown
-    this._actionCompleted = true
+    this.placeBet(this._bet)
+    this.updateStatusAndCompleteAction(ParticipantStatuses.DoubleDown)
   }
 
   public surrender(): void {
-    const currentBet: number = this.bet
+    const currentBet: number = this._bet
 
     this.subtractBet(Math.floor(currentBet / 2))
     this.addChips(Math.floor(currentBet / 2))
-    this._status = ParticipantStatuses.Surrender
-    this._actionCompleted = true
+    this.updateStatusAndCompleteAction(ParticipantStatuses.Surrender)
   }
 
   public blackjack(): void {
-    this._status = ParticipantStatuses.Blackjack
-    this.actionCompleted = true
+    this.updateStatusAndCompleteAction(ParticipantStatuses.Blackjack)
   }
 
-  public evaluating(houseScore: number, houseStatus: ParticipantStatuses) {
-    if (
-      this._status === ParticipantStatuses.Bust ||
-      (houseStatus !== ParticipantStatuses.Bust &&
-        this.getHandTotalScore() < houseScore)
-    ) {
+  private evaluateLoser(
+    houseStatus: ParticipantStatuses,
+    houseScore: number
+  ): boolean {
+    const isBust: boolean = this.isBust()
+    const houseIsBust: boolean = houseStatus === ParticipantStatuses.Bust
+    const isBelowHouseScore: boolean = this.getHandTotalScore() < houseScore
+
+    return isBust || (!houseIsBust && isBelowHouseScore)
+  }
+
+  private evaluateWinner(
+    houseStatus: ParticipantStatuses,
+    houseScore: number
+  ): boolean {
+    const isBust: boolean = this.isBust()
+    const houseIsBust: boolean = houseStatus === ParticipantStatuses.Bust
+    const isAboveHouseScore: boolean = this.getHandTotalScore() > houseScore
+
+    return isAboveHouseScore || (houseIsBust && !isBust)
+  }
+
+  public evaluating(houseStatus: ParticipantStatuses, houseScore: number) {
+    if (this._status === ParticipantStatuses.Surrender || this.isBroken()) {
+      this._gameResult = GameResult.No
+    } else if (this.evaluateLoser(houseStatus, houseScore)) {
       this._gameResult = GameResult.Lose
-    } else if (this.getHandTotalScore() !== houseScore) {
+    } else if (this.evaluateWinner(houseStatus, houseScore)) {
       this._gameResult = GameResult.Win
     }
   }
 
   public settlement(): void {
-    if (this._gameResult === GameResult.Win) {
+    if (this.isWinner()) {
       this.addChips(this._bet * 2)
-    } else if (this._gameResult === GameResult.Draw) {
+    } else if (this.isDrawer()) {
       this.addChips(this._bet)
     }
 
-    // prepare内でやってもいいかも
     this.resetBet()
-  }
-
-  public decideAiPlayerBetAmount(): void {
-    // 条件分岐不要
-    if (this.playerType === PlayerTypes.Ai) {
-      const max: number = Math.floor(this.chips * 0.2)
-      const min: number = Math.floor(this.chips * 0.1)
-      this.bet = Math.floor(Math.random() * (max - min) + min)
-
-      this.subtractChips(this.bet)
-    }
   }
 
   // eslint-disable-next-line
@@ -142,28 +187,12 @@ export default class BlackjackPlayer extends Player<BlackjackHand> {
     return new BlackjackHand()
   }
 
-  get currentTurn(): number {
-    return this._currentTurn
-  }
-
-  set currentTurn(numOfTurns: number) {
-    this._currentTurn = numOfTurns
-  }
-
   get status(): ParticipantStatuses {
     return this._status
   }
 
-  set status(playerStatus: ParticipantStatuses) {
-    this._status = playerStatus
-  }
-
   get actionCompleted(): boolean {
     return this._actionCompleted
-  }
-
-  set actionCompleted(bool: boolean) {
-    this._actionCompleted = bool
   }
 
   get gameResult(): GameResult {

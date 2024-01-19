@@ -32,4 +32,8 @@ export default class BlackjackHand extends Hand {
   public canHit(): boolean {
     return !this.isBlackjack() && !this.isBust()
   }
+
+  public isHandTotalScoreAbove17(): boolean {
+    return this.calculateBlackjackTotal() >= 17
+  }
 }
