@@ -1,7 +1,7 @@
 import * as Phaser from 'phaser'
 import Card from '@/models/common/Card'
-import CardView from '@/phaser/common/CardView'
 import BlackjackPlayer from '@/models/blackjack/BlackjackPlayer'
+import CardView from '@/phaser/common/CardView'
 
 export default class PlayerView extends Phaser.GameObjects.Container {
   private readonly _playerModel: BlackjackPlayer
@@ -19,8 +19,6 @@ export default class PlayerView extends Phaser.GameObjects.Container {
   private readonly _statusText: Phaser.GameObjects.Text
 
   private readonly _scoreText: Phaser.GameObjects.Text
-
-  private _dealerBtn: Phaser.GameObjects.Image | undefined | null
 
   constructor(
     scene: Phaser.Scene,
@@ -44,7 +42,7 @@ export default class PlayerView extends Phaser.GameObjects.Container {
     )
     this._chipsText = this.scene.add.text(
       70,
-      -32, // カードの高さ → 64
+      -32,
       `CHIPS: ${this._playerModel.chips}`
     )
     this._statusText = this.scene.add.text(
@@ -86,18 +84,11 @@ export default class PlayerView extends Phaser.GameObjects.Container {
   }
 
   public updateBlackjackColor(): void {
-    this._playerNameText.setColor('#e6b422')
+    this._playerNameText.setColor('gold')
   }
 
   public resetBlackjackColor(): void {
     this._playerNameText.setColor('white')
-  }
-
-  public updateAll(): void {
-    this.updateStatus()
-    this.updateChips()
-    this.updateBet()
-    this.updateScore()
   }
 
   public updateStatus(): void {

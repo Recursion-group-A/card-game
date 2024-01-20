@@ -1,8 +1,7 @@
-import House from '@/models/blackjack/House'
 import BlackjackPlayer from '@/models/blackjack/BlackjackPlayer'
-import Table from '@/models/common/Table'
-import { ParticipantStatuses } from '@/types/blackjack/participant-status-types'
+import House from '@/models/blackjack/House'
 import BlackjackHand from '@/models/blackjack/BlackjackHand'
+import Table from '@/models/common/Table'
 import PlayerTypes from '@/types/common/player-types'
 import { GamePhases } from '@/types/common/game-phase-types'
 import { GameTypes } from '@/types/common/game-types'
@@ -54,7 +53,7 @@ export default class BlackjackTable extends Table<
     this.gamePhase = GamePhases.Betting
   }
 
-  public setPlayersStatus(): void {
+  public initializeParticipantsStatus(): void {
     this.players.forEach((player) => {
       if (player.isBlackjack()) {
         player.blackjack()
@@ -62,9 +61,7 @@ export default class BlackjackTable extends Table<
         player.stand()
       }
     })
-  }
 
-  public setHouseStatus(): void {
     if (this._house.isBlackjack()) {
       this._house.blackjack()
     } else if (this._house.isHandTotalScoreAbove17()) {
@@ -85,11 +82,8 @@ export default class BlackjackTable extends Table<
   }
 
   public evaluatingPlayers(): void {
-    const houseStatus: ParticipantStatuses = this._house.status
-    const houseScore: number = this._house.getHandTotalScore()
-
     this.players.forEach((player) => {
-      player.evaluating(houseStatus, houseScore)
+      player.evaluating(this._house.status, this._house.getHandTotalScore())
     })
 
     this._evaluateCompleted = true
@@ -122,6 +116,22 @@ export default class BlackjackTable extends Table<
       }
     }
     return players
+  }
+
+  public setActingPhase(): void {
+    this._gamePhase = GamePhases.Acting
+  }
+
+  public setEvaluatingPhase(): void {
+    this._gamePhase = GamePhases.Evaluating
+  }
+
+  public setSettlementPhase(): void {
+    this._gamePhase = GamePhases.Settlement
+  }
+
+  public setPreparationPhase(): void {
+    this._gamePhase = GamePhases.Preparation
   }
 
   get betDenominations(): number[] {

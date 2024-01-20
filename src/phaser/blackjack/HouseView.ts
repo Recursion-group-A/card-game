@@ -1,9 +1,9 @@
 import * as Phaser from 'phaser'
 import Card from '@/models/common/Card'
-import CardView from '@/phaser/common/CardView'
 import House from '@/models/blackjack/House'
+import CardView from '@/phaser/common/CardView'
 
-export default class PlayerView extends Phaser.GameObjects.Container {
+export default class HouseView extends Phaser.GameObjects.Container {
   private readonly _houseModel: House
 
   private readonly _handCardViews: Phaser.GameObjects.Container
@@ -30,7 +30,7 @@ export default class PlayerView extends Phaser.GameObjects.Container {
     this._statusText = this.scene.add.text(
       5,
       64 + 40,
-      `STATES: ${this._houseModel.status}`
+      `STATES: ${this._houseModel.status.toUpperCase()}`
     )
     this._scoreText = this.scene.add.text(5, 64 + 60, `SCORE: ?`, {
       font: '24px',
@@ -48,10 +48,6 @@ export default class PlayerView extends Phaser.GameObjects.Container {
     scene.add.existing(this)
   }
 
-  get houseModel(): House {
-    return this._houseModel
-  }
-
   public animateAddHand(x: number, y: number, card: Card, i: number): void {
     const cardView: CardView = new CardView(this.scene, x, y, card)
 
@@ -61,7 +57,7 @@ export default class PlayerView extends Phaser.GameObjects.Container {
   }
 
   public updateBlackjackColor(): void {
-    this._playerNameText.setColor('#e6b422')
+    this._playerNameText.setColor('gold')
   }
 
   public resetBlackjackColor(): void {
@@ -74,7 +70,7 @@ export default class PlayerView extends Phaser.GameObjects.Container {
   }
 
   public updateStatus(): void {
-    this._statusText.setText(`STATES: ${this._houseModel.status}`)
+    this._statusText.setText(`STATES: ${this._houseModel.status.toUpperCase()}`)
   }
 
   public updateScore(): void {
@@ -103,9 +99,7 @@ export default class PlayerView extends Phaser.GameObjects.Container {
     })
   }
 
-  public revealHand(): void {
-    this._handCardViews.each((child: CardView) => {
-      child.open()
-    })
+  get houseModel(): House {
+    return this._houseModel
   }
 }
