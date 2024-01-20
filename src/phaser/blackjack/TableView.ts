@@ -6,6 +6,7 @@ import PlayerTypes from '@/types/common/player-types'
 import DeckView from '@/phaser/common/DeckView'
 import PlayerView from '@/phaser/blackjack/PlayerView'
 import HouseView from '@/phaser/blackjack/HouseView'
+import House from '@/models/blackjack/House'
 
 export default class TableView extends Phaser.GameObjects.Container {
   private readonly _tableModel: BlackjackTable
@@ -77,6 +78,36 @@ export default class TableView extends Phaser.GameObjects.Container {
     this.add(houseView)
   }
 
+  public createBetButtons(): void {
+    const userView: PlayerView | undefined = this._playerViews.filter(
+      (playerView: PlayerView) =>
+        playerView.playerModel.playerType === PlayerTypes.Player
+    )[0]
+    const { betDenominations } = this._tableModel
+
+    betDenominations.forEach((number: number, index: number) => {
+      this.displayButtons(userView, String(number), index - 1.5, 'bet')
+    })
+
+    this.displayButtons(userView, 'ALL', betDenominations.length - 1.5, 'bet')
+    this.displayButtons(userView, 'RESET', betDenominations.length - 0.5, 'bet')
+    this.displayButtons(userView, 'OK', betDenominations.length + 0.5, 'bet')
+  }
+
+  public createActionButtons(): void {
+    const userView: PlayerView | undefined = this._playerViews.filter(
+      (playerView: PlayerView) =>
+        playerView.playerModel.playerType === PlayerTypes.Player
+    )[0]
+
+    if (!userView.playerModel.isBlackjack()) {
+      this.displayButtons(userView, 'STAND', 0, 'action')
+      this.displayButtons(userView, 'HIT', 1, 'action')
+      this.displayButtons(userView, 'DOUBLE', 2, 'action')
+      this.displayButtons(userView, 'SURRENDER', 3, 'action')
+    }
+  }
+
   public displayButtons(
     userView: PlayerView,
     content: string,
@@ -128,78 +159,66 @@ export default class TableView extends Phaser.GameObjects.Container {
     })
   }
 
-  public getUserBetInfo(): void {
+  public getUserBetAction(): void {
     this._betButtons.each((child: Phaser.GameObjects.Container) => {
       child.list[0].on('pointerdown', () => {
-        const betInfo: string = child.list[1].name
+        const betAction: string = child.list[1].name
 
-        if (betInfo === 'OK') {
-          this.decideBetAmount()
-        } else if (betInfo === 'RESET') {
-          this.resetBetAmount()
-        } else if (betInfo === 'ALL') {
-          this.allIn()
-        } else {
-          this.addBet(Number(betInfo))
-        }
+        if (betAction === 'OK') this.decideBetAmount()
+        else if (betAction === 'RESET') this.resetBetAmount()
+        else if (betAction === 'ALL') this.allIn()
+        // 危険
+        else this.addBet(Number(betAction))
       })
     })
   }
 
-  public async getUserAction(): Promise<void> {
+  public async getUserBlackjackAction(): Promise<void> {
     this._actionButtons.each((child: Phaser.GameObjects.Container) => {
       child.list[0].on('pointerdown', () => {
-        const action: string = child.list[1].name
+        const blackjackAction: string = child.list[1].name
 
         const userView: PlayerView = this.userView()
         const userModel: BlackjackPlayer = userView.playerModel
 
-        if (action === 'STAND') {
-          this.standProcess(userView, userModel)
-        } else if (action === 'DOUBLE') {
-          this.doubleProcess(userView, userModel)
-        } else if (action === 'SURRENDER') {
-          this.surrenderProcess(userView, userModel)
-        } else {
-          this.hitProcess(userView, userModel)
-        }
+        if (blackjackAction === 'STAND') this.standProcess(userModel, userView)
+        else if (blackjackAction === 'DOUBLE')
+          this.doubleProcess(userModel, userView)
+        else if (blackjackAction === 'SURRENDER')
+          this.surrenderProcess(userModel, userView)
+        else this.hitProcess(userModel, userView)
       })
     })
   }
 
-  public standProcess(userView: PlayerView, userModel: BlackjackPlayer): void {
+  public standProcess(userModel: BlackjackPlayer, userView: PlayerView): void {
     userModel.stand()
     userView.updateStatus()
 
     this.clearActionButtons()
   }
 
-  public doubleProcess(userView: PlayerView, userModel: BlackjackPlayer): void {
+  public doubleProcess(userModel: BlackjackPlayer, userView: PlayerView): void {
     if (userModel.canDouble()) {
       userModel.double()
-
-      const card: Card = this._tableModel.drawCard()
-      userModel.addHand(card)
-      userView.animateAddHand(
-        this._deckView.x,
-        this._deckView.y - 14,
-        card,
-        userModel.hand.cards.length - 1
-      )
+      this.addCardToHand(userModel, userView)
       userView.revealLastHand()
 
       if (userModel.isBust()) {
         userModel.bust()
       }
-      userView.updateAll()
+      userView.updateStatus()
+      userView.updateChips()
+      userView.updateBet()
+      userView.updateScore()
 
       this.clearActionButtons()
     }
   }
 
   public surrenderProcess(
-    userView: PlayerView,
-    userModel: BlackjackPlayer
+    userModel: BlackjackPlayer,
+    userView: PlayerView
   ): void {
     if (userModel.canSurrender()) {
       userModel.surrender()
@@ -211,17 +230,11 @@ export default class TableView extends Phaser.GameObjects.Container {
     }
   }
 
-  public hitProcess(userView: PlayerView, userModel: BlackjackPlayer): void {
+  public hitProcess(userModel: BlackjackPlayer, userView: PlayerView): void {
     if (userModel.canHit()) {
-      const card: Card = this._tableModel.drawCard()
-      userModel.addHand(card)
+      this.addCardToHand(userModel, userView)
+
       userModel.incrementCurrentTurn()
-      userView.animateAddHand(
-        this._deckView.x,
-        this._deckView.y - 14,
-        card,
-        userModel.hand.cards.length - 1
-      )
       userView.revealLastHand()
       userView.updateScore()
 
@@ -292,6 +305,20 @@ export default class TableView extends Phaser.GameObjects.Container {
     })
 
     this._actionButtons.removeAll()
+  }
+
+  public async addCardToHand(
+    model: BlackjackPlayer | House,
+    view: PlayerView | HouseView
+  ): Promise<void> {
+    const card: Card = this._tableModel.drawCard()
+    model.addHand(card)
+    view.animateAddHand(
+      this._deckView.x,
+      this._deckView.y - 14,
+      card,
+      model.hand.cards.length - 1
+    )
   }
 
   public userModel(): BlackjackPlayer {

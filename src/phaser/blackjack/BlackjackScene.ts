@@ -1,16 +1,14 @@
 import BaseScene from '@/phaser/common/BaseScene'
-import Card from '@/models/common/Card'
 // eslint-disable-next-line
 import House from '@/models/blackjack/House'
+import BlackjackPlayer from '@/models/blackjack/BlackjackPlayer'
 import BlackjackTable from '@/models/blackjack/BlackjackTable'
-import TableView from '@/phaser/blackjack/TableView'
-import PlayerView from '@/phaser/blackjack/PlayerView'
-import HouseView from '@/phaser/blackjack/HouseView'
 import PlayerTypes from '@/types/common/player-types'
 import { GameTypes } from '@/types/common/game-types'
-import { GamePhases } from '@/types/common/game-phase-types'
+import PlayerView from '@/phaser/blackjack/PlayerView'
+import HouseView from '@/phaser/blackjack/HouseView'
+import TableView from '@/phaser/blackjack/TableView'
 import { delay } from '@/utils/utils'
-import BlackjackPlayer from '@/models/blackjack/BlackjackPlayer'
 
 export default class BlackjackScene extends BaseScene {
   private readonly _tableModel: BlackjackTable
@@ -64,8 +62,8 @@ export default class BlackjackScene extends BaseScene {
 
   private async bettingProcess(): Promise<void> {
     this.decideAiPlayersBetAmount()
-    this.createBetButtons()
-    this._tableView?.getUserBetInfo()
+    this._tableView?.createBetButtons()
+    this._tableView?.getUserBetAction()
   }
 
   private async actingProcess(): Promise<void> {
@@ -73,20 +71,19 @@ export default class BlackjackScene extends BaseScene {
       () => this._tableModel.userBetCompleted
     )
 
-    this._tableModel.gamePhase = GamePhases.Acting
+    this._tableModel.setActingPhase()
 
     await this.dealCardsToParticipants()
     await delay(BlackjackScene.DELAY_TIME)
     this.revealAllHand()
 
-    this._tableModel.setPlayersStatus()
-    this._tableModel.setHouseStatus()
+    this._tableModel.initializeParticipantsStatus()
     this.updatePlayersStatus()
     this.updatePlayersScore()
 
     await delay(BlackjackScene.DELAY_TIME)
-    this.createActionButtons()
-    await this._tableView?.getUserAction()
+    this._tableView?.createActionButtons()
+    await this._tableView?.getUserBlackjackAction()
     await this.aiProcess()
     await this.houseProcess()
   }
@@ -96,7 +93,9 @@ export default class BlackjackScene extends BaseScene {
       this._tableModel.houseActionCompleted()
     )
 
-    this._tableModel.gamePhase = GamePhases.Evaluating
+    await delay(BlackjackScene.DELAY_TIME)
+
+    this._tableModel.setEvaluatingPhase()
     this._tableModel.evaluatingPlayers()
 
     this.updatePlayersGameResult()
@@ -109,7 +108,7 @@ export default class BlackjackScene extends BaseScene {
       () => this._tableModel.evaluateCompleted
     )
 
-    this._tableModel.gamePhase = GamePhases.Settlement
+    this._tableModel.setSettlementPhase()
     this._tableModel.settlementPlayers()
 
     this.updatePlayersChips()
@@ -121,6 +120,9 @@ export default class BlackjackScene extends BaseScene {
     await BlackjackScene.waitForCompletion(
       () => this._tableModel.settlementCompleted
     )
+
+    this._tableModel.setPreparationPhase()
+
     const houseView: HouseView = this.getHouseView()
 
     this._tableModel.prepareNextRound()
@@ -145,43 +147,24 @@ export default class BlackjackScene extends BaseScene {
   }
 
   private async dealCardsToParticipants(): Promise<void> {
-    const totalPlayers: number = this._tableModel.players.length
-
+    let count = 0
     for (let times: number = 0; times < 2; times += 1) {
-      let currentIndex: number = 0
-
-      for (let i: number = 0; i < totalPlayers; i += 1) {
-        const currentPlayerView: PlayerView = this._playerViews[currentIndex]
-
-        if (!currentPlayerView.playerModel.isBroken()) {
-          const card: Card = this._tableModel.drawCard()
-          currentPlayerView.playerModel.addHand(card)
-
+      // eslint-disable-next-line
+      for (const playerView of this._playerViews) {
+        if (!playerView.playerModel.isBroken()) {
           // eslint-disable-next-line
           await delay(BlackjackScene.DELAY_TIME / 10)
-          currentPlayerView.animateAddHand(
-            this._tableView!.deckView.x,
-            this._tableView!.deckView.y - 14,
-            card,
-            times
-          )
-          currentIndex = (currentIndex + 1) % totalPlayers
+          this._tableView?.addCardToHand(playerView.playerModel, playerView)
         }
-        // houseの手札追加
-        if (i >= totalPlayers - 1) {
-          const houseView: HouseView = this.getHouseView()
-          const houseCard: Card = this._tableModel.drawCard()
-          houseView.houseModel.addHand(houseCard)
 
-          // eslint-disable-next-line
-          await delay(BlackjackScene.DELAY_TIME / 10)
-          houseView.animateAddHand(
-            this._tableView!.deckView.x,
-            this._tableView!.deckView.y - 14,
-            houseCard,
-            times
-          )
-        }
+        count += 1
+      }
+
+      if (count >= this._playerViews.length) {
+        // eslint-disable-next-line
+        await delay(BlackjackScene.DELAY_TIME / 10)
+        const houseView: HouseView = this.getHouseView()
+        this._tableView?.addCardToHand(houseView.houseModel, houseView)
       }
     }
   }
@@ -262,65 +245,11 @@ export default class BlackjackScene extends BaseScene {
     })
   }
 
-  private createBetButtons(): void {
-    const userView: PlayerView | undefined = this._playerViews.filter(
-      (playerView: PlayerView) =>
-        playerView.playerModel.playerType === PlayerTypes.Player
-    )[0]
-    const { betDenominations } = this._tableModel
-
-    betDenominations.forEach((number: number, index: number) => {
-      this._tableView?.displayButtons(
-        userView,
-        String(number),
-        index - 1.5,
-        'bet'
-      )
-    })
-
-    this._tableView?.displayButtons(
-      userView,
-      'ALL',
-      betDenominations.length - 1.5,
-      'bet'
-    )
-    this._tableView?.displayButtons(
-      userView,
-      'RESET',
-      betDenominations.length - 0.5,
-      'bet'
-    )
-    this._tableView?.displayButtons(
-      userView,
-      'OK',
-      betDenominations.length + 0.5,
-      'bet'
-    )
-  }
-
-  private createActionButtons(): void {
-    const userView: PlayerView | undefined = this._playerViews.filter(
-      (playerView: PlayerView) =>
-        playerView.playerModel.playerType === PlayerTypes.Player
-    )[0]
-
-    if (!userView.playerModel.isBlackjack()) {
-      this._tableView?.displayButtons(userView, 'STAND', 0, 'action')
-      this._tableView?.displayButtons(userView, 'HIT', 1, 'action')
-      this._tableView?.displayButtons(userView, 'DOUBLE', 2, 'action')
-      this._tableView?.displayButtons(userView, 'SURRENDER', 3, 'action')
-    }
-  }
-
   private getAiPlayersView(): PlayerView[] {
     return this._playerViews.filter(
       (playerView: PlayerView) =>
         playerView.playerModel.playerType === PlayerTypes.Ai
     )
-  }
-
-  private getHouseView(): HouseView {
-    return this._houseView[0]
   }
 
   private async aiProcess(): Promise<void> {
@@ -329,32 +258,9 @@ export default class BlackjackScene extends BaseScene {
     // eslint-disable-next-line
     for (const aiPlayerView of aiPlayerViews) {
       const aiPlayerModel: BlackjackPlayer = aiPlayerView.playerModel
-      if (!aiPlayerModel.isBroken()) {
-        while (aiPlayerModel.getHandTotalScore() < 17) {
-          // eslint-disable-next-line
-          await delay(BlackjackScene.DELAY_TIME * 2)
 
-          const card: Card = this._tableModel.drawCard()
-          aiPlayerModel.addHand(card)
-          aiPlayerView.animateAddHand(
-            this._tableView!.deckView.x,
-            this._tableView!.deckView.y - 14,
-            card,
-            aiPlayerModel.hand.cards.length - 1
-          )
-          aiPlayerView.revealLastHand()
-
-          if (aiPlayerModel.getHandTotalScore() > 21) {
-            aiPlayerModel.bust()
-            aiPlayerView.updateStatus()
-          } else if (aiPlayerModel.getHandTotalScore() >= 17) {
-            aiPlayerModel.stand()
-            aiPlayerView.updateStatus()
-          }
-
-          aiPlayerView.updateScore()
-        }
-      }
+      // eslint-disable-next-line
+      await this.drawUntilSeventeen(aiPlayerModel, aiPlayerView)
     }
   }
 
@@ -372,30 +278,34 @@ export default class BlackjackScene extends BaseScene {
     if (houseModel.isBlackjack()) {
       houseView.updateBlackjackColor()
     } else {
-      while (houseModel.getHandTotalScore() < 17) {
-        // eslint-disable-next-line
-        await delay(BlackjackScene.DELAY_TIME * 2)
-
-        const card: Card = this._tableModel.drawCard()
-        houseModel.addHand(card)
-        houseView.animateAddHand(
-          this._tableView!.deckView.x,
-          this._tableView!.deckView.y - 14,
-          card,
-          houseModel.hand.cards.length - 1
-        )
-        houseView.revealLastHand()
-
-        if (houseModel.getHandTotalScore() > 21) {
-          houseModel.bust()
-          houseView.updateStatus()
-        } else if (houseModel.getHandTotalScore() >= 17) {
-          houseModel.stand()
-          houseView.updateStatus()
-        }
-
-        houseView.updateScore()
-      }
+      await this.drawUntilSeventeen(houseModel, houseView)
     }
+  }
+
+  private async drawUntilSeventeen(
+    model: BlackjackPlayer | House,
+    view: PlayerView | HouseView
+  ): Promise<void> {
+    while (model.getHandTotalScore() < 17) {
+      // eslint-disable-next-line
+      await delay(BlackjackScene.DELAY_TIME)
+
+      this._tableView?.addCardToHand(model, view)
+      view.revealLastHand()
+
+      if (model.getHandTotalScore() > 21) {
+        model.bust()
+        view.updateStatus()
+      } else if (model.getHandTotalScore() >= 17) {
+        model.stand()
+        view.updateStatus()
+      }
+
+      view.updateScore()
+    }
+  }
+
+  private getHouseView(): HouseView {
+    return this._houseView[0]
   }
 }
