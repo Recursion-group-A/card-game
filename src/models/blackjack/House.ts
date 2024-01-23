@@ -18,7 +18,7 @@ export default class House {
   }
 
   public prepareNextRound(): void {
-    this._hand = House.generateHand()
+    this._hand.resetHand()
     this._status = ParticipantStatuses.Wait
     this._actionCompleted = false
   }
@@ -51,7 +51,7 @@ export default class House {
   public isBlackjack(): boolean {
     return this._hand.isBlackjack()
   }
-  
+
   public addHand(card: Card): void {
     this._hand.addOne(card)
   }
