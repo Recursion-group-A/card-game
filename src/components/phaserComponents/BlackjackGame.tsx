@@ -1,10 +1,10 @@
 'use client'
 
-import * as Phaser from 'phaser'
 import React, { useEffect } from 'react'
-import gameConfig from '@/phaser/common/config'
+import Phaser from 'phaser'
+import gameConfig from '@/phaser/blackjack/config'
 
-export default function PhaserComponent() {
+export default function BlackjackGame() {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const game: Phaser.Game = new Phaser.Game(gameConfig)
@@ -16,5 +16,5 @@ export default function PhaserComponent() {
     return (): void => {}
   }, [])
 
-  return <div id="phaser-game" />
+  return <div id="phaser-blackjack-game" />
 }

@@ -35,17 +35,17 @@ export default function SwiperComponent() {
       <SwiperSlide key="blackjack" className="flex-col">
         BLACKJACK
         {renderImage('BLACKJACK', '/assets/ui/casino3.jpeg')}
-        <ButtonComponent />
+        <ButtonComponent title="blackjack" />
       </SwiperSlide>
       <SwiperSlide key="poker" className="flex-col">
         POKER
         {renderImage('POKER', '/assets/ui/casino8.jpg')}
-        <ButtonComponent />
+        <ButtonComponent title="poker" />
       </SwiperSlide>
       <SwiperSlide key="speed" className="flex-col">
         SPEED
         {renderImage('SPEED', '/assets/ui/casino10.jpg')}
-        <ButtonComponent />
+        <ButtonComponent title="speed" />
       </SwiperSlide>
     </Swiper>
   )

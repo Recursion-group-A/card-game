@@ -3,23 +3,12 @@ import { SUITS_FOR_IMAGE } from '@/constants/cards/suits.constants'
 import { RANKS_FOR_IMAGE } from '@/constants/cards/ranks.constants'
 
 export default class PreloadScene extends Phaser.Scene {
-  private _nextScene: string | undefined
-
-  constructor() {
-    super('PreloadScene')
-  }
-
-  init(data: { nextScene: string }): void {
-    this._nextScene = data.nextScene
-  }
-
   preload(): void {
     const { width, height } = this.cameras.main
 
     this.load.setBaseURL('../../assets/')
     this.load.image('table', 'ui/table.jpeg')
 
-    // 全種類のカードを読み込む
     SUITS_FOR_IMAGE.forEach((suit: string) => {
       RANKS_FOR_IMAGE.forEach((rank: string) => {
         const key: string = `card_${suit}_${rank}`
@@ -76,7 +65,7 @@ export default class PreloadScene extends Phaser.Scene {
     })
   }
 
-  create(): void {
-    this.scene.start(this._nextScene)
+  create(nextScene: string): void {
+    this.scene.start(nextScene)
   }
 }
