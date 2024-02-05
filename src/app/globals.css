@@ -52,3 +52,7 @@ body {
 .swiper-slide:nth-child(3n) {
   background: linear-gradient(#facc15, #eab308);
 }
+
+.swiper-slide:nth-child(4n) {
+  background: linear-gradient(#84cc16, #65a30d);
+}
