@@ -41,19 +41,22 @@ export default class CardView extends Phaser.GameObjects.Image {
 
   public setClickable(): void {
     this.setInteractive({ useHandCursor: true })
-    this.on('pointerdown', this.animateWarCardMove)
   }
 
-  private animateWarCardMove(): void {
+  public animateWarCardMove(isPlayer: boolean): void {
     const targetX: number = this.scene.cameras.main.width / 2
     const targetY: number = this.scene.cameras.main.height / 2
 
     this.scene.tweens.add({
       targets: this,
       x: targetX,
-      y: targetY + 50,
-      duration: 350,
+      y: isPlayer ? targetY + 50 : targetY - 50,
+      duration: 200,
       ease: 'Power2'
     })
+  }
+
+  get cardModel(): Card {
+    return this._cardModel
   }
 }

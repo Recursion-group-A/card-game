@@ -12,6 +12,8 @@ export default class TableView extends Phaser.GameObjects.Container {
 
   private readonly _playerViews: PlayerView[] = []
 
+  private readonly _resultText: Phaser.GameObjects.Text | null = null
+
   // private readonly _promptText: Phaser.GameObjects.Text
 
   constructor(scene: Phaser.Scene, tableModel: WarTable) {
@@ -46,6 +48,15 @@ export default class TableView extends Phaser.GameObjects.Container {
       this._playerViews.push(playerView)
       this.add(playerView)
     })
+  }
+
+  public displayResultText(text: string): void {
+    this.scene.add.text(
+      this._sceneWidth / 2 - 30,
+      this._sceneHeight / 2 - 13,
+      text,
+      { font: '25px' }
+    )
   }
 
   get playerViews(): PlayerView[] {

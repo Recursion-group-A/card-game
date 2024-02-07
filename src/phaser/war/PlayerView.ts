@@ -62,7 +62,21 @@ export default class PlayerView extends Phaser.GameObjects.Container {
     return this._chipsText
   }
 
+  public async getUserAction(): Promise<CardView> {
+    return new Promise((resolve) => {
+      this._handCardViews.each((card: CardView) => {
+        card.on('pointerdown', () => {
+          resolve(card)
+        })
+      })
+    })
+  }
+
   get playerModel(): WarPlayer {
     return this._playerModel
+  }
+
+  get handCardViews() {
+    return this._handCardViews
   }
 }
