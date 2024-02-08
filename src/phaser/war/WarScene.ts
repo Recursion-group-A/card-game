@@ -4,7 +4,6 @@ import BaseScene from '@/phaser/common/BaseScene'
 import CardView from '@/phaser/common/CardView'
 import PlayerView from '@/phaser/war/PlayerView'
 import TableView from '@/phaser/war/TableView'
-import { Rank } from '@/types/common/rank-types'
 import { GameTypes } from '@/types/common/game-types'
 import { delay } from '@/utils/utils'
 
@@ -38,17 +37,14 @@ export default class WarScene extends BaseScene {
     await this.startGame()
   }
 
-  // eslint-disable-next-line
   protected async startGame(): Promise<void> {
     await this.processBeforeBattle()
-    await this.processBattle()
-    // await this.prepareNextGame()
+    await this.processRound()
+    await this.prepareNextGame()
   }
 
   // eslint-disable-next-line
-  protected prepareNextGame(): Promise<void> {
-    return Promise.resolve(undefined)
-  }
+  protected async prepareNextGame(): Promise<void> {}
 
   private async processBeforeBattle(): Promise<void> {
     await delay(WarScene.DELAY_TIME / 2)
@@ -56,22 +52,26 @@ export default class WarScene extends BaseScene {
   }
 
   private async dealCardsToPlayers(): Promise<void> {
-    for (let c: number = 0; c < 26; c += 1) {
+    for (let i: number = 0; i < 26; i += 1) {
       const card1: Card = this._tableModel.drawCard()
       const card2: Card = this._tableModel.drawCard()
 
-      // eslint-disable-next-line
-      await delay(WarScene.DELAY_TIME / 30)
-
       this._playerViews[0].playerModel.addHand(card1)
-      this._playerViews[0].animateAddHand(330, 160, card1, c)
+      this._playerViews[0].animateAddHand(330, 160, card1, i)
 
       this._playerViews[1].playerModel.addHand(card2)
-      this._playerViews[1].animateAddHand(330, 610, card2, c)
+      this._playerViews[1].animateAddHand(330, 610, card2, i)
     }
   }
 
-  private async processBattle(): Promise<void> {
+  private async processRound(): Promise<void> {
+    for (let i: number = 0; i < 26; i += 1) {
+      // eslint-disable-next-line
+      await this.processEachBattle()
+    }
+  }
+
+  private async processEachBattle(): Promise<void> {
     const playerCard: CardView = await this.processPlayerAction()
     const botCard: CardView = await this.processBotAction()
 
@@ -79,41 +79,62 @@ export default class WarScene extends BaseScene {
     playerCard.open()
     botCard.open()
 
-    this.processJudgement(playerCard, botCard)
+    await delay(WarScene.DELAY_TIME / 2)
+    await this.processJudgement(playerCard, botCard)
   }
 
   private async processPlayerAction(): Promise<CardView> {
-    const card: CardView = await this._playerViews[1].getUserAction()
+    const player: PlayerView = this._playerViews[1]
+    const card: CardView = await player.getUserAction()
+
+    player.playerModel.hand.popOne(card.cardModel)
     card.animateWarCardMove(true)
 
     return card
   }
 
   private async processBotAction(): Promise<CardView> {
-    const card: CardView = this.selectCard()
+    const bot: PlayerView = this._playerViews[0]
+    const card: CardView = this.selectCard(bot)
+
+    bot.playerModel.hand.popOne(card.cardModel)
+    bot.handCardViews.remove(card)
     card.animateWarCardMove(false)
 
     return card
   }
 
-  private selectCard(): CardView {
-    const numOfCards: number =
-      this._playerViews[0].playerModel.hand.getCardCount()
+  // eslint-disable-next-line
+  private selectCard(bot: PlayerView): CardView {
+    const numOfCards: number = bot.playerModel.hand.getCardCount()
     const randomInt: number = Math.floor(Math.random() * numOfCards)
 
-    return this._playerViews[0].handCardViews.getAt(randomInt)
+    return bot.handCardViews.getAt(randomInt)
   }
 
-  private processJudgement(card1: CardView, card2: CardView): void {
-    const card1Rank: Rank = card1.cardModel.rank
-    const card2Rank: Rank = card2.cardModel.rank
+  private async processJudgement(
+    card1: CardView,
+    card2: CardView
+  ): Promise<void> {
+    const card1Rank: number = card1.cardModel.getRankNumber()
+    const card2Rank: number = card2.cardModel.getRankNumber()
+
+    let resultText: string
+    let resultIndex: number
 
     if (card1Rank === card2Rank) {
-      this._tableView?.displayResultText('DRAW')
+      resultText = 'DRAW'
+      resultIndex = 2
     } else if (card1Rank > card2Rank) {
-      this._tableView?.displayResultText('WIN!')
+      resultText = 'WIN!'
+      resultIndex = 1
     } else {
-      this._tableView?.displayResultText('LOSE')
+      resultText = 'LOSE'
+      resultIndex = 0
     }
+
+    this._tableView?.displayResultText(resultText)
+    await delay(WarScene.DELAY_TIME / 2)
+    this._tableView?.animateMoveToDeck(card1, card2, resultIndex)
   }
 }

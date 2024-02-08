@@ -5,12 +5,8 @@ import PlayerTypes from '@/types/common/player-types'
 import { GameTypes } from '@/types/common/game-types'
 
 export default class WarTable extends Table<WarPlayer, Hand> {
-  private _cardsOnTable: number
-
   constructor(gameType: GameTypes) {
     super(gameType, 2)
-
-    this._cardsOnTable = 0
   }
 
   // eslint-disable-next-line
