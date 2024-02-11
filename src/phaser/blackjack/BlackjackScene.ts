@@ -1,13 +1,12 @@
-import BaseScene from '@/phaser/common/BaseScene'
-// eslint-disable-next-line
 import House from '@/models/blackjack/House'
 import BlackjackPlayer from '@/models/blackjack/BlackjackPlayer'
 import BlackjackTable from '@/models/blackjack/BlackjackTable'
+import BaseScene from '@/phaser/common/BaseScene'
+import HouseView from '@/phaser/blackjack/HouseView'
+import PlayerView from '@/phaser/blackjack/PlayerView'
+import TableView from '@/phaser/blackjack/TableView'
 import PlayerTypes from '@/types/common/player-types'
 import { GameTypes } from '@/types/common/game-types'
-import PlayerView from '@/phaser/blackjack/PlayerView'
-import HouseView from '@/phaser/blackjack/HouseView'
-import TableView from '@/phaser/blackjack/TableView'
 import { delay } from '@/utils/utils'
 
 export default class BlackjackScene extends BaseScene {
@@ -32,10 +31,9 @@ export default class BlackjackScene extends BaseScene {
     this._playerViews = this._tableView.playerViews
     this._houseView = this._tableView.houseView
 
-    this.startGame()
+    await this.startGame()
   }
 
-  // eslint-disable-next-line
   protected async startGame(): Promise<void> {
     await this.bettingProcess()
     await this.actingProcess()
@@ -115,8 +113,7 @@ export default class BlackjackScene extends BaseScene {
     this.updatePlayersBet()
   }
 
-  // eslint-disable-next-line
-  protected async prepareNextGame(): Promise<void> {
+  private async prepareNextGame(): Promise<void> {
     await BlackjackScene.waitForCompletion(
       () => this._tableModel.settlementCompleted
     )
@@ -136,7 +133,7 @@ export default class BlackjackScene extends BaseScene {
 
     await delay(BlackjackScene.DELAY_TIME * 3)
 
-    this.startGame()
+    await this.startGame()
   }
 
   private decideAiPlayersBetAmount(): void {

@@ -12,7 +12,9 @@ export default class PlayerView extends Phaser.GameObjects.Container {
 
   private readonly _handCardViews: Phaser.GameObjects.Container
 
-  private _cardCount: Phaser.GameObjects.Text
+  private readonly _acquiredCardViews: Phaser.GameObjects.Container
+
+  private _cardCount: Phaser.GameObjects.Text | null = null
 
   constructor(
     scene: Phaser.Scene,
@@ -24,21 +26,21 @@ export default class PlayerView extends Phaser.GameObjects.Container {
     this._playerModel = player
     this._playerNameText = this.createPlayerNameText()
     this._chipsText = this.createChipsText()
-    this._cardCount = this.createGetCardCount().setVisible(false)
     this._handCardViews = this.scene.add.container()
+    this._acquiredCardViews = this.scene.add.container()
 
     this.add([
       this._playerNameText,
       this._chipsText,
       this._handCardViews,
-      this._cardCount,
-      this._handCardViews
+      this._acquiredCardViews
     ])
+
     scene.add.existing(this)
   }
 
   update(): void {
-    this._cardCount.setText(`COUNT: ${this._playerModel.acquiredCards}`)
+    this.displayCardCount()
   }
 
   public animateAddHand(x: number, y: number, card: Card, i: number): void {
@@ -69,6 +71,14 @@ export default class PlayerView extends Phaser.GameObjects.Container {
     })
   }
 
+  public animateAddOwnDeck(cards: CardView[]): void {
+    cards.forEach((card: CardView) => {
+      this._acquiredCardViews.add(card)
+    })
+
+    this.scene.add.existing(this._acquiredCardViews)
+  }
+
   private setNonInteractiveAllCards(): void {
     this._handCardViews.each((card: CardView) => {
       card.setInteractive(false)
@@ -76,6 +86,17 @@ export default class PlayerView extends Phaser.GameObjects.Container {
       card.off('pointerout')
       card.off('pointerdown')
     })
+  }
+
+  private displayCardCount(): void {
+    this._cardCount?.destroy()
+
+    const x: number = this.playerModel.isPlayer ? -295 : 340
+    const y: number = this.playerModel.isPlayer ? 110 : 0
+    const cardCount: number = this._playerModel.acquiredCards
+
+    this._cardCount = this.scene.add.text(x, y, `COUNT: ${cardCount}`)
+    this.add(this._cardCount)
   }
 
   private createPlayerNameText(): Phaser.GameObjects.Text {
@@ -102,15 +123,6 @@ export default class PlayerView extends Phaser.GameObjects.Container {
     return this._chipsText
   }
 
-  private createGetCardCount(): Phaser.GameObjects.Text {
-    const cardCount: number = this._playerModel.acquiredCards
-    const x: number = this.playerModel.isPlayer ? -295 : 340
-    const y: number = this.playerModel.isPlayer ? 110 : 0
-
-    this._cardCount = this.scene.add.text(x, y, `COUNT: ${cardCount}`)
-    return this._cardCount
-  }
-
   get playerModel(): WarPlayer {
     return this._playerModel
   }
@@ -119,7 +131,11 @@ export default class PlayerView extends Phaser.GameObjects.Container {
     return this._handCardViews
   }
 
-  get cardCount(): Phaser.GameObjects.Text {
+  get acquiredCardViews(): Phaser.GameObjects.Container {
+    return this._acquiredCardViews
+  }
+
+  get cardCount(): Phaser.GameObjects.Text | null {
     return this._cardCount
   }
 }

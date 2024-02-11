@@ -1,15 +1,15 @@
-import BaseScene from '@/phaser/common/BaseScene'
 import Card from '@/models/common/Card'
-import PlayerView from '@/phaser/poker/PlayerView'
 import PokerTable from '@/models/poker/PokerTable'
-import TableView from '@/phaser/poker/TableView'
 import BotDecisionMaker from '@/models/poker/BotDecisionMaker'
 import PokerHandEvaluator from '@/models/poker/PokerHandEvaluator'
+import BaseScene from '@/phaser/common/BaseScene'
+import PlayerView from '@/phaser/poker/PlayerView'
+import TableView from '@/phaser/poker/TableView'
+import PlayerTypes from '@/types/common/player-types'
+import { GameTypes } from '@/types/common/game-types'
 import PokerHand from '@/types/poker/hand-types'
 import PokerRound from '@/types/poker/round-types'
 import PokerActions from '@/types/poker/action-types'
-import PlayerTypes from '@/types/common/player-types'
-import { GameTypes } from '@/types/common/game-types'
 import { delay } from '@/utils/utils'
 
 export default class PokerScene extends BaseScene {
@@ -56,7 +56,7 @@ export default class PokerScene extends BaseScene {
     await this.prepareNextGame()
   }
 
-  protected async prepareNextGame(): Promise<void> {
+  private async prepareNextGame(): Promise<void> {
     this._tableModel.resetGame()
     this._tableView?.displayPromptText()
     await this.waitForUserClick()

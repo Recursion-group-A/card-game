@@ -7,6 +7,9 @@ export default class WarPreloadScene extends PreloadScene {
 
   preload() {
     super.preload()
+
+    this.load.audio('gun', 'ui/gun.mp3')
+    this.load.audio('sword', 'ui/sword-hit.mp3')
   }
 
   create() {

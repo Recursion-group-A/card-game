@@ -9,9 +9,12 @@ export default abstract class Table<T extends Player<H>, H extends Hand> {
 
   protected _players: T[]
 
+  protected _isFirstGame: boolean
+
   protected constructor(gameType: GameTypes, numOfPlayers: number) {
     this._deck = new Deck(gameType)
     this._players = this.generatePlayers(numOfPlayers)
+    this._isFirstGame = true
 
     this._deck.shuffle()
   }
@@ -49,5 +52,13 @@ export default abstract class Table<T extends Player<H>, H extends Hand> {
 
   get deck(): Deck {
     return this._deck
+  }
+
+  get isFirstTime(): boolean {
+    return this._isFirstGame
+  }
+
+  set isFirstTime(bool: boolean) {
+    this._isFirstGame = bool
   }
 }

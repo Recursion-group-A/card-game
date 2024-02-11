@@ -12,7 +12,9 @@ export default class WarScene extends BaseScene {
 
   private _tableView: TableView | undefined
 
-  private _playerViews: PlayerView[] = []
+  private _botView: PlayerView | undefined
+
+  private _playerView: PlayerView | undefined
 
   constructor() {
     super('WarScene')
@@ -24,7 +26,8 @@ export default class WarScene extends BaseScene {
     super.create()
 
     this._tableView = new TableView(this, this._tableModel)
-    this._playerViews = this._tableView.playerViews
+    const { playerViews } = this._tableView
+    ;[this._botView, this._playerView] = playerViews
 
     await this.startGameLoop()
   }
@@ -33,22 +36,28 @@ export default class WarScene extends BaseScene {
     this._tableView?.update()
   }
 
-  private async startGameLoop(): Promise<void> {
-    await this.startGame()
-  }
-
   protected async startGame(): Promise<void> {
-    await this.processBeforeBattle()
+    await this.processBeforeRound()
     await this.processRound()
-    await this.prepareNextGame()
+    await this.processBetweenRounds()
+    this.prepareNextRound()
   }
 
-  // eslint-disable-next-line
-  protected async prepareNextGame(): Promise<void> {}
+  private async startGameLoop(): Promise<void> {
+    while (this.isGameActive) {
+      await this.startGame() // eslint-disable-line
+    }
+    this.redirectToHomePage()
+  }
 
-  private async processBeforeBattle(): Promise<void> {
+  private async processBeforeRound(): Promise<void> {
     await delay(WarScene.DELAY_TIME / 2)
     await this.dealCardsToPlayers()
+    await delay(WarScene.DELAY_TIME)
+    if (this._tableModel.isFirstTime) {
+      this._tableView?.displayPromptText()
+      this._tableModel.isFirstTime = false
+    }
   }
 
   private async dealCardsToPlayers(): Promise<void> {
@@ -56,26 +65,31 @@ export default class WarScene extends BaseScene {
       const card1: Card = this._tableModel.drawCard()
       const card2: Card = this._tableModel.drawCard()
 
-      this._playerViews[0].playerModel.addHand(card1)
-      this._playerViews[0].animateAddHand(330, 160, card1, i)
+      this._botView?.playerModel.addHand(card1)
+      this._botView?.animateAddHand(330, 160, card1, i)
 
-      this._playerViews[1].playerModel.addHand(card2)
-      this._playerViews[1].animateAddHand(330, 610, card2, i)
+      this._playerView?.playerModel.addHand(card2)
+      this._playerView?.animateAddHand(330, 610, card2, i)
     }
   }
 
   private async processRound(): Promise<void> {
     for (let i: number = 0; i < 26; i += 1) {
-      // eslint-disable-next-line
-      await this.processEachBattle()
+      await this.processEachBattle() // eslint-disable-line
     }
   }
 
   private async processEachBattle(): Promise<void> {
-    const playerCard: CardView = await this.processPlayerAction()
-    const botCard: CardView = await this.processBotAction()
+    const x: number = this.cameras.main.width / 2
+    const y: number = this.cameras.main.height / 2
 
-    await delay(WarScene.DELAY_TIME / 2)
+    const playerCard: CardView = await this.processPlayerAction(x, y)
+    const botCard: CardView = await this.processBotAction(x, y)
+
+    this.playSoundEffect('gun')
+    await delay(WarScene.DELAY_TIME / 4)
+    this.playSoundEffect('sword')
+
     playerCard.open()
     botCard.open()
 
@@ -83,49 +97,47 @@ export default class WarScene extends BaseScene {
     await this.processJudgement(playerCard, botCard)
   }
 
-  private async processPlayerAction(): Promise<CardView> {
-    const player: PlayerView = this._playerViews[1]
-    const card: CardView = await player.getUserAction()
+  private async processPlayerAction(x: number, y: number): Promise<CardView> {
+    const card: CardView = await this._playerView!.getUserAction()
 
-    player.playerModel.hand.popOne(card.cardModel)
-    card.animateWarCardMove(true)
-
-    return card
-  }
-
-  private async processBotAction(): Promise<CardView> {
-    const bot: PlayerView = this._playerViews[0]
-    const card: CardView = this.selectCard(bot)
-
-    bot.playerModel.hand.popOne(card.cardModel)
-    bot.handCardViews.remove(card)
-    card.animateWarCardMove(false)
+    card.animateCardMove(x, y + 50, 200)
+    this._playerView?.playerModel.hand.popOne(card.cardModel)
+    this._playerView?.handCardViews.remove(card)
+    this._tableView?.setVisiblePromptText(false)
 
     return card
   }
 
-  // eslint-disable-next-line
-  private selectCard(bot: PlayerView): CardView {
-    const numOfCards: number = bot.playerModel.hand.getCardCount()
+  private async processBotAction(x: number, y: number): Promise<CardView> {
+    const card: CardView = this.selectCard()
+
+    card.animateCardMove(x, y - 50, 200)
+    this._botView?.playerModel.hand.popOne(card.cardModel)
+    this._botView?.handCardViews.remove(card)
+
+    return card
+  }
+
+  private selectCard(): CardView {
+    const numOfCards: number = this._botView!.playerModel.hand.getCardCount()
     const randomInt: number = Math.floor(Math.random() * numOfCards)
-
-    return bot.handCardViews.getAt(randomInt)
+    return this._botView!.handCardViews.getAt(randomInt)
   }
 
   private async processJudgement(
     card1: CardView,
     card2: CardView
   ): Promise<void> {
-    const card1Rank: number = card1.cardModel.getRankNumber()
-    const card2Rank: number = card2.cardModel.getRankNumber()
+    const playerRank: number = card1.cardModel.getRankNumber()
+    const botRank: number = card2.cardModel.getRankNumber()
 
     let resultText: string
     let resultIndex: number
 
-    if (card1Rank === card2Rank) {
+    if (playerRank === botRank) {
       resultText = 'DRAW'
       resultIndex = 2
-    } else if (card1Rank > card2Rank) {
+    } else if (playerRank > botRank) {
       resultText = 'WIN!'
       resultIndex = 1
     } else {
@@ -133,8 +145,26 @@ export default class WarScene extends BaseScene {
       resultIndex = 0
     }
 
-    this._tableView?.displayResultText(resultText)
+    this._tableView?.displayBattleResultText(resultText)
     await delay(WarScene.DELAY_TIME / 2)
     this._tableView?.animateMoveToDeck(card1, card2, resultIndex)
+  }
+
+  private async processBetweenRounds(): Promise<void> {
+    this._tableView?.displayRoundResult()
+    await delay(WarScene.DELAY_TIME)
+    await this.processUserDecision()
+  }
+
+  private async processUserDecision(): Promise<void> {
+    const userDecision: string | undefined =
+      await this._tableView?.promptUserDecision()
+    if (userDecision === 'quit') {
+      this.redirectToHomePage()
+    }
+  }
+
+  private prepareNextRound(): void {
+    this._tableView?.resetTableView()
   }
 }

@@ -13,7 +13,7 @@ export default abstract class BaseScene extends Phaser.Scene {
 
   protected soundButton: Phaser.GameObjects.Image | undefined
 
-  protected readonly isGameActive: boolean
+  protected isGameActive: boolean
 
   protected isSoundOn: boolean
 
@@ -41,9 +41,18 @@ export default abstract class BaseScene extends Phaser.Scene {
     })
   }
 
-  protected abstract startGame(): Promise<void>
+  public playSoundEffect(soundKey: string): void {
+    if (this.isSoundOn) {
+      this.sound.add(soundKey).setVolume(0.3).play()
+    }
+  }
 
-  protected abstract prepareNextGame(): Promise<void>
+  // eslint-disable-next-line
+  public redirectToHomePage(): void {
+    window.location.href = '/'
+  }
+
+  protected abstract startGame(): Promise<void>
 
   private createBackground(): void {
     this.background = this.add.image(

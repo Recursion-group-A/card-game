@@ -1,6 +1,6 @@
 import Hand from '@/models/common/Hand'
-import WarPlayer from '@/models/war/WarPlayer'
 import Table from '@/models/common/Table'
+import WarPlayer from '@/models/war/WarPlayer'
 import PlayerTypes from '@/types/common/player-types'
 import { GameTypes } from '@/types/common/game-types'
 
@@ -21,5 +21,21 @@ export default class WarTable extends Table<WarPlayer, Hand> {
       }
     }
     return players
+  }
+
+  public resetGame(): void {
+    this.deck.resetDeck()
+    this.resetPlayersBet()
+    this.resetPlayersHand()
+    this.resetAcquiredCards()
+  }
+
+  private resetPlayersHand(): void {
+    this.players.forEach((player: WarPlayer) => player.resetHand())
+  }
+
+  private resetAcquiredCards(): void {
+    // eslint-disable-next-line
+    this.players.forEach((player: WarPlayer) => (player.acquiredCards = 0))
   }
 }

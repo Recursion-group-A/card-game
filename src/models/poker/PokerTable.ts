@@ -1,11 +1,11 @@
-import Pot from '@/models/poker/Pot'
 import Hand from '@/models/common/Hand'
-import PokerPlayer from '@/models/poker/PokerPlayer'
 import Table from '@/models/common/Table'
-import PokerRounds from '@/types/poker/round-types'
-import PokerActions from '@/types/poker/action-types'
+import Pot from '@/models/poker/Pot'
+import PokerPlayer from '@/models/poker/PokerPlayer'
 import PlayerTypes from '@/types/common/player-types'
 import { GameTypes } from '@/types/common/game-types'
+import PokerRounds from '@/types/poker/round-types'
+import PokerActions from '@/types/poker/action-types'
 
 export default class PokerTable extends Table<PokerPlayer, Hand> {
   private readonly _pot: Pot
@@ -30,8 +30,6 @@ export default class PokerTable extends Table<PokerPlayer, Hand> {
 
   private _round: PokerRounds
 
-  private _isFirstGame: boolean
-
   constructor(gameType: GameTypes) {
     super(gameType, 6)
 
@@ -44,7 +42,6 @@ export default class PokerTable extends Table<PokerPlayer, Hand> {
     this._utgIndex = 0
     this._currentMaxBet = this._bigBlind
     this._round = PokerRounds.PreFlop
-    this._isFirstGame = true
   }
 
   public assignInitialDealer(): void {
@@ -237,13 +234,5 @@ export default class PokerTable extends Table<PokerPlayer, Hand> {
 
   set round(round: PokerRounds) {
     this._round = round
-  }
-
-  get isFirstTime(): boolean {
-    return this._isFirstGame
-  }
-
-  set isFirstTime(bool: boolean) {
-    this._isFirstGame = bool
   }
 }
