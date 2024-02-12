@@ -41,9 +41,9 @@ export default abstract class BaseScene extends Phaser.Scene {
     })
   }
 
-  public playSoundEffect(soundKey: string): void {
+  public playSoundEffect(soundKey: string, volume: number = 0.3): void {
     if (this.isSoundOn) {
-      this.sound.add(soundKey).setVolume(0.3).play()
+      this.sound.add(soundKey).setVolume(volume).play()
     }
   }
 

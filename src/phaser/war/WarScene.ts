@@ -61,6 +61,7 @@ export default class WarScene extends BaseScene {
   }
 
   private async dealCardsToPlayers(): Promise<void> {
+    this.playSoundEffect('casino4', 0.6)
     for (let i: number = 0; i < 26; i += 1) {
       const card1: Card = this._tableModel.drawCard()
       const card2: Card = this._tableModel.drawCard()

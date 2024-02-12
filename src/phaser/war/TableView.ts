@@ -93,13 +93,13 @@ export default class TableView extends Phaser.GameObjects.Container {
 
   public displayBattleResultText(text: string): void {
     this._battleResultText?.destroy()
+    const color: string = this.setColorBattleResult(text)
 
-    this._battleResultText = this.scene.add.text(
-      this._sceneWidth / 2 - 25,
-      this._sceneHeight / 2 - 11,
-      text,
-      { font: '20px' }
-    )
+    this._battleResultText = this.scene.add
+      .text(this._sceneWidth / 2 - 25, this._sceneHeight / 2 - 11, text, {
+        font: '20px'
+      })
+      .setColor(color)
 
     this.add(this._battleResultText)
     this.scene.time.delayedCall(800, () => this._battleResultText?.destroy())
@@ -168,6 +168,14 @@ export default class TableView extends Phaser.GameObjects.Container {
     })
 
     return drawCards
+  }
+
+  // eslint-disable-next-line
+  private setColorBattleResult(result: string): string {
+    if (result === 'DRAW') {
+      return '#c0c0c0'
+    }
+    return result === 'WIN!' ? '#00ff00' : '#ff8c00'
   }
 
   // eslint-disable-next-line
