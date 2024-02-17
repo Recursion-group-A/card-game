@@ -36,7 +36,7 @@ export default class WarScene extends BaseScene {
     this._tableView?.update()
   }
 
-  protected async startGame(): Promise<void> {
+  private async startGame(): Promise<void> {
     await this.processBeforeRound()
     await this.processRound()
     await this.processBetweenRounds()

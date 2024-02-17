@@ -52,8 +52,6 @@ export default abstract class BaseScene extends Phaser.Scene {
     window.location.href = '/'
   }
 
-  protected abstract startGame(): Promise<void>
-
   private createBackground(): void {
     this.background = this.add.image(
       this.sceneWidth! / 2,

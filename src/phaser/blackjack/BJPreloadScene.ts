@@ -10,6 +10,7 @@ export default class PokerPreloadScene extends PreloadScene {
   }
 
   create() {
+    // TODO：BetScene に変更する
     super.create('BlackjackScene')
   }
 }

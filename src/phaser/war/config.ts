@@ -1,5 +1,6 @@
 import * as Phaser from 'phaser'
 import WarPreloadScene from '@/phaser/war/WarPreloadScene'
+import BetScene from '@/phaser/common/BetScene'
 import WarScene from '@/phaser/war/WarScene'
 
 const gameConfig: Phaser.Types.Core.GameConfig = {
@@ -24,7 +25,7 @@ const gameConfig: Phaser.Types.Core.GameConfig = {
       debug: true
     }
   },
-  scene: [WarPreloadScene, WarScene]
+  scene: [WarPreloadScene, BetScene, WarScene]
 }
 
 export default gameConfig

@@ -16,7 +16,7 @@ export default class BlackjackScene extends BaseScene {
 
   private _playerViews: PlayerView[] = []
 
-  private _houseView: HouseView[] = []
+  private _houseView: HouseView | undefined
 
   constructor() {
     super('BlackjackScene')
@@ -31,40 +31,54 @@ export default class BlackjackScene extends BaseScene {
     this._playerViews = this._tableView.playerViews
     this._houseView = this._tableView.houseView
 
-    await this.startGame()
+    await this.startGameLoop()
   }
 
-  protected async startGame(): Promise<void> {
-    await this.bettingProcess()
-    await this.actingProcess()
-    await this.evaluatingProcess()
-    await this.settlementProcess()
+  update(): void {
+    this._tableView?.update()
+  }
+
+  private async startGameLoop(): Promise<void> {
+    while (this.isGameActive) {
+      await this.startGame() // eslint-disable-line
+    }
+    this.redirectToHomePage()
+  }
+
+  private async startGame(): Promise<void> {
+    await this.processBetting()
+    await this.processActing()
+    await this.processEvaluating()
+    await this.processSettlement()
     await this.prepareNextGame()
   }
 
-  private static async waitForCompletion(
-    condition: () => boolean
-  ): Promise<void> {
-    return new Promise<void>((resolve) => {
-      const checkCompletion = () => {
-        if (condition()) {
-          resolve()
-        } else {
-          setTimeout(checkCompletion, BlackjackScene.DELAY_TIME)
-        }
-      }
-
-      checkCompletion()
-    })
-  }
-
-  private async bettingProcess(): Promise<void> {
-    this.decideAiPlayersBetAmount()
+  private async processBetting(): Promise<void> {
+    this.decidePlayersBetAmount()
     this._tableView?.createBetButtons()
     this._tableView?.getUserBetAction()
   }
 
-  private async actingProcess(): Promise<void> {
+  private decidePlayersBetAmount(): void {
+    this._tableModel.decideAiPlayersBetAmount()
+
+    this.updatePlayersBet()
+    this.updatePlayersChips()
+  }
+
+  private updatePlayersChips(): void {
+    this._playerViews.forEach((playerView) => {
+      playerView.updateChips()
+    })
+  }
+
+  private updatePlayersBet(): void {
+    this._playerViews.forEach((playerView) => {
+      playerView.updateBet()
+    })
+  }
+
+  private async processActing(): Promise<void> {
     await BlackjackScene.waitForCompletion(
       () => this._tableModel.userBetCompleted
     )
@@ -82,65 +96,24 @@ export default class BlackjackScene extends BaseScene {
     await delay(BlackjackScene.DELAY_TIME)
     this._tableView?.createActionButtons()
     await this._tableView?.getUserBlackjackAction()
-    await this.aiProcess()
-    await this.houseProcess()
+    await this.processAiAction()
+    await this.processHouseAction()
   }
 
-  private async evaluatingProcess(): Promise<void> {
-    await BlackjackScene.waitForCompletion(() =>
-      this._tableModel.houseActionCompleted()
-    )
+  private static async waitForCompletion(
+    condition: () => boolean
+  ): Promise<void> {
+    return new Promise<void>((resolve) => {
+      const checkCompletion = () => {
+        if (condition()) {
+          resolve()
+        } else {
+          setTimeout(checkCompletion, BlackjackScene.DELAY_TIME)
+        }
+      }
 
-    await delay(BlackjackScene.DELAY_TIME)
-
-    this._tableModel.setEvaluatingPhase()
-    this._tableModel.evaluatingPlayers()
-
-    this.updatePlayersGameResult()
-    await delay(BlackjackScene.DELAY_TIME * 3)
-    this.removePlayersGameResult()
-  }
-
-  private async settlementProcess(): Promise<void> {
-    await BlackjackScene.waitForCompletion(
-      () => this._tableModel.evaluateCompleted
-    )
-
-    this._tableModel.setSettlementPhase()
-    this._tableModel.settlementPlayers()
-
-    this.updatePlayersChips()
-    this.updatePlayersBet()
-  }
-
-  private async prepareNextGame(): Promise<void> {
-    await BlackjackScene.waitForCompletion(
-      () => this._tableModel.settlementCompleted
-    )
-
-    this._tableModel.setPreparationPhase()
-
-    const houseView: HouseView = this.getHouseView()
-
-    this._tableModel.prepareNextRound()
-    this.updatePlayersStatus()
-    this.updatePlayersScore()
-    this.resetBlackjackPlayerColor()
-    houseView.updateStatus()
-    houseView.updateScore()
-    this.removePlayersCards()
-    houseView.removeAllCards()
-
-    await delay(BlackjackScene.DELAY_TIME * 3)
-
-    await this.startGame()
-  }
-
-  private decideAiPlayersBetAmount(): void {
-    this._tableModel.decideAiPlayersBetAmount()
-
-    this.updatePlayersBet()
-    this.updatePlayersChips()
+      checkCompletion()
+    })
   }
 
   private async dealCardsToParticipants(): Promise<void> {
@@ -160,53 +133,20 @@ export default class BlackjackScene extends BaseScene {
       if (count >= this._playerViews.length) {
         // eslint-disable-next-line
         await delay(BlackjackScene.DELAY_TIME / 10)
-        const houseView: HouseView = this.getHouseView()
+        const houseView: HouseView = this._houseView!
         this._tableView?.addCardToHand(houseView.houseModel, houseView)
       }
     }
   }
 
   private revealAllHand(): void {
-    this.revealUserHand()
-    this.revealBotHand()
-    this.revealHouseFirstHand()
+    this.revealParticipantsHand()
+    this._houseView?.revealFirstHand()
   }
 
-  private revealUserHand(): void {
-    const user: PlayerView = this._playerViews.filter(
-      (player: PlayerView) =>
-        player.playerModel.playerType === PlayerTypes.Player
-    )[0]
-    user.revealHand()
-  }
-
-  private revealBotHand(): void {
-    this._playerViews.forEach((playerView: PlayerView) => {
-      if (playerView.playerModel.playerType === PlayerTypes.Ai)
-        playerView.revealHand()
-    })
-  }
-
-  private revealHouseFirstHand(): void {
-    const houseView: HouseView = this.getHouseView()
-    houseView.revealFirstHand()
-  }
-
-  private removePlayersCards(): void {
-    this._playerViews.forEach((playerView: PlayerView) =>
-      playerView.removeAllCards()
-    )
-  }
-
-  private removePlayersGameResult(): void {
-    this._playerViews.forEach((playerView: PlayerView) => {
-      playerView.removeGameResult()
-    })
-  }
-
-  private updatePlayersGameResult(): void {
-    this._playerViews.forEach((playerView: PlayerView) => {
-      playerView.updateGameResult()
+  private revealParticipantsHand(): void {
+    this._playerViews.forEach((player: PlayerView) => {
+      player.revealHand()
     })
   }
 
@@ -224,48 +164,21 @@ export default class BlackjackScene extends BaseScene {
     })
   }
 
-  private updatePlayersChips(): void {
-    this._playerViews.forEach((playerView) => {
-      playerView.updateChips()
-    })
-  }
-
-  private updatePlayersBet(): void {
-    this._playerViews.forEach((playerView) => {
-      playerView.updateBet()
-    })
-  }
-
-  private resetBlackjackPlayerColor(): void {
-    this._playerViews.forEach((playerView: PlayerView) => {
-      playerView.resetBlackjackColor()
-    })
-  }
-
-  private getAiPlayersView(): PlayerView[] {
-    return this._playerViews.filter(
-      (playerView: PlayerView) =>
-        playerView.playerModel.playerType === PlayerTypes.Ai
-    )
-  }
-
-  private async aiProcess(): Promise<void> {
-    const aiPlayerViews: PlayerView[] = this.getAiPlayersView()
-
+  private async processAiAction(): Promise<void> {
     // eslint-disable-next-line
-    for (const aiPlayerView of aiPlayerViews) {
-      const aiPlayerModel: BlackjackPlayer = aiPlayerView.playerModel
-
-      // eslint-disable-next-line
-      await this.drawUntilSeventeen(aiPlayerModel, aiPlayerView)
+    for (const player of this._playerViews) {
+      if (player.playerModel.playerType === PlayerTypes.Ai) {
+        // eslint-disable-next-line
+        await this.drawUntilSeventeen(player.playerModel, player)
+      }
     }
   }
 
-  private async houseProcess(): Promise<void> {
+  private async processHouseAction(): Promise<void> {
     await BlackjackScene.waitForCompletion(() => this._tableModel.isHouseTurn())
     await delay(BlackjackScene.DELAY_TIME)
 
-    const houseView: HouseView = this.getHouseView()
+    const houseView: HouseView = this._houseView!
 
     houseView.revealLastHand()
     houseView.updateStatus()
@@ -277,6 +190,75 @@ export default class BlackjackScene extends BaseScene {
     } else {
       await this.drawUntilSeventeen(houseModel, houseView)
     }
+  }
+
+  private async processEvaluating(): Promise<void> {
+    await BlackjackScene.waitForCompletion(() =>
+      this._tableModel.houseActionCompleted()
+    )
+
+    await delay(BlackjackScene.DELAY_TIME)
+
+    this._tableModel.setEvaluatingPhase()
+    this._tableModel.evaluatingPlayers()
+
+    this.updatePlayersGameResult()
+    await delay(BlackjackScene.DELAY_TIME * 3)
+    this.removePlayersGameResult()
+  }
+
+  private updatePlayersGameResult(): void {
+    this._playerViews.forEach((playerView: PlayerView) => {
+      playerView.updateGameResult()
+    })
+  }
+
+  private removePlayersGameResult(): void {
+    this._playerViews.forEach((playerView: PlayerView) => {
+      playerView.removeGameResult()
+    })
+  }
+
+  private async processSettlement(): Promise<void> {
+    await BlackjackScene.waitForCompletion(
+      () => this._tableModel.evaluateCompleted
+    )
+
+    this._tableModel.setSettlementPhase()
+    this._tableModel.settlementPlayers()
+
+    this.updatePlayersChips()
+    this.updatePlayersBet()
+  }
+
+  private async prepareNextGame(): Promise<void> {
+    await BlackjackScene.waitForCompletion(
+      () => this._tableModel.settlementCompleted
+    )
+
+    this._tableModel.setPreparationPhase()
+    this._tableModel.prepareNextRound()
+    this.updatePlayersStatus()
+    this.updatePlayersScore()
+    this.resetBlackjackPlayerColor()
+    this._houseView?.updateStatus()
+    this._houseView?.updateScore()
+    this.removePlayersCards()
+    this._houseView?.removeAllCards()
+
+    await delay(BlackjackScene.DELAY_TIME * 3)
+  }
+
+  private removePlayersCards(): void {
+    this._playerViews.forEach((playerView: PlayerView) =>
+      playerView.removeAllCards()
+    )
+  }
+
+  private resetBlackjackPlayerColor(): void {
+    this._playerViews.forEach((playerView: PlayerView) => {
+      playerView.resetBlackjackColor()
+    })
   }
 
   private async drawUntilSeventeen(
@@ -300,9 +282,5 @@ export default class BlackjackScene extends BaseScene {
 
       view.updateScore()
     }
-  }
-
-  private getHouseView(): HouseView {
-    return this._houseView[0]
   }
 }

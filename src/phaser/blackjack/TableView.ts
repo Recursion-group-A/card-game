@@ -13,7 +13,7 @@ export default class TableView extends Phaser.GameObjects.Container {
 
   private readonly _playerViews: PlayerView[] = []
 
-  private readonly _houseView: HouseView[] = []
+  private readonly _houseView: HouseView
 
   private readonly _deckView: DeckView
 
@@ -29,14 +29,19 @@ export default class TableView extends Phaser.GameObjects.Container {
     super(scene)
 
     this._tableModel = tableModel
-    this._playerViews = []
+    this._houseView = this.createHouseView()
     this._deckView = this.createDeckView()
     this._betButtons = this.scene.add.container()
     this._actionButtons = this.scene.add.container()
     this.createPlayerViews()
     this.createHouseView()
 
-    this.add([this._deckView, this._betButtons, this._actionButtons])
+    this.add([
+      this._houseView,
+      this._deckView,
+      this._betButtons,
+      this._actionButtons
+    ])
     scene.add.existing(this)
   }
 
@@ -66,16 +71,9 @@ export default class TableView extends Phaser.GameObjects.Container {
     )
   }
 
-  private createHouseView(): void {
+  private createHouseView(): HouseView {
     const housePos: { x: number; y: number } = { x: 450, y: 100 }
-
-    const houseView: HouseView = new HouseView(
-      this.scene,
-      this._tableModel.house,
-      housePos
-    )
-    this._houseView.push(houseView)
-    this.add(houseView)
+    return new HouseView(this.scene, this._tableModel.house, housePos)
   }
 
   public createBetButtons(): void {
@@ -350,11 +348,7 @@ export default class TableView extends Phaser.GameObjects.Container {
     return this._playerViews
   }
 
-  get houseView(): HouseView[] {
+  get houseView(): HouseView {
     return this._houseView
-  }
-
-  get deckView(): DeckView {
-    return this._deckView
   }
 }

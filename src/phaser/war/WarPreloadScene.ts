@@ -14,6 +14,7 @@ export default class WarPreloadScene extends PreloadScene {
   }
 
   create() {
+    // TODO: BetScene が完成したら BetScene に変更する
     super.create('WarScene')
   }
 }

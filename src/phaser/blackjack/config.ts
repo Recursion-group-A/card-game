@@ -1,5 +1,6 @@
 import * as Phaser from 'phaser'
 import BJPreloadScene from '@/phaser/blackjack/BJPreloadScene'
+import BetScene from '@/phaser/common/BetScene'
 import BlackjackScene from '@/phaser/blackjack/BlackjackScene'
 
 const gameConfig: Phaser.Types.Core.GameConfig = {
@@ -24,7 +25,7 @@ const gameConfig: Phaser.Types.Core.GameConfig = {
       debug: true
     }
   },
-  scene: [BJPreloadScene, BlackjackScene]
+  scene: [BJPreloadScene, BetScene, BlackjackScene]
 }
 
 export default gameConfig
