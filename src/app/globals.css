@@ -26,10 +26,33 @@ body {
     rgb(var(--background-start-rgb));
 }
 
-.img-set-blackjack {
-  background-image: url('/image/blackjack.jpg');
+.swiper {
+  width: 300px;
+  height: 480px;
 }
 
-.img-start {
-  background-image: url('/image/start.jpg');
+.swiper-slide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+  font-size: 22px;
+  font-weight: bold;
+  color: #fff;
+}
+
+.swiper-slide:nth-child(1n) {
+  background: linear-gradient(#b91c1c, #7f1d1d);
+}
+
+.swiper-slide:nth-child(2n) {
+  background: linear-gradient(#1e40af, #1e3a8a);
+}
+
+.swiper-slide:nth-child(3n) {
+  background: linear-gradient(#facc15, #eab308);
+}
+
+.swiper-slide:nth-child(4n) {
+  background: linear-gradient(#84cc16, #65a30d);
 }

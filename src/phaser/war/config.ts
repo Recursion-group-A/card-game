@@ -1,15 +1,14 @@
 import * as Phaser from 'phaser'
-import HomeScene from '@/phaser/common/HomeScene'
-import PreloadScene from '@/phaser/common/PreloadScene'
-import BlackjackScene from '@/phaser/blackjack/BlackjackScene'
-import PokerScene from '@/phaser/poker/PokerScene'
+import WarPreloadScene from '@/phaser/war/WarPreloadScene'
+import BetScene from '@/phaser/common/BetScene'
+import WarScene from '@/phaser/war/WarScene'
 
 const gameConfig: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
-  parent: 'phaser-game',
+  parent: 'phaser-war-game',
   scale: {
     mode: Phaser.Scale.FIT,
-    parent: 'phaser-game',
+    parent: 'phaser-war-game',
     autoCenter: Phaser.Scale.CENTER_BOTH,
     min: {
       width: window.innerWidth - window.innerWidth / 4,
@@ -26,7 +25,7 @@ const gameConfig: Phaser.Types.Core.GameConfig = {
       debug: true
     }
   },
-  scene: [HomeScene, PreloadScene, BlackjackScene, PokerScene]
+  scene: [WarPreloadScene, BetScene, WarScene]
 }
 
 export default gameConfig

@@ -3,23 +3,12 @@ import { SUITS_FOR_IMAGE } from '@/constants/cards/suits.constants'
 import { RANKS_FOR_IMAGE } from '@/constants/cards/ranks.constants'
 
 export default class PreloadScene extends Phaser.Scene {
-  private _nextScene: string | undefined
-
-  constructor() {
-    super('PreloadScene')
-  }
-
-  init(data: { nextScene: string }): void {
-    this._nextScene = data.nextScene
-  }
-
   preload(): void {
     const { width, height } = this.cameras.main
 
     this.load.setBaseURL('../../assets/')
     this.load.image('table', 'ui/table.jpeg')
 
-    // 全種類のカードを読み込む
     SUITS_FOR_IMAGE.forEach((suit: string) => {
       RANKS_FOR_IMAGE.forEach((rank: string) => {
         const key: string = `card_${suit}_${rank}`
@@ -37,18 +26,12 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image('sound-on', 'ui/sound_on.png')
     this.load.image('sound-off', 'ui/sound_off.png')
 
-    this.load.audio('click', 'sounds/click2.mp3')
-    this.load.audio('click3', 'sounds/click3.wav')
-    this.load.audio('card-sound', 'sounds/card-sound.mp3')
-    this.load.audio('card-flip1', 'sounds/card-flip1.mp3')
+    this.load.audio('bet', 'sounds/bet.mp3')
     this.load.audio('card-flip2', 'sounds/card-flip2.mp3')
     this.load.audio('card-flip3', 'sounds/card-flip3.mp3')
-    this.load.audio('bet', 'sounds/bet.mp3')
-    this.load.audio('retro', 'sounds/retro-sound.wav')
-    this.load.audio('hit', 'sounds/hit.wav')
-    this.load.audio('fold', 'sounds/fold.wav')
-    this.load.audio('negative', 'sounds/negative-sound.wav')
+    this.load.audio('click3', 'sounds/click3.wav')
     this.load.audio('money', 'sounds/money.wav')
+    this.load.audio('negative', 'sounds/negative-sound.wav')
 
     const progressBar: Phaser.GameObjects.Graphics = this.add.graphics()
     const progressBox: Phaser.GameObjects.Graphics = this.add.graphics()
@@ -76,7 +59,7 @@ export default class PreloadScene extends Phaser.Scene {
     })
   }
 
-  create(): void {
-    this.scene.start(this._nextScene)
+  create(nextScene: string): void {
+    this.scene.start(nextScene)
   }
 }

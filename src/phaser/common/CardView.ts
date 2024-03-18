@@ -11,12 +11,16 @@ export default class CardView extends Phaser.GameObjects.Image {
     this.scene.add.existing(this)
   }
 
-  public animateCardMove(newX: number, newY: number): void {
+  public animateCardMove(
+    newX: number,
+    newY: number,
+    durationTime: number = 600
+  ): void {
     this.scene.tweens.add({
       targets: this,
       x: newX,
       y: newY,
-      duration: 600,
+      duration: durationTime,
       ease: 'Power2'
     })
   }
@@ -37,5 +41,9 @@ export default class CardView extends Phaser.GameObjects.Image {
         })
       }
     })
+  }
+
+  get cardModel(): Card {
+    return this._cardModel
   }
 }

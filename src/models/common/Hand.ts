@@ -10,6 +10,13 @@ export default class Hand {
     this._cards.push(card)
   }
 
+  public popOne(card: Card): void {
+    const index: number = this._cards.indexOf(card)
+    if (index !== -1) {
+      this._cards.splice(index, 1)
+    }
+  }
+
   public resetHand(): void {
     this._cards = []
   }

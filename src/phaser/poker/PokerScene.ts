@@ -1,15 +1,15 @@
-import BaseScene from '@/phaser/common/BaseScene'
 import Card from '@/models/common/Card'
-import PlayerView from '@/phaser/poker/PlayerView'
 import PokerTable from '@/models/poker/PokerTable'
-import TableView from '@/phaser/poker/TableView'
 import BotDecisionMaker from '@/models/poker/BotDecisionMaker'
 import PokerHandEvaluator from '@/models/poker/PokerHandEvaluator'
+import BaseScene from '@/phaser/common/BaseScene'
+import PlayerView from '@/phaser/poker/PlayerView'
+import TableView from '@/phaser/poker/TableView'
+import PlayerTypes from '@/types/common/player-types'
+import { GameTypes } from '@/types/common/game-types'
 import PokerHand from '@/types/poker/hand-types'
 import PokerRound from '@/types/poker/round-types'
 import PokerActions from '@/types/poker/action-types'
-import PlayerTypes from '@/types/common/player-types'
-import { GameTypes } from '@/types/common/game-types'
 import { delay } from '@/utils/utils'
 
 export default class PokerScene extends BaseScene {
@@ -47,16 +47,17 @@ export default class PokerScene extends BaseScene {
     while (this.isGameActive) {
       await this.startGame() // eslint-disable-line
     }
+    this.redirectToHomePage()
   }
 
-  protected async startGame(): Promise<void> {
+  private async startGame(): Promise<void> {
     await this.processBeforePreFlop()
     await this.processAllRounds()
     await this.showDown()
     await this.prepareNextGame()
   }
 
-  protected async prepareNextGame(): Promise<void> {
+  private async prepareNextGame(): Promise<void> {
     this._tableModel.resetGame()
     this._tableView?.displayPromptText()
     await this.waitForUserClick()
@@ -101,9 +102,7 @@ export default class PokerScene extends BaseScene {
     this._tableModel.collectBlind(index, amount)
     this._playerViews[index].animatePlaceBet()
     this._playerViews[index].displayBlindText(amount)
-    if (this.isSoundOn) {
-      this.sound.add('bet').setVolume(0.3).play()
-    }
+    this.playSoundEffect('bet')
   }
 
   private async dealCardsToPlayers(): Promise<void> {
@@ -116,9 +115,7 @@ export default class PokerScene extends BaseScene {
         const currentPlayerView: PlayerView = this._playerViews[currentIndex]
         const card: Card = this._tableModel.drawCard()
         currentPlayerView.playerModel.addHand(card)
-        if (this.isSoundOn) {
-          this.sound.add('card-flip3').setVolume(0.3).play()
-        }
+        this.playSoundEffect('card-flip3')
 
         // eslint-disable-next-line
         await delay(PokerScene.DELAY_TIME / 10)
@@ -153,9 +150,7 @@ export default class PokerScene extends BaseScene {
     await delay(PokerScene.DELAY_TIME)
     if (cardsToAdd > 0 && !this._isWalk) {
       await this._tableView?.dealCommunityCards(cardsToAdd)
-      if (this.isSoundOn) {
-        this.sound.add('card-flip2').setVolume(0.5).play()
-      }
+      this.playSoundEffect('card-flip2')
     }
   }
 
@@ -287,10 +282,8 @@ export default class PokerScene extends BaseScene {
   }
 
   private async makeMoneySound(): Promise<void> {
-    if (this.isSoundOn) {
-      this.sound.add('money').setVolume(0.2).play()
-      await delay(PokerScene.DELAY_TIME / 10)
-      this.sound.add('money').setVolume(0.2).play()
-    }
+    this.playSoundEffect('money', 0.2)
+    await delay(PokerScene.DELAY_TIME / 10)
+    this.playSoundEffect('money', 0.2)
   }
 }

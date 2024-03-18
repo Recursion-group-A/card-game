@@ -60,15 +60,6 @@ export default class HouseView extends Phaser.GameObjects.Container {
     this._playerNameText.setColor('gold')
   }
 
-  public resetBlackjackColor(): void {
-    this._playerNameText.setColor('white')
-  }
-
-  public updateAll(): void {
-    this.updateStatus()
-    this.updateScore()
-  }
-
   public updateStatus(): void {
     this._statusText.setText(`STATES: ${this._houseModel.status.toUpperCase()}`)
   }

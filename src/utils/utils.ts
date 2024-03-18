@@ -2,11 +2,16 @@ import { GameTypes } from '@/types/common/game-types'
 import { RankStrategy } from '@/models/common/RankStrategy'
 import BlackjackRankStrategy from '@/models/blackjack/BlackjackRankStrategy'
 import PokerRankStrategy from '@/models/poker/PokerRankStrategy'
+import WarRankStrategy from '@/models/war/WarRankStrategy'
 
 export function getRankStrategy(gameType: GameTypes): RankStrategy {
-  return gameType === GameTypes.Blackjack
-    ? new BlackjackRankStrategy()
-    : new PokerRankStrategy()
+  if (gameType === GameTypes.Blackjack) {
+    return new BlackjackRankStrategy()
+  }
+  if (gameType === GameTypes.Poker) {
+    return new PokerRankStrategy()
+  }
+  return new WarRankStrategy()
 }
 
 export function delay(ms: number): Promise<void> {
